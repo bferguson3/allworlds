@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.0" tiledversion="1.0.3" orientation="orthogonal" renderorder="right-down" width="11" height="11" tilewidth="16" tileheight="16" nextobjectid="1">
+ <tileset firstgid="1" source="bg2.tsx"/>
+ <layer name="Tile Layer 1" width="11" height="11">
+  <data encoding="csv">
+1,1,1,1,1,1,1,1,1,1,1,
+1,1,1,1,1,1,1,1,1,1,1,
+1,1,4,1,1,1,1,1,4,1,1,
+1,1,1,4,1,1,1,4,1,1,1,
+1,1,1,1,1,1,1,1,1,1,1,
+1,1,1,1,1,1,1,1,1,1,1,
+1,1,1,1,1,1,1,1,1,1,1,
+1,1,1,4,1,1,1,4,1,1,1,
+1,1,4,1,1,1,1,1,4,1,1,
+1,1,1,1,1,1,1,1,1,1,1,
+1,1,1,1,1,1,1,1,1,1,1
+</data>
+ </layer>
+</map>
