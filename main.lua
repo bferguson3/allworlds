@@ -1,10 +1,5 @@
 -- ALLWORLDS
 
--- 256x192 resolution games
--- 8x8 character tiles
--- screen is a map of character tiles
--- char tiles are 0-255, can be swapped freely, but 
--- every map must only contain 255.
 
 lg = love.graphics;
 
@@ -14,6 +9,7 @@ map_w = 35;
 tileSize = 8;
 tileSet = {};
 screenmap = {};
+animationTimer = 0;
 bgmap = {};
 px = 9;
 py = 10;
@@ -30,9 +26,20 @@ cameraMode = ZOOM_SMALL;
 log = { ".", ".", ".", ".", ".", ".", ".", ".", ".", "> Loaded." }
 MOVE_MODE = 0;
 TALK_MODE = 1;
+COMBAT_MOVE = 2;
+COMBAT_COMMAND = 5;
+COMBAT_MELEE = 6;
 inputMode = MOVE_MODE;
 current_npc = nil;
 myinput = ''
+selectorflash = 0;
+flashtimer = 0.1;
+remainingMov = 0;
+selector = { x = 0, y = 0}
+currentTurn = nil;
+--anim = { false, false, false } -- ticks true, true true every second. for animation.
+queue = {}
+
 map_1 = {
     {
         g = "01",
@@ -73,7 +80,7 @@ map_1 = {
             bye   = {"Farewell, son."},
             awaken = {"You've been in stasis\nfor thirty years. Your\nmemories will return\nin time. It may seem\nsudden, but a\ntask awaits you.", "task"},
             task = {"Indeed. The horrors have\n returned. First, you\nmust purify the\nshrine nearby.", "shrine"},
-            shrine = {"Purify the horrors\nto the northeast.\nOnly you can do this.", "horrors"},
+            shrine = {"Purify the horrors\nto the northeast.\nOnly you can do this."},
             horrors = {"I wish I had the\nanswers. It is best to\nask others."}
         },
         x = 20,
@@ -81,45 +88,63 @@ map_1 = {
     }
 }
 known_kw = { "name", "job", "bye" }
+classes = {
+    Fighter = {}
+}
+--print(classes["Fighter"])
 enemies = {
     guard = {
         name = "Guard",
+        class = "Fighter",
         g = "01",
         hp = 30,
+        mov = 1,
         str = 10,
         dex = 10,
         con = 10,
         int = 10,
         wis = 10,
         cha = 10,
-        dmg_die = 8,
+        weapon = {
+            dmg_die = 8,
+            type = "melee"
+        },
         thaco = 20,
-        ac = 10
+        ac = 10,
+        player = false
     }
 }
-hero = {
-    name = "Alistair",
-    g = "00",
-    hp = 30,
-    str = 14,
-    dex = 16,
-    con = 9,
-    int = 17,
-    wis = 14,
-    cha = 13,
-    weapon = {
-        name = "Long Sword",
-        dmg_die = 8
-    },
-    armor = {
-        name = "Quilted Vest",
-        ac = 1
-    },
-    thaco = 20,
-    level = 1,
-    xp = 0
+party = {
+    {
+        name = "Alistair",
+        g = "00",
+        hp = 30,
+        mhp = 30,
+        mov = 1,
+        str = 14,
+        dex = 16,
+        con = 9,
+        int = 17,
+        wis = 14,
+        cha = 13,
+        weapon = {
+            name = "Long Sword",
+            dmg_die = 8,
+            type = "melee"
+        },
+        armor = {
+            name = "Quilted Vest",
+            ac = 1 -- 10 - armor - dex bonus
+        },
+        thaco = 20,
+        level = 1,
+        xp = 0,
+        class = "Fighter",
+        player = true
+    }
 }
 combat_actors = {}
+currentMap = map_1;
 
 function TestHardware()
     local gfx_support = lg.getSupported();
@@ -154,7 +179,7 @@ function love.load(arg)
     scr_w, scr_h = lg.getDimensions();
     scale = math.floor(scr_h / 192);
     x_draw_offset = (scr_w - (scale * 256))/2;
-
+    love.math.setRandomSeed(love.timer.getTime())
     --currentState = systemState.init;
     init_time = love.timer.getTime();
     --check device gfx mode support
@@ -191,7 +216,41 @@ function love.load(arg)
     end
 end -- love.load
 
+function toggleselflash()
+    selectorflash = selectorflash + 1;
+    if selectorflash == 5 then selectorflash = 0 end
+end
+
 function love.update(dT)
+    if dT ~= nil then 
+        animationTimer = animationTimer - dT;
+        flashtimer = flashtimer - dT;
+    end
+    if flashtimer < 0 then flashtimer = 0.1; toggleselflash(); end
+
+    if animationTimer > 0 then 
+        love.draw()
+        return 
+    end
+    if #queue > 0 then 
+        if queue[1][1] == "moveDown" then 
+            animationTimer = 0.5
+            queue[1][2].y = queue[1][2].y + 1
+        end
+        table.remove(queue)
+        return
+    end
+    -- if animationTimer > 1 then 
+    --     animationTimer = 0;
+    --     for i=1,#anim do 
+    --         if anim[i] ~= false then 
+    --             anim[i] = false 
+    --             return 
+    --         end
+    --     end
+    -- end
+    
+    
     repeatkeys = { "right", "left", "up", "down" };
     p = false;
     for i=1,#repeatkeys do 
@@ -212,28 +271,51 @@ function love.update(dT)
 end
 
 function DrawMapObjects_Small()
-    for i=1,#map_1 do
-        if ((px + 10) >= map_1[i].x) and ((px - 10) <= map_1[i].x) then 
-            if ((py+10)>=map_1[i].y) and ((py-10)<=map_1[i].y) then
-                r = "assets/"..map_1[i].g.."_8x8.png"
-                lg.draw(lg.newImage(r), 8*scale*(map_1[i].x-px+10), 8*scale*(map_1[i].y-py+10), 0, scale);
+    for i=1,#currentMap do
+        if ((px + 10) >= currentMap[i].x) and ((px - 10) <= currentMap[i].x) then 
+            if ((py+10)>=currentMap[i].y) and ((py-10)<=currentMap[i].y) then
+                r = "assets/"..currentMap[i].g.."_8x8.png"
+                lg.draw(lg.newImage(r), 8*scale*(currentMap[i].x-px+10), 8*scale*(currentMap[i].y-py+10), 0, scale);
             end
         end
     end
 end
 
 function DrawMapObjects_Large()
-    for i=1,#map_1 do
-        if ((px + 5) >= map_1[i].x) and ((px - 5) <= map_1[i].x) then 
-            if ((py+5)>=map_1[i].y) and ((py-5)<=map_1[i].y) then
-                r = "assets/"..map_1[i].g.."_16x16.png"
-                lg.draw(lg.newImage(r), 16*scale*(map_1[i].x-px+5), 16*scale*(map_1[i].y-py+5), 0, scale);
+    for i=1,#currentMap do
+        if ((px + 5) >= currentMap[i].x) and ((px - 5) <= currentMap[i].x) then 
+            if ((py+5)>=currentMap[i].y) and ((py-5)<=currentMap[i].y) then
+                r = "assets/"..currentMap[i].g.."_16x16.png"
+                lg.draw(lg.newImage(r), 16*scale*(currentMap[i].x-px+5), 16*scale*(currentMap[i].y-py+5), 0, scale);
             end
         end
     end
 end
 
-function love.draw()
+function DrawMoveBox(o)
+    lg.setColor((85/255), 1, (85/255), 1);
+    o.mov = o.mov or 1;
+    if o.mov == 1 then
+        lg.rectangle("fill", o.x*16*scale, o.y*16*scale-(16*scale), scale*16, scale*16*3);
+        lg.rectangle("fill", o.x*16*scale-(16*scale), o.y*16*scale, scale*16*3, scale*16);
+    end
+    --lg.rectangle("fill", o.x*16*scale-(16*scale), o.y*16*scale-(16*scale), scale*16*3, scale*16*3);
+    lg.setColor(1, 1, 1, 1);
+end
+
+function DrawAttackBox(o)
+    lg.setColor(1, (85/255), (85/255), 1);
+    --o.mov = o.mov or 1;
+    --if o.mov == 1 then
+        lg.rectangle("fill", o.x*16*scale, o.y*16*scale-(16*scale), scale*16, scale*16*3);
+        lg.rectangle("fill", o.x*16*scale-(16*scale), o.y*16*scale, scale*16*3, scale*16);
+    --end
+    --lg.rectangle("fill", o.x*16*scale-(16*scale), o.y*16*scale-(16*scale), scale*16*3, scale*16*3);
+    lg.setColor(1, 1, 1, 1);
+end
+
+function love.draw(dT)
+    
     local ofs = ((py-10) * map_w) + (px-10);
     -- BIG:
     if cameraMode == ZOOM_BIG then 
@@ -248,6 +330,13 @@ function love.draw()
         if inCombat == false then 
             lg.draw(lg.newImage('assets/00_16x16.png'), 16*scale*5, 16*scale*5, 0, scale);
         else
+            if selectorflash == 4 and inputMode == COMBAT_MOVE then 
+            -- draw movement box - base on char's mov stat
+                DrawMoveBox(currentTurn);                
+            elseif selectorflash == 4 and inputMode == COMBAT_MELEE then 
+                DrawAttackBox(currentTurn);
+            end
+            
             for i=1,#combat_actors do 
                 r = "assets/"..combat_actors[i].g.."_16x16.png";
                 lg.draw(lg.newImage(r), 16*scale*combat_actors[i].x, 16*scale*combat_actors[i].y, 0, scale);
@@ -301,7 +390,38 @@ function love.draw()
         for i=1, #known_kw do 
             lg.print(known_kw[i], 176*scale, (8*i)*scale, 0, scale);
         end 
-    end 
+    else 
+        lg.print(party[1].name, 176*scale, 8*scale, 0, scale);
+        lg.print(" "..party[1].class.." "..party[1].level, 176*scale, 16*scale, 0, scale);
+        lg.setFont(widefont)
+        lg.print(party[1].hp, (176+64)*scale, 8*scale, 0, scale);
+        lg.setFont(defaultfont)
+        lg.print("GOLD\nRELICS", 176*scale, (8*11)*scale, 0, scale);
+    end
+    if inputMode == COMBAT_MOVE or inputMode == COMBAT_COMMAND then 
+        if selectorflash == 1 or selectorflash == 3 then 
+            lg.setColor(0, 0, 0, 1);
+        elseif selectorflash == 0 or selectorflash == 4 then 
+            lg.setColor(0, 0, 0, 0);
+        end
+        selector.x, selector.y = currentTurn.x, currentTurn.y;
+        lg.draw(tileSet[2].sheet, tileSet[2].quads[21], selector.x*scale*16, selector.y*scale*16, 0, scale);
+        lg.setColor(1, 1, 1, 1);
+        lg.print("  A)ttack  D)efend  E)quip  I)tem\n  L)ook  M)agic/Skill  Z)tats", 0, (8*22)*scale, 0, scale);
+        if remainingMov > 0 then 
+            lg.print("↑→↓← Move", (8*16)*scale, (8*23)*scale, 0, scale);
+        end
+    end
+    if inputMode == COMBAT_MELEE then 
+        if selectorflash == 1 or selectorflash == 3 then 
+            lg.setColor(0, 0, 0, 1);
+        elseif selectorflash == 0 or selectorflash == 4 then 
+            lg.setColor(0, 0, 0, 0);
+        end
+        lg.draw(tileSet[2].sheet, tileSet[2].quads[21], selector.x*scale*16, selector.y*scale*16, 0, scale);
+        lg.setColor(1, 1, 1, 1);
+        lg.print("  ↑→↓←    Direction        Esc Cancel\n  space/enter Select", 0, (8*22)*scale, 0, scale);
+    end
 end --love.draw
 
 function togglezoom(cm)
@@ -321,11 +441,20 @@ function togglezoom(cm)
 end
 
 function CheckCollision(x, y)
-    for i = 1, #map_1 do 
-        if x == map_1[i].x and map_1[i].y == y then 
-            AddLog("Blocked!")
-            return true;
-        end 
+    if inCombat == true then 
+        for i=1,#combat_actors do 
+            if combat_actors[i].x == x and combat_actors[i].y == y then 
+                AddLog("Blocked!")
+                return true;
+            end
+        end
+    else
+        for i = 1, #currentMap do 
+            if x == currentMap[i].x and currentMap[i].y == y then 
+                AddLog("Blocked!")
+                return true;
+            end 
+        end
     end
     --map_w = 32;
     ofs = (y * map_w) + x+1;
@@ -333,7 +462,7 @@ function CheckCollision(x, y)
         AddLog("Blocked!")
         return true;
     end --7 to 14
-    if tonumber(bgmap[ofs]) >= 7 and tonumber(bgmap[ofs]) <= 14 then
+    if (tonumber(bgmap[ofs]) >= 7 and tonumber(bgmap[ofs]) <= 14) or bgmap[ofs]=='17'or bgmap[ofs]=='18'or bgmap[ofs]=='19' then
         AddLog("Can't swim!")
         return true;
     end
@@ -362,12 +491,12 @@ function AddLog(l, arrow)
 end
 
 function CheckTalk(x, y)
-    for i = 1, #map_1 do 
-        if x == map_1[i].x and map_1[i].y == y then 
-            if map_1[i].name then 
-                AddLog("You greet "..map_1[i].name..".");
-                --AddLog("\""..map_1[i].chat["hello"][1].."\"", 0);
-                current_npc = map_1[i];
+    for i = 1, #currentMap do 
+        if x == currentMap[i].x and currentMap[i].y == y then 
+            if currentMap[i].name then 
+                AddLog("You greet "..currentMap[i].name..".");
+                --AddLog("\""..currentMap[i].chat["hello"][1].."\"", 0);
+                current_npc = currentMap[i];
                 AskNPC("hello")
                 return true;
             end
@@ -398,10 +527,7 @@ function AskNPC(inp)
     else 
         AddLog("? _", 0)
     end
-    
     current_npc.chat[inp][2] = current_npc.chat[inp][2] or nil;
-    --print('a')
-    --print('b')
     if current_npc.chat[inp][2] ~= nil then 
         for i=1,#known_kw do 
             if known_kw[i]==current_npc.chat[inp][2] then 
@@ -417,13 +543,11 @@ function AskNPC(inp)
                 if known_kw[i]==inp then 
                     return 
                 end
-                --return
             end
             table.insert(known_kw, inp)
             return
         end
     end 
-    
 end
 
 function StartCombat(nmes)
@@ -432,8 +556,13 @@ function StartCombat(nmes)
     epos = {{x=5, y=3}, {x=4,y=2}};
     ppos = {{x=5, y=8}}
     combat_actors = {}
-    hero.x, hero.y = ppos[1].x, ppos[1].y
-    table.insert(combat_actors, hero);
+    --party
+    --print(currentTurn.name)
+    for i=1,#party do 
+        party[i].x, party[i].y = ppos[i].x, ppos[i].y 
+        table.insert(combat_actors, party[i]);
+    end
+    --enemies
     for i=1,#nmes do 
         nmes[i].x = epos[i].x; nmes[i].y = epos[i].y;
         table.insert(combat_actors, nmes[i]);
@@ -452,6 +581,164 @@ function StartCombat(nmes)
     end
     AddLog("Combat!!", 0)
     inCombat = true;
+    -- initiative.
+    for i=1,#combat_actors do 
+        combat_actors[i].init = math.ceil(love.math.random()*10) + math.floor((combat_actors[i].dex-10)/2);
+        --print(combat_actors[i].name.." "..combat_actors[i].init)
+    end
+    next = combat_actors[1];
+    for i=1,#combat_actors do 
+        if combat_actors[i].init > next.init then 
+            next = combat_actors[i]
+        end
+    end
+    
+    if next.player == true then 
+        inputMode = COMBAT_MOVE;
+        AddLog(next.name.."'s turn.\nCommand?");
+        remainingMov = next.mov;
+        selector.x, selector.y = next.x, next.y;
+        currentTurn = next;
+    else 
+        currentTurn = next;
+        AddLog(next.name.."'s turn...")
+        remainingMov = next.mov;
+        EnemyTurn(next);
+    end
+end
+
+function NextPlayer()
+    for i =1,#combat_actors do 
+        if combat_actors[i].player == true then 
+            return combat_actors[i]
+        end 
+    end 
+end
+
+function TryMoveUD(o, c)
+    if o.y - c.y > 0 then 
+        -- move up: -y
+        if CheckCollision(o.x, o.y-1) == false then 
+            --o.y = o.y - 1;
+            AddQueue({"moveUp", o});
+        end
+    else 
+        if CheckCollision(o.x, o.y+1) == false then 
+            --o.y = o.y + 1;
+            AddQueue({"moveDown", o});
+        end 
+    end 
+end
+
+function TryMoveLR(o, c)
+    if o.x - c.x > 0 then 
+        -- move left: -x
+        if CheckCollision(o.x-1, o.y) == false then 
+            --o.x = o.x - 1;
+            AddQueue({"moveLeft", o});
+        end
+    else 
+        if CheckCollision(o.x+1, o.y) == false then 
+            --o.x = o.x + 1;
+            AddQueue({"moveRight", o});
+        end 
+    end 
+end
+
+function AddQueue(q)
+    table.insert(queue, q)
+end
+
+function EnemyTurn(o)
+    --print(o.name);
+    -- AI is based on o.class 
+    -- if fighter: 
+       -- 1. in melee range?
+       -- 2. (move towards closest player)
+       -- 3. attack if can
+    local c = NextPlayer();--combat_actors[1]
+    local d = (c.x-o.x)^2 + (c.y-o.y)^2
+    for i=1,#combat_actors do 
+        -- d = (ex-px)^2+(ey-py)^2
+        if combat_actors[i].player == true then 
+            dt = (combat_actors[i].x-o.x)^2 + (combat_actors[i].y-o.y)^2;
+            if dt < d then d = dt; c = combat_actors[i]; end 
+        end
+    end
+    --if anim[1]==false then return end 
+    -- d has shortest distance from o to c 
+    if (math.abs(o.x-c.x) == 1 and math.abs(o.y-c.y)==0) or (math.abs(o.y-c.y)==1 and math.abs(o.x-c.x)==0) then 
+        --within melee range
+        AddQueue({"log", o.name.." attacks\n"..c.name.."!"})
+        --AddLog(o.name.." attacks\n"..c.name.."!", 0)    
+    else
+        -- move
+        if math.abs(o.x-c.x) > math.abs(o.y-c.y) then 
+            --if <> distance is more than y distance
+            if (o.x-c.x) > 0 then -- right
+                if CheckCollision(o.x-1, o.y) == false then 
+                    --o.x = o.x - 1
+                    AddQueue({"moveLeft", o})
+                else TryMoveUD(o, c); end
+            else 
+                if CheckCollision(o.x+1, o.y) == false then 
+                    --o.x = o.x + 1
+                    AddQueue({"moveRight", o})
+                else TryMoveUD(o, c); end
+            end
+        else 
+            if (o.y-c.y)>0 then 
+                if CheckCollision(o.x, o.y-1) == false then 
+                    --o.y = o.y -1;
+                    AddQueue({"moveUp", o})
+                else TryMoveLR(o, c); end
+            else
+                if CheckCollision(o.x, o.y+1) == false then 
+                    --o.y = o.y + 1;
+                    AddQueue({"moveDown", o})
+                else TryMoveLR(o, c); end
+            end
+        end
+    end
+    --if anim[2] == false then return end;
+    o.init = -1;
+    AddQueue({"nextTurn"})
+end
+
+function NextTurn()
+    next = combat_actors[1];
+    for i=1,#combat_actors do 
+        if combat_actors[i].init > next.init then 
+            next = combat_actors[i]
+        end
+    end
+
+    if next.init == -1 then 
+        for i=1,#combat_actors do 
+            combat_actors[i].init = math.ceil(love.math.random()*10) + math.floor((combat_actors[i].dex-10)/2);
+        end
+        next = combat_actors[1];
+        for i=1,#combat_actors do 
+            if combat_actors[i].init > next.init then 
+                next = combat_actors[i]
+            end
+        end
+    end
+
+    if next.player == true then 
+        inputMode = COMBAT_MOVE;
+        AddLog(next.name.."'s turn.\nCommand?");
+        remainingMov = next.mov;
+        selector.x, selector.y = next.x, next.y;
+        currentTurn = next;
+    else 
+        currentTurn = next;
+        AddLog(next.name.."'s turn...")
+        remainingMov = next.mov;
+        --SetAnimTimer(2);
+        --AddQueue({"enemyTurn", next})
+        EnemyTurn(next);
+    end
 end
 
 function love.keypressed(key)
@@ -474,6 +761,65 @@ function love.keypressed(key)
     end
     if lastkey ~= key then 
         keyRepeat = LONG_REPEAT;
+    end
+    if inputMode == COMBAT_MOVE then
+        if key == "up" and CheckCollision(currentTurn.x, currentTurn.y-1) == false then 
+            currentTurn.y = currentTurn.y - 1;
+            remainingMov = remainingMov - 1;
+            AddLog("Move: Up\nCommand?")
+        elseif key == "down" and CheckCollision(currentTurn.x, currentTurn.y+1)==false then 
+            currentTurn.y = currentTurn.y + 1;
+            remainingMov = remainingMov - 1;
+            AddLog("Move: Down\nCommand?");
+        elseif key == "right" and CheckCollision(currentTurn.x+1, currentTurn.y)==false then 
+            currentTurn.x = currentTurn.x + 1;
+            remainingMov = remainingMov - 1;
+            AddLog("Move: Right\nCommand?");
+        elseif key == "left" and CheckCollision(currentTurn.x-1, currentTurn.y)==false then 
+            currentTurn.x = currentTurn.x - 1;
+            remainingMov = remainingMov - 1;
+            AddLog("Move: Left\nCommand?");
+        end
+        if remainingMov == 0 then 
+            inputMode = COMBAT_COMMAND;
+        end
+    end
+    if inputMode == COMBAT_MELEE then 
+        if key == "up" then 
+            selector.x, selector.y = currentTurn.x, currentTurn.y-1
+        elseif key == "down" then 
+            selector.x, selector.y = currentTurn.x, currentTurn.y+1
+        elseif key == "left" then 
+            selector.x, selector.y = currentTurn.x-1, currentTurn.y
+        elseif key == "right" then 
+            selector.x, selector.y = currentTurn.x+1, currentTurn.y
+        end
+        if key == "escape" then 
+            inputMode = COMBAT_COMMAND;
+            if remainingMov > 0 then inputMode = COMBAT_MOVE end
+        elseif key == "space" or key == "return" then 
+            for i=1,#combat_actors do 
+                if selector.x == combat_actors[i].x and selector.y == combat_actors[i].y then 
+                    print('target found');
+                end
+            end
+        end
+    end
+    if inputMode == COMBAT_COMMAND or inputMode == COMBAT_MOVE then 
+        if key == "a" then 
+            atktype = currentTurn.weapon.type;
+            if atktype == "melee" then 
+                inputMode = COMBAT_MELEE;
+            else 
+                inputMode = COMBAT_RANGE;
+            end
+            selector.y = selector.y-1;
+        elseif key == "d" then 
+            currentTurn.defend = true;
+            AddLog(currentTurn.name.." defends.")
+            currentTurn.init = -1;
+            NextTurn();
+        end
     end
     if inputMode == TALK_MODE then 
         if key == "right" then 
