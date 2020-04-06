@@ -37,8 +37,14 @@ flashtimer = 0.1;
 remainingMov = 0;
 selector = { x = 0, y = 0}
 currentTurn = nil;
---anim = { false, false, false } -- ticks true, true true every second. for animation.
+anim = { false, false, false } -- ticks true, true true every second. for animation.
 queue = {}
+
+
+t = coroutine.create(function ()
+    love.timer.sleep(0.5);
+end)
+
 
 map_1 = {
     {
@@ -226,31 +232,26 @@ function love.update(dT)
         animationTimer = animationTimer - dT;
         flashtimer = flashtimer - dT;
     end
+    
     if flashtimer < 0 then flashtimer = 0.1; toggleselflash(); end
-
+    
     if animationTimer > 0 then 
         love.draw()
         return 
     end
     if #queue > 0 then 
-        if queue[1][1] == "moveDown" then 
-            animationTimer = 0.5
-            queue[1][2].y = queue[1][2].y + 1
+        if queue[1][1] == "nextTurn" then 
+            table.remove(queue);
+            NextTurn()
+        elseif queue[1][1] == "enemyTurn" then 
+            table.remove(queue);
+            EnemyTurn(currentTurn)
         end
-        table.remove(queue)
-        return
+    end 
+    if inCombat==true then 
+
     end
-    -- if animationTimer > 1 then 
-    --     animationTimer = 0;
-    --     for i=1,#anim do 
-    --         if anim[i] ~= false then 
-    --             anim[i] = false 
-    --             return 
-    --         end
-    --     end
-    -- end
-    
-    
+
     repeatkeys = { "right", "left", "up", "down" };
     p = false;
     for i=1,#repeatkeys do 
@@ -315,7 +316,7 @@ function DrawAttackBox(o)
 end
 
 function love.draw(dT)
-    
+
     local ofs = ((py-10) * map_w) + (px-10);
     -- BIG:
     if cameraMode == ZOOM_BIG then 
@@ -544,8 +545,9 @@ function AskNPC(inp)
                     return 
                 end
             end
-            table.insert(known_kw, inp)
-            return
+            
+            --if current_npc.chat[inp]~=nil then table.insert(known_kw, inp) end 
+            --return
         end
     end 
 end
@@ -603,8 +605,13 @@ function StartCombat(nmes)
         currentTurn = next;
         AddLog(next.name.."'s turn...")
         remainingMov = next.mov;
-        EnemyTurn(next);
+        AddQueue({"enemyTurn"})
+        --EnemyTurn(next);
     end
+end
+
+function AddQueue(q)
+    table.insert(queue, q)
 end
 
 function NextPlayer()
@@ -619,13 +626,11 @@ function TryMoveUD(o, c)
     if o.y - c.y > 0 then 
         -- move up: -y
         if CheckCollision(o.x, o.y-1) == false then 
-            --o.y = o.y - 1;
-            AddQueue({"moveUp", o});
+            o.y = o.y - 1;
         end
     else 
         if CheckCollision(o.x, o.y+1) == false then 
-            --o.y = o.y + 1;
-            AddQueue({"moveDown", o});
+            o.y = o.y + 1;
         end 
     end 
 end
@@ -634,20 +639,15 @@ function TryMoveLR(o, c)
     if o.x - c.x > 0 then 
         -- move left: -x
         if CheckCollision(o.x-1, o.y) == false then 
-            --o.x = o.x - 1;
-            AddQueue({"moveLeft", o});
+            o.x = o.x - 1;
         end
     else 
         if CheckCollision(o.x+1, o.y) == false then 
-            --o.x = o.x + 1;
-            AddQueue({"moveRight", o});
+            o.x = o.x + 1;
         end 
     end 
 end
 
-function AddQueue(q)
-    table.insert(queue, q)
-end
 
 function EnemyTurn(o)
     --print(o.name);
@@ -666,36 +666,32 @@ function EnemyTurn(o)
         end
     end
     --if anim[1]==false then return end 
+    animationTimer = 0.5
     -- d has shortest distance from o to c 
     if (math.abs(o.x-c.x) == 1 and math.abs(o.y-c.y)==0) or (math.abs(o.y-c.y)==1 and math.abs(o.x-c.x)==0) then 
         --within melee range
-        AddQueue({"log", o.name.." attacks\n"..c.name.."!"})
-        --AddLog(o.name.." attacks\n"..c.name.."!", 0)    
+        AddLog(o.name.." attacks\n"..c.name.."!", 0)    
     else
         -- move
         if math.abs(o.x-c.x) > math.abs(o.y-c.y) then 
             --if <> distance is more than y distance
             if (o.x-c.x) > 0 then -- right
                 if CheckCollision(o.x-1, o.y) == false then 
-                    --o.x = o.x - 1
-                    AddQueue({"moveLeft", o})
+                    o.x = o.x - 1
                 else TryMoveUD(o, c); end
             else 
                 if CheckCollision(o.x+1, o.y) == false then 
-                    --o.x = o.x + 1
-                    AddQueue({"moveRight", o})
+                    o.x = o.x + 1
                 else TryMoveUD(o, c); end
             end
         else 
             if (o.y-c.y)>0 then 
                 if CheckCollision(o.x, o.y-1) == false then 
-                    --o.y = o.y -1;
-                    AddQueue({"moveUp", o})
+                    o.y = o.y -1;
                 else TryMoveLR(o, c); end
             else
                 if CheckCollision(o.x, o.y+1) == false then 
-                    --o.y = o.y + 1;
-                    AddQueue({"moveDown", o})
+                    o.y = o.y + 1;
                 else TryMoveLR(o, c); end
             end
         end
@@ -703,6 +699,7 @@ function EnemyTurn(o)
     --if anim[2] == false then return end;
     o.init = -1;
     AddQueue({"nextTurn"})
+    --NextTurn()
 end
 
 function NextTurn()
@@ -735,9 +732,8 @@ function NextTurn()
         currentTurn = next;
         AddLog(next.name.."'s turn...")
         remainingMov = next.mov;
-        --SetAnimTimer(2);
-        --AddQueue({"enemyTurn", next})
-        EnemyTurn(next);
+        AddQueue({"enemyTurn"})
+        --EnemyTurn(next);
     end
 end
 
@@ -815,10 +811,12 @@ function love.keypressed(key)
             end
             selector.y = selector.y-1;
         elseif key == "d" then 
+            inputMode = nil
             currentTurn.defend = true;
             AddLog(currentTurn.name.." defends.")
+            animationTimer = 0.5;
             currentTurn.init = -1;
-            NextTurn();
+            AddQueue({"nextTurn"});--NextTurn();
         end
     end
     if inputMode == TALK_MODE then 
