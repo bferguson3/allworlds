@@ -11,6 +11,7 @@ tileSet = {};
 screenmap = {};
 animationTimer = 0;
 bgmap = {};
+currentMap = nil;
 px = 9;
 py = 10;
 LONG_REPEAT = 0.75;
@@ -29,6 +30,7 @@ TALK_MODE = 1;
 COMBAT_MOVE = 2;
 COMBAT_COMMAND = 5;
 COMBAT_MELEE = 6;
+EXAMINE_MODE = 7;
 inputMode = MOVE_MODE;
 current_npc = nil;
 myinput = ''
@@ -45,54 +47,8 @@ t = coroutine.create(function ()
     love.timer.sleep(0.5);
 end)
 
+dofile("maps/map_1.lua")
 
-map_1 = {
-    {
-        g = "01",
-        name = "Guard",
-        chat = {
-            hello = {"Greetings, highness.\nLovely day."},
-            name  = {"I am not permitted\nto give you that\ninformation."},
-            horrors = {"It's bad luck\nto discuss it openly,\n,highness..."},
-            job   = {"Happily in the ser-\nvice of our king,\nhighness."},
-            shrine = {"The nearest shrine\nis to the northeast."},
-            bye   = {"Farewell, highness."}
-        },
-        x = 19,
-        y = 18
-    },
-    {
-        g = "01",
-        name = "Guard",
-        chat = {
-            hello = {"Greetings, highness.\nYour father was\nlooking for you.", "father"},--{{1, 1, 1}, "Greetings, highness.\nYour ",{0.8, 1, 0.8}, "father", {1, 1, 1}, "was\nlooking for you."},
-            horrors = {"It's bad luck\nto discuss it openly,\n,highness..."},
-            name  = {"I am not permitted\nto give you that\ninformation."},
-            shrine = {"The nearest shrine\nis to the northeast."},
-            job   = {"Happily in the ser-\nvice of our king,\nhighness."},
-            father = {"King Amadeus, of\n course. He's inside."},
-            bye   = {"Farewell, highness."}
-        },
-        x = 21,
-        y = 18
-    },
-    {
-        g = "02",
-        name = "Amadeus",
-        chat = {
-            hello = {"My son. I've been\nwaiting for you\nto awaken.", "awaken"},
-            name  = {"It is I, child.\nAmadeus, your father."},
-            job   = {"It is my task,\nas it will be yours\nsomeday, to rule\nover this land."},
-            bye   = {"Farewell, son."},
-            awaken = {"You've been in stasis\nfor thirty years. Your\nmemories will return\nin time. It may seem\nsudden, but a\ntask awaits you.", "task"},
-            task = {"Indeed. The horrors have\n returned. First, you\nmust purify the\nshrine nearby.", "shrine"},
-            shrine = {"Purify the horrors\nto the northeast.\nOnly you can do this."},
-            horrors = {"I wish I had the\nanswers. It is best to\nask others."}
-        },
-        x = 20,
-        y = 13
-    }
-}
 known_kw = { "name", "job", "bye" }
 classes = {
     Fighter = {}
@@ -104,6 +60,7 @@ enemies = {
         class = "Fighter",
         g = "01",
         hp = 30,
+        mhp = 30,
         mov = 1,
         str = 10,
         dex = 10,
@@ -116,7 +73,9 @@ enemies = {
             type = "melee"
         },
         thaco = 20,
-        ac = 10,
+        armor = {
+            ac = 1
+        },
         player = false
     }
 }
@@ -146,11 +105,20 @@ party = {
         level = 1,
         xp = 0,
         class = "Fighter",
-        player = true
+        player = true,
+        --getac = function()
+        --    a = 10 - armor.ac - math.floor( (dex-10)/2); return a;
+        --end
     }
+    
 }
+
+function getac(o)
+    a = 10 - o.armor.ac - math.floor((o.dex-10)/2);
+    return a;
+end
+
 combat_actors = {}
-currentMap = map_1;
 
 function TestHardware()
     local gfx_support = lg.getSupported();
@@ -202,9 +170,12 @@ function love.load(arg)
     tileSet[2] = SliceTileSheet(lg.newImage('assets/bg_16x16.png'), 16, 16);
     
     --defaultfont = lg.setNewFont('ModernDOS8x8.ttf', 16);
-    defaultfont = lg.setNewFont('assets/PxPlus_AmstradPC1512-2y.ttf', 8);
+    --defaultfont = lg.setNewFont('assets/PxPlus_AmstradPC1512-2y.ttf', 8);
+    --defaultfont = lg.setNewFont('assets/Px437_ATI_SmallW_6x8.ttf', 8);
+    --defaultfont = lg.newImageFont('assets/atarifont.png', ' !"#$%@\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~')
+    defaultfont = lg.newImageFont('assets/EYUK29X.png', " ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-=[]\\,./;')!@#$%^&*(+{}|<>?:\"↑→↓←", 1)
     widefont = lg.newFont('assets/PxPlus_AmstradPC1512.ttf', 8);
-    
+    lg.setFont(defaultfont);
     -- init canvases
     --UICanvas = lg.newCanvas(256, 192);
 
@@ -216,10 +187,11 @@ function love.load(arg)
     local thisbeat = (currenttime.sec + (currenttime.min * 60) + (currenttime.hour * 3600)) / 86.4
     print('current beat: '.. tostring(thisbeat));
     bgmap = {};
-    bg = love.filesystem.read('maps/bg.csv');
+    bg = love.filesystem.read('maps/map_1.csv');
     for n in bg:gmatch("(%d*).") do
         table.insert(bgmap, n);
     end
+    --currentMap = map_1;
 end -- love.load
 
 function toggleselflash()
@@ -251,7 +223,39 @@ function love.update(dT)
     if inCombat==true then 
 
     end
-
+    -- am I in a room?
+    local b = false
+    for i=1,#currentMap.rooms do 
+        r = currentMap.rooms[i]
+        if (px >= r.x1) and (px <= r.x2) then 
+            if (py >= r.y1) and (py <= r.y2) then 
+                b = true 
+                --togglezoom("big")
+            end
+        end 
+    end
+    if b == true then 
+        togglezoom("big")
+    else 
+        togglezoom("small")
+    end
+    -- am I on a teleporter?
+    for i=1,#currentMap.warps do 
+        w = currentMap.warps[i] 
+        if (px==w.x) and (py==w.y) then 
+            --Warp me!
+            --warps[1].x 
+            --warps[1].target.map 
+            --             .x
+            cm = currentMap.warps[i].target.map --worldmap
+            px = currentMap.warps[i].target.x 
+            py = currentMap.warps[i].target.y
+            
+            dofile("maps/"..cm .. ".lua")
+            LoadMap(cm, currentMap.width)
+            AddLog("Entering\n " .. currentMap.name .. "...")
+        end
+    end
     repeatkeys = { "right", "left", "up", "down" };
     p = false;
     for i=1,#repeatkeys do 
@@ -394,10 +398,16 @@ function love.draw(dT)
     else 
         lg.print(party[1].name, 176*scale, 8*scale, 0, scale);
         lg.print(" "..party[1].class.." "..party[1].level, 176*scale, 16*scale, 0, scale);
-        lg.setFont(widefont)
-        lg.print(party[1].hp, (176+64)*scale, 8*scale, 0, scale);
-        lg.setFont(defaultfont)
+        lg.print("AC " .. getac(party[1]), 232*scale, 16*scale, 0, scale);
+        --lg.setFont(widefont)
+        lg.print("HP " .. party[1].hp, (176+64)*scale, 8*scale, 0, scale);
+        --lg.setFont(defaultfont)
         lg.print("GOLD\nRELICS", 176*scale, (8*11)*scale, 0, scale);
+        
+    end
+    if inputMode == MOVE_MODE then 
+        lg.print("  A)ttack  E)xamine  I)nventory\n  M)agic/Skill  Z)tats", 0, (8*22)*scale, 0, scale);
+        lg.print("↑→↓← Move", (8*16)*scale, (8*23)*scale, 0, scale);
     end
     if inputMode == COMBAT_MOVE or inputMode == COMBAT_COMMAND then 
         if selectorflash == 1 or selectorflash == 3 then 
@@ -532,24 +542,41 @@ function AskNPC(inp)
     if current_npc.chat[inp][2] ~= nil then 
         for i=1,#known_kw do 
             if known_kw[i]==current_npc.chat[inp][2] then 
-                --!TODO FIXME
+                --i know the extra kw already
                 return 
             end 
         end 
+        --i do not know the extra kw
         table.insert(known_kw, current_npc.chat[inp][2])
     end
-    for k,v in pairs(current_npc.chat) do
-        if k == inp and k ~= "hello" then 
-            for i=1,#known_kw do 
-                if known_kw[i]==inp then 
-                    return 
-                end
+    if current_npc.chat[inp][1] ~= "I don't understand." then 
+        local f = false 
+        for i=1,#known_kw do 
+            if (known_kw[i] == inp) then 
+                f = true 
+            end 
+        end 
+        if f == false then 
+            if inp ~= "hello" then 
+                table.insert(known_kw,inp) 
             end
-            
-            --if current_npc.chat[inp]~=nil then table.insert(known_kw, inp) end 
-            --return
         end
-    end 
+    end
+    --print(current_npc.chat[inp][1])
+end
+
+function LoadMap(name, w)
+
+    map_w = w;
+    bgmap = {};
+    local r = "maps/"..name..".csv";
+    print(r)
+    local bg = love.filesystem.read(r);
+    --print(bg)
+    for n in bg:gmatch("(%d*).") do
+        table.insert(bgmap, n);
+    end
+    print(name .. " loaded.")
 end
 
 function StartCombat(nmes)
@@ -581,6 +608,7 @@ function StartCombat(nmes)
     for n in bg:gmatch("(%d*).") do
         table.insert(bgmap, n);
     end
+    --
     AddLog("Combat!!", 0)
     inCombat = true;
     -- initiative.
@@ -737,6 +765,54 @@ function NextTurn()
     end
 end
 
+function TestDead(t)
+    if t.hp <= 0 then 
+        AddLog(t.name .. " dies!", 0)
+        local n = 1
+        for n=1,#combat_actors do 
+            if combat_actors[n] == t then 
+                table.remove(combat_actors, n)
+                break
+            end 
+        end 
+        --table.remove(combat_actors, t)
+        local e = false;
+        for i=1,#combat_actors do 
+            if combat_actors[i].player == false then 
+                e = true;
+            end
+        end
+        if e == false then 
+            AddLog("Ending combat.")
+        return;
+        end
+    end
+    if t.hp < ((t.mhp*0.25)/t.mhp) then 
+        AddLog("Badly wounded!", 0)
+    end
+end 
+
+function CheckSearch(x, y)
+    for i=1,#currentMap do 
+        if currentMap[i].x == x then 
+            if currentMap[i].y == y then 
+                currentMap[i].name = currentMap[i].name or "nothing special"
+                currentMap[i].examine = currentMap[i].examine or { "You see " .. currentMap[i].name .. "." }
+                local ex = currentMap[i].examine[1]--("You see " .. currentMap[i].name) or "Nothing special."
+                AddLog(ex, 0)
+                return true
+            end 
+        end 
+    end
+    AddLog("Nothing there!", 0)
+    return true
+end
+
+function GetAttackDamage(src, tgt)
+    d = (love.math.random()*src.weapon.dmg_die) + (math.floor((src.str-10)/2))
+    return math.floor(d)
+end
+
 function love.keypressed(key)
     if inputMode == CHAT_INPUT then 
         if key == 'backspace' and #myinput > 0 then 
@@ -796,7 +872,30 @@ function love.keypressed(key)
         elseif key == "space" or key == "return" then 
             for i=1,#combat_actors do 
                 if selector.x == combat_actors[i].x and selector.y == combat_actors[i].y then 
-                    print('target found');
+                    local tgt = combat_actors[i]
+                    AddLog(currentTurn.name .. " attacks\n " .. tgt.name .. "!")
+                    -- roll attack: thaco - 1-20 + dex mod
+                    local r = math.ceil(love.math.random()*20)
+                    local ac = (currentTurn.thaco - r - math.floor( (currentTurn.dex-10)/2))
+                    AddLog("Roll: " .. r .. " (AC".. ac .."+)", 0);
+                    local hit = false;
+                    if r == 20 then 
+                        local dmg = GetAttackDamage(currentTurn, tgt)
+                        tgt.hp = tgt.hp - dmg*2;
+                        AddLog("Critical hit!!", 0)
+                        AddLog(" "..dmg*2 .. " damage!", 0)
+                        hit = true
+                    elseif r == 1 then 
+                        AddLog("Critical miss!!", 0)
+                    elseif ac <= getac(combat_actors[i]) then 
+                        local dmg = GetAttackDamage(currentTurn, tgt) --"attack"=normal attack
+                        tgt.hp = tgt.hp - dmg;
+                        AddLog("Hit!! " .. dmg .. " damage!", 0)
+                        hit = true
+                    else
+                        AddLog("Missed!", 0)
+                    end             
+                    if hit==true then TestDead(tgt) end
                 end
             end
         end
@@ -847,7 +946,28 @@ function love.keypressed(key)
             inputMode = MOVE_MODE
         end
     end
-    if inputMode == MOVE_MODE then 
+    if inputMode == EXAMINE_MODE then 
+        if key == "right" then 
+            if CheckSearch(px+1, py) then 
+                inputMode = MOVE_MODE
+            end
+        elseif key == "left" then 
+            if CheckSearch(px-1, py) then 
+                inputMode = MOVE_MODE
+            end
+        elseif key == "down" then 
+            if CheckSearch(px, py+1) then 
+                inputMode = MOVE_MODE
+            end
+        elseif key == "up" then 
+            if CheckSearch(px, py-1) then 
+                inputMode = MOVE_MODE
+            end
+        else 
+            AddLog("Invalid direction!", 0);
+            inputMode = MOVE_MODE
+        end
+    elseif inputMode == MOVE_MODE then 
         if key == "right" then 
             if CheckCollision(px+1, py) == false then 
                 px = px + 1;   
@@ -874,6 +994,11 @@ function love.keypressed(key)
             AddLog("Talk")
             AddLog("Direction?", 0)
             inputMode = TALK_MODE;
+        elseif key == "e" then 
+            print(px, py)
+            AddLog("Examine")
+            AddLog("Direction?", 0)
+            inputMode = EXAMINE_MODE
         elseif key == "b" then 
             StartCombat({enemies["guard"]})
         end
