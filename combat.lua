@@ -28,6 +28,9 @@ end
 
 
 function StartCombat(nmes)
+    outOfCombatState.map = currentMap.fname
+    outOfCombatState.x, outOfCombatState.y = px, py
+    
     px, py = 5, 5;
     
     epos = {{x=5, y=3}, {x=4,y=2}};
@@ -50,13 +53,14 @@ function StartCombat(nmes)
     
     n = math.ceil(love.math.random()*2);
     
-    map_w = 11;
-    bgmap = {};
-    r = "maps/batt"..n..".csv";
-    bg = love.filesystem.read(r);
-    for n in bg:gmatch("(%d*).") do
-        table.insert(bgmap, n);
-    end
+    --map_w = 11;
+    --bgmap = {};
+    --r = "maps/batt"..n..".csv";
+    --bg = love.filesystem.read(r);
+    --for n in bg:gmatch("(%d*).") do
+    --    table.insert(bgmap, n);
+    --end
+    LoadMap("batt"..n, 11)
     --
     AddLog("Combat!!", 0)
     inCombat = true;
@@ -174,10 +178,17 @@ function TestDead(t)
             end
         end
         if e == false then 
+            animationTimer = 0.5
             AddLog("Ending combat.")
-
-            --TODO FIXME
-        return;
+            combat_actors = {}
+            currentTurn = nil
+            queue = {}
+            inputMode = MOVE_MODE
+            inCombat = false 
+            px, py = outOfCombatState.x, outOfCombatState.y
+            dofile("maps/"..outOfCombatState.map..".lua")
+            LoadMap(outOfCombatState.map, currentMap.width)
+            return;
         end
     end
     

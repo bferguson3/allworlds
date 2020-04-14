@@ -1,6 +1,7 @@
 currentMap = {
     width = 35,
     name = "Shrine of Birth",
+    fname = "map_1",
     {
         g = "01",
         name = "Guard",

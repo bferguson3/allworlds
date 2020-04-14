@@ -3,6 +3,11 @@
 
 lg = love.graphics;
 
+outOfCombatState = {
+    map = "worldmap",
+    x = 10,
+    y = 10
+}
 inCombat = false;
 scale = 1;
 map_w = 35;
@@ -190,17 +195,16 @@ function love.update(dT)
         love.draw()
         return 
     end
-    if #queue > 0 then 
-        if queue[1][1] == "nextTurn" then 
-            table.remove(queue);
-            NextTurn()
-        elseif queue[1][1] == "enemyTurn" then 
-            table.remove(queue);
-            EnemyTurn(currentTurn)
+    if queue ~= nil then 
+        if #queue > 0 then 
+            if queue[1][1] == "nextTurn" then 
+                table.remove(queue);
+                NextTurn()
+            elseif queue[1][1] == "enemyTurn" then 
+                table.remove(queue);
+                EnemyTurn(currentTurn)
+            end
         end
-    end 
-    if inCombat==true then 
-
     end
     -- am I in a room?
     local b = false
@@ -379,11 +383,11 @@ function AskNPC(inp)
 end
 
 function LoadMap(name, w)
-
+    noEnemiesSpawned = 0;
     map_w = w;
     bgmap = {};
     local r = "maps/"..name..".csv";
-    print(r)
+    --print(r)
     local bg = love.filesystem.read(r);
     --print(bg)
     for n in bg:gmatch("(%d*).") do

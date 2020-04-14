@@ -62,11 +62,12 @@ function love.keypressed(key)
                         if (combat_actors[i].player == true) then 
                             return 
                         end
-                        MeleeAttack(combat_actors[i])
                         inputMode = nil
                         animationTimer = 0.5;
                         currentTurn.init = -1;
                         AddQueue({"nextTurn"});--NextTurn();
+                        MeleeAttack(combat_actors[i])
+                        
                         --END TURN
                     end
                 end
