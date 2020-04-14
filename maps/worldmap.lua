@@ -1,6 +1,12 @@
 currentMap = {
     width = 50,
     name = "world map",
+    encounters = {
+        [1] = {
+            enemies = { "guard", "guard" },
+            g = "01"
+        }
+    },
     {
         g = "01",
         name = "Guard",
