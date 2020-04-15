@@ -17,6 +17,7 @@ xpTable = { 1000, 3000, 6000, 10000, 15000, 21000, 28000, 36000, 45000 }
 inCombat = false;
 scale = 1;
 map_w = 35;
+x_draw_offset = 0;
 tileSize = 8;
 tileSet = {};
 screenmap = {};
@@ -140,18 +141,27 @@ end
 
 currentSave = nil;
 
+function SetZoom(z)
+    love.window.setMode(320*z, 200*z)
+    scr_w, scr_h = lg.getDimensions();
+    --scale = math.floor(scr_h / 200);
+    scale = scr_h / 200;
+    x_draw_offset = (scr_w - (scale * 320))/2;
+end
+
 function love.load(arg)
     --====================================
     --=ANDROID SHIT==-
     --love.window.setMode(0, 0, {fullscreen=false});
+    
+    SetZoom(1)
+
     if love.filesystem.getInfo("01.sav") == nil then 
         currentSave = love.filesystem.newFile("01.sav")
         love.filesystem.write("01.sav", 'ok')
         print("k")
     end
 
-    scr_w, scr_h = lg.getDimensions();
-    scale = math.floor(scr_h / 192);
     music:setLooping(true)
     music:play()
     sfx = {}
@@ -162,7 +172,7 @@ function love.load(arg)
     sfx.miss = love.audio.newSource("sfx/miss.wav", "static");
     sfx.spell1 = love.audio.newSource("sfx/spell1.wav", "static");
     sfx.step = love.audio.newSource("sfx/step.wav", "static");
-    x_draw_offset = (scr_w - (scale * 256))/2;
+    
     love.math.setRandomSeed(love.timer.getTime())
     --currentState = systemState.init;
     init_time = love.timer.getTime();

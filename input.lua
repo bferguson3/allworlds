@@ -193,6 +193,14 @@ function love.keypressed(key)
             inputMode = EXAMINE_MODE
         elseif key == "b" then 
             StartCombat({"guard"})
+        elseif key == "1" then 
+            SetZoom(1)
+        elseif key == "2" then 
+            SetZoom(2)
+        elseif key == "3" then 
+            SetZoom(3)
+        elseif key == "4" then 
+            SetZoom(0)
         end
         if (moved == true) then 
             sfx.step:play()

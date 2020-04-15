@@ -35,7 +35,13 @@ currentMap = {
         g = "barrel",
         x = 18,
         y = 13, 
-        examine = {": \"Trail rations.\""}
+        examine = {": \"Just trail rations.\""}
+    },
+    {
+        g = "table",
+        x = 19,
+        y = 15,
+        examine = {": \"Old scrolls written in\n cryptic tongue.\""}
     },
     {
         g = "02",

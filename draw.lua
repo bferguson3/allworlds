@@ -44,15 +44,27 @@ function DrawAttackBox(o)
 end
 
 function love.draw(dT)
-
+    love.graphics.translate(x_draw_offset, 0)
     local ofs = ((py-10) * map_w) + (px-10);
+    lg.setColor(0, 0, 0, 1);
+    lg.rectangle("fill", 0, 0, 320*scale, 200*scale)
+    --lg.rectangle("fill", 0, 0, 256*scale, 8*scale)
+    --lg.rectangle("fill", 0, 0, 8*scale, 192*scale)
+    --lg.rectangle("fill", 0, 168*scale, 256*scale, 32*scale)
+    --lg.rectangle("fill", 168*scale, 0, 100*scale, 200*scale)
+    lg.setColor(1, 1, 1, 1);
+
     -- BIG:
+    lg.translate(16*scale, 8*scale)
     if cameraMode == ZOOM_BIG then 
+        
         for y=0,10,1 do 
             for x=0,10,1 do
                 b = bgmap[ofs+((map_w*5)+5)+1+(y*map_w)+x];
                 if b == nil then b = bgmap[1] end;
+                
                 lg.draw(tileSet[2].sheet, tileSet[2].quads[b+1], scale*(16*x), scale*(16*y), 0, scale);
+                
             end
         end
         DrawMapObjects_Large();
@@ -74,7 +86,7 @@ function love.draw(dT)
     elseif cameraMode == ZOOM_SMALL then 
     -- SMALL:
         for y=0,20,1 do 
-            for x=0,20,1 do
+            for x=0,21,1 do
                 if (ofs+1+(y*map_w)+x) < #bgmap then 
                     b = bgmap[ofs+1+(y*map_w)+x]
                     if b == nil then b = bgmap[1] end;
@@ -88,22 +100,16 @@ function love.draw(dT)
         end
         
     end    
-    --lg.translate(0, 0)
-    lg.setColor(0, 0, 0, 1);
-    lg.rectangle("fill", 0, 0, 256*scale, 8*scale)
-    lg.rectangle("fill", 0, 0, 8*scale, 192*scale)
-    lg.rectangle("fill", 0, 168*scale, 256*scale, 32*scale)
-    lg.rectangle("fill", 168*scale, 0, 100*scale, 200*scale)
-    lg.setColor(1, 1, 1, 1);
+    lg.translate(-8*scale, -8*scale)
     --GUI
-    for i = 1, 20 do 
+    for i = 1, 23 do 
         lg.draw(tileSet[1].sheet, tileSet[1].quads[6], (i)*8*scale, 0, 0, scale)
-        lg.draw(tileSet[1].sheet, tileSet[1].quads[6], (i)*8*scale, 21*8*scale, 0, scale)
+        lg.draw(tileSet[1].sheet, tileSet[1].quads[6], (i)*8*scale, 22*8*scale, 0, scale)
         lg.draw(tileSet[1].sheet, tileSet[1].quads[7], 0, i*8*scale, 0, scale)
-        lg.draw(tileSet[1].sheet, tileSet[1].quads[7], 21*8*scale, i*8*scale, 0, scale)
+        lg.draw(tileSet[1].sheet, tileSet[1].quads[7], 23*8*scale, i*8*scale, 0, scale)
     end
     for i=1,10 do 
-        lg.draw(tileSet[1].sheet, tileSet[1].quads[6], ((i+21)*8)*scale, 13*8*scale, 0, scale)
+        lg.draw(tileSet[1].sheet, tileSet[1].quads[6], ((i+23)*8)*scale, 13*8*scale, 0, scale)
     end
     lg.draw(tileSet[1].sheet, tileSet[1].quads[5], 0, 0, 0, scale)
     lg.draw(tileSet[1].sheet, tileSet[1].quads[5], 21*8*scale, 0, 0, scale)
@@ -113,25 +119,27 @@ function love.draw(dT)
     lg.draw(tileSet[1].sheet, tileSet[1].quads[5], 32*8*scale, 13*8*scale, 0, scale)
 
     for i = 1, #log do 
-        lg.print(log[i], 176*scale, (104+(8*i))*scale, 0, scale);
+        lg.print(log[i], 24.5*8*scale, (104+(8*i))*scale, 0, scale);
     end
     if inputMode == CHAT_INPUT then 
         for i=1, #known_kw do 
-            lg.print(known_kw[i], 176*scale, (8*i)*scale, 0, scale);
+            lg.print(known_kw[i], 22*8*scale, (8*i)*scale, 0, scale);
         end 
     else 
-        lg.print(party[1].name, 176*scale, 8*scale, 0, scale);
-        lg.print(" "..party[1].class.." "..party[1].level, 176*scale, 16*scale, 0, scale);
-        lg.print("  AC " .. getac(party[1]), 232*scale, 16*scale, 0, scale);
+        lg.translate(4*scale, 0);
+        lg.print(party[1].name, 24*8*scale, 8*scale, 0, scale);
+        lg.print(" "..party[1].class.." "..party[1].level, 24*8*scale, 16*scale, 0, scale);
+        lg.print("      AC " .. getac(party[1]), 232*scale, 16*scale, 0, scale);
         --lg.setFont(widefont)
-        lg.print("HP " .. party[1].hp, (176+64)*scale, 8*scale, 0, scale);
+        lg.print("HP " .. party[1].hp, ((24*8)+(8*8))*scale, 8*scale, 0, scale);
         --lg.setFont(defaultfont)
-        lg.print("GOLD\nRELICS", 176*scale, (8*11)*scale, 0, scale);
-        
+        lg.print("GOLD\nRELICS", 24*8*scale, (8*11)*scale, 0, scale);
+        lg.translate(-4*scale, 0);
     end
+    lg.translate(-8*scale, 0)
     if inputMode == MOVE_MODE then 
-        lg.print("  A)ttack  E)xamine  I)nventory\n  M)agic/Skill  Z)tats", 0, (8*22)*scale, 0, scale);
-        lg.print("↑→↓← Move", (8*16)*scale, (8*23)*scale, 0, scale);
+        lg.print("  A)ttack  E)xamine  I)nventory\n  M)agic/Skill  Z)tats", 0, (8*23)*scale, 0, scale);
+        lg.print("↑→↓← Move", (8*16)*scale, (8*24)*scale, 0, scale);
     end
     if (inputMode == COMBAT_MOVE) or (inputMode == COMBAT_COMMAND) or (inputMode == nil) then 
         if selectorflash == 1 or selectorflash == 3 then 
@@ -140,11 +148,13 @@ function love.draw(dT)
             lg.setColor(0, 0, 0, 0);
         end
         --selector.x, selector.y = currentTurn.x, currentTurn.y;
+        lg.translate(16*scale, 8*scale)
         lg.draw(tileSet[2].sheet, tileSet[2].quads[21], selector.x*scale*16, selector.y*scale*16, 0, scale);
+        lg.translate(-16*scale, -8*scale)
         lg.setColor(1, 1, 1, 1);
-        lg.print("  A)ttack  D)efend  E)quip  I)tem\n  L)ook  M)agic/Skill  Z)tats", 0, (8*22)*scale, 0, scale);
+        lg.print("  A)ttack  D)efend  E)quip  I)tem\n  L)ook  M)agic/Skill  Z)tats", 0, (8*23)*scale, 0, scale);
         if remainingMov > 0 then 
-            lg.print("↑→↓← Move", (8*16)*scale, (8*23)*scale, 0, scale);
+            lg.print("↑→↓← Move", (8*16)*scale, (8*24)*scale, 0, scale);
         end
     end
     if inputMode == COMBAT_MELEE then 
@@ -153,9 +163,11 @@ function love.draw(dT)
         elseif selectorflash == 0 or selectorflash == 4 then 
             lg.setColor(0, 0, 0, 0);
         end
+        lg.translate(16*scale, 8*scale)
         lg.draw(tileSet[2].sheet, tileSet[2].quads[21], selector.x*scale*16, selector.y*scale*16, 0, scale);
+        lg.translate(-16*scale, -8*scale)
         lg.setColor(1, 1, 1, 1);
-        lg.print("  ↑→↓←    Direction        Esc Cancel\n  space/enter Select", 0, (8*22)*scale, 0, scale);
+        lg.print("  ↑→↓←    Direction        Esc Cancel\n  space/enter Select", 0, (8*23)*scale, 0, scale);
     end
 end --love.draw
 
