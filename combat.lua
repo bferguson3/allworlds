@@ -1,29 +1,40 @@
-function MeleeAttack(tgt)
-    --local tgt = combat_actors[i]
-    AddLog(currentTurn.name .. " attacks\n " .. tgt.name .. "!")
-                    
-    local r = math.ceil(love.math.random()*20)
-    local ac = (currentTurn.thaco - r - math.floor( (currentTurn.dex-10)/2))
-    AddLog("Roll: " .. r .. " (AC".. ac .."+)", 0);
+function MeleeTwo(tgt)
+    --print(tgt.name)
+    selector.x, selector.y = tgt.x, tgt.y
     local hit = false;
-    if r == 20 then 
+    if roll == 20 then 
         local dmg = GetAttackDamage(currentTurn, tgt)
         tgt.hp = tgt.hp - dmg*2;
         AddLog("Critical hit!!", 0)
         AddLog(" "..dmg*2 .. " damage!", 0)
         hit = true
-    elseif r == 1 then 
+    elseif roll == 1 then 
         AddLog("Critical miss!!", 0)
-    elseif ac <= getac(tgt) then 
+    elseif hitac <= getac(tgt) then 
         local dmg = GetAttackDamage(currentTurn, tgt) --"attack"=normal attack
         tgt.hp = tgt.hp - dmg;
         AddLog("Hit!! " .. dmg .. " damage!", 0)
         hit = true
     else
         AddLog("Missed!", 0)
+        sfx.miss:play()
     end             
-    if hit==true then TestDead(tgt) end
+    if hit==true then sfx.hurt:play(); TestDead(tgt) end
+    AddQueue({"wait", 0.5})
     --GO TO NEXT TURN
+
+end
+
+function MeleeAttack(tgt)
+    --local tgt = combat_actors[i]
+    AddLog(currentTurn.name .. " attacks\n " .. tgt.name .. "!")
+    selector.x, selector.y = currentTurn.x, currentTurn.y
+    roll = math.ceil(love.math.random()*20)
+    hitac = (currentTurn.thaco - roll - math.floor( (currentTurn.dex-10)/2))
+    AddLog("Roll: " .. roll .. " (AC".. hitac .."+)", 0);
+    --animationTimer = 0.5
+    sfx.atk:play()
+    --AddQueue({"MeleeTwo", tgt});
 end
 
 
@@ -116,8 +127,10 @@ function GenerateCombatant(n)
     --     },
     --     player = false
     -- }
+    --also level
     nn = {}
     nn.name = n.name 
+    nn.level = n.level;
     nn.class = n.class 
     nn.g = n.g 
     nn.hp, nn.mhp = n.hp, n.mhp 
@@ -155,6 +168,17 @@ function FindNearestPlayerTo(o)
     return c, d
 end
 
+--XP table *1000
+--1
+--3
+--6
+--10
+--15
+--21
+--28
+--36
+--45
+--nme xp table - 25*lvl
 
 function TestDead(t)
     if (t.hp < ((t.mhp*0.25)/t.mhp)) and (t.hp > 0) then 
@@ -163,6 +187,11 @@ function TestDead(t)
     end
     if t.hp <= 0 then 
         AddLog(t.name .. " dies!", 0)
+        --xp
+        if t.player == false then 
+            combatXP = combatXP + (t.level*25)
+        end
+        
         local n = 1
         for n=1,#combat_actors do 
             if combat_actors[n] == t then 
@@ -178,21 +207,39 @@ function TestDead(t)
             end
         end
         if e == false then 
-            animationTimer = 0.5
-            AddLog("Ending combat.")
-            combat_actors = {}
-            currentTurn = nil
+            --animationTimer = 0.5
+            selector.x, selector.y = 99, 99
             queue = {}
-            inputMode = MOVE_MODE
-            inCombat = false 
-            px, py = outOfCombatState.x, outOfCombatState.y
-            dofile("maps/"..outOfCombatState.map..".lua")
-            LoadMap(outOfCombatState.map, currentMap.width)
+            AddQueue({"wait", 1})
+            AddQueue({"EndCombat"})
+            AddLog("Ending combat.")
+            for s=1,#combat_actors do 
+                if combat_actors[s].player == true then -- sanity
+                    combat_actors[s].xp = combat_actors[s].xp + combatXP
+                end 
+            end
+            AddLog("Party gains\n "..combatXP.." XP!", 0)
+            
             return;
         end
     end
     
 end 
+
+function EndCombat()
+    combatXP = 0;
+    combat_actors = {}
+    currentTurn = nil
+    queue = {}
+    inputMode = MOVE_MODE
+    inCombat = false 
+    px, py = outOfCombatState.x, outOfCombatState.y
+    --dofile("maps/"..outOfCombatState.map..".lua")
+    m = love.filesystem.load("maps/"..outOfCombatState.map..".lua")
+    m()
+    LoadMap(outOfCombatState.map, currentMap.width)
+end
+
 function EnemyTurn(o)
     --print(o.name);
     -- AI is based on o.class 
@@ -212,13 +259,19 @@ function EnemyTurn(o)
     local c, d = FindNearestPlayerTo(o)
     -- d has shortest distance from o to c 
     --if anim[1]==false then return end 
-    animationTimer = 0.5
+    --animationTimer = 0.5
+    AddQueue({"wait", 0.5})
     
     if (math.abs(o.x-c.x) == 1 and math.abs(o.y-c.y)==0) or (math.abs(o.y-c.y)==1 and math.abs(o.x-c.x)==0) then 
         --within melee range
         --AddLog(o.name.." attacks\n"..c.name.."!", 0)    
         currentTurn = o
-        MeleeAttack(c)
+        AddQueue({"MeleeAttack", c})
+        AddQueue({"wait", 0.5})
+        AddQueue({"MeleeTwo", c})
+        AddQueue({"wait", 0.5})
+        --AddQueue({"nextTurn"});
+        --MeleeAttack(c)
     else
         -- move
         if math.abs(o.x-c.x) > math.abs(o.y-c.y) then 
@@ -227,6 +280,7 @@ function EnemyTurn(o)
                 if CheckCollision(o.x-1, o.y) == false then 
                     o.x = o.x - 1
                 else TryMoveUD(o, c); end
+                
             else 
                 if CheckCollision(o.x+1, o.y) == false then 
                     o.x = o.x + 1
@@ -243,7 +297,9 @@ function EnemyTurn(o)
                 else TryMoveLR(o, c); end
             end
         end
+        
     end
+    selector.x, selector.y = currentTurn.x, currentTurn.y
     --if anim[2] == false then return end;
     o.init = -1;
     AddQueue({"nextTurn"})
@@ -279,6 +335,7 @@ function NextTurn()
         selector.x, selector.y = next.x, next.y;
         currentTurn = next;
     else 
+        selector.x, selector.y = next.x, next.y;
         currentTurn = next;
         AddLog(next.name.."'s turn...")
         remainingMov = next.mov;

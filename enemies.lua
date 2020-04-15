@@ -3,6 +3,7 @@ enemies = {
         name = "Guard",
         class = "Fighter",
         g = "01",
+        level = 1,
         hp = 1,
         mhp = 30,
         mov = 1,

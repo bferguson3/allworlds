@@ -24,17 +24,21 @@ function love.keypressed(key)
         if key == "up" and CheckCollision(currentTurn.x, currentTurn.y-1) == false then 
             currentTurn.y = currentTurn.y - 1;
             remainingMov = remainingMov - 1;
+            selector.x, selector.y = currentTurn.x, currentTurn.y
             AddLog("Move: Up\nCommand?")
         elseif key == "down" and CheckCollision(currentTurn.x, currentTurn.y+1)==false then 
             currentTurn.y = currentTurn.y + 1;
+            selector.x, selector.y = currentTurn.x, currentTurn.y
             remainingMov = remainingMov - 1;
             AddLog("Move: Down\nCommand?");
         elseif key == "right" and CheckCollision(currentTurn.x+1, currentTurn.y)==false then 
             currentTurn.x = currentTurn.x + 1;
+            selector.x, selector.y = currentTurn.x, currentTurn.y
             remainingMov = remainingMov - 1;
             AddLog("Move: Right\nCommand?");
         elseif key == "left" and CheckCollision(currentTurn.x-1, currentTurn.y)==false then 
             currentTurn.x = currentTurn.x - 1;
+            selector.x, selector.y = currentTurn.x, currentTurn.y
             remainingMov = remainingMov - 1;
             AddLog("Move: Left\nCommand?");
         end
@@ -63,10 +67,13 @@ function love.keypressed(key)
                             return 
                         end
                         inputMode = nil
-                        animationTimer = 0.5;
                         currentTurn.init = -1;
+                        AddQueue({"MeleeAttack", combat_actors[i]})
+                        AddQueue({"wait", 0.5})
+                        AddQueue({"MeleeTwo", combat_actors[i]})
+                        AddQueue({"wait", 0.5})
                         AddQueue({"nextTurn"});--NextTurn();
-                        MeleeAttack(combat_actors[i])
+                        --MeleeAttack(combat_actors[i])
                         
                         --END TURN
                     end
@@ -188,6 +195,7 @@ function love.keypressed(key)
             StartCombat({"guard"})
         end
         if (moved == true) then 
+            sfx.step:play()
             if currentMap.name == "world map" then 
                 -- random spawn 
                 if noEnemiesSpawned < maxEnemySpawns then 

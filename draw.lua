@@ -139,7 +139,7 @@ function love.draw(dT)
         elseif selectorflash == 0 or selectorflash == 4 then 
             lg.setColor(0, 0, 0, 0);
         end
-        selector.x, selector.y = currentTurn.x, currentTurn.y;
+        --selector.x, selector.y = currentTurn.x, currentTurn.y;
         lg.draw(tileSet[2].sheet, tileSet[2].quads[21], selector.x*scale*16, selector.y*scale*16, 0, scale);
         lg.setColor(1, 1, 1, 1);
         lg.print("  A)ttack  D)efend  E)quip  I)tem\n  L)ook  M)agic/Skill  Z)tats", 0, (8*22)*scale, 0, scale);

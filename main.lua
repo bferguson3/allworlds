@@ -8,6 +8,12 @@ outOfCombatState = {
     x = 10,
     y = 10
 }
+
+roll = 0
+hitac = 0
+
+combatXP = 0;
+xpTable = { 1000, 3000, 6000, 10000, 15000, 21000, 28000, 36000, 45000 }
 inCombat = false;
 scale = 1;
 map_w = 35;
@@ -53,14 +59,18 @@ t = coroutine.create(function ()
     love.timer.sleep(0.5);
 end)
 
-dofile("maps/map_1.lua")
+m = love.filesystem.load("maps/map_1.lua")--dofile("maps/map_1.lua")
+m()
 
 known_kw = { "name", "job", "bye" }
 classes = {
     Fighter = {}
 }
 --print(classes["Fighter"])
-dofile("enemies.lua")
+--dofile("enemies.lua")
+m = love.filesystem.load("enemies.lua")
+m()
+
 party = {
     {
         name = "Alistair",
@@ -128,14 +138,30 @@ function ChangeRichPresence(newrp)
     love.window.setTitle("ALLWORLDS - " .. newrp)
 end
 
+currentSave = nil;
+
 function love.load(arg)
     --====================================
     --=ANDROID SHIT==-
     --love.window.setMode(0, 0, {fullscreen=false});
+    if love.filesystem.getInfo("01.sav") == nil then 
+        currentSave = love.filesystem.newFile("01.sav")
+        love.filesystem.write("01.sav", 'ok')
+        print("k")
+    end
+
     scr_w, scr_h = lg.getDimensions();
     scale = math.floor(scr_h / 192);
     music:setLooping(true)
     music:play()
+    sfx = {}
+    sfx.atk = love.audio.newSource("sfx/atk.wav", "static");
+    sfx.dead = love.audio.newSource("sfx/dead.wav", "static");
+    sfx.exit = love.audio.newSource("sfx/exit.wav", "static");
+    sfx.hurt = love.audio.newSource("sfx/hurt.wav", "static");
+    sfx.miss = love.audio.newSource("sfx/miss.wav", "static");
+    sfx.spell1 = love.audio.newSource("sfx/spell1.wav", "static");
+    sfx.step = love.audio.newSource("sfx/step.wav", "static");
     x_draw_offset = (scr_w - (scale * 256))/2;
     love.math.setRandomSeed(love.timer.getTime())
     --currentState = systemState.init;
@@ -198,11 +224,27 @@ function love.update(dT)
     if queue ~= nil then 
         if #queue > 0 then 
             if queue[1][1] == "nextTurn" then 
-                table.remove(queue);
+                table.remove(queue, 1);
                 NextTurn()
             elseif queue[1][1] == "enemyTurn" then 
-                table.remove(queue);
+                table.remove(queue, 1);
                 EnemyTurn(currentTurn)
+            elseif queue[1][1] == "MeleeAttack" then 
+                local t = queue[1][2]
+                table.remove(queue, 1);
+                MeleeAttack(t)
+                --print("queued")
+            elseif queue[1][1] == "MeleeTwo" then 
+                local t = queue[1][2]
+                table.remove(queue, 1);
+                MeleeTwo(t)
+            elseif queue[1][1] == "wait" then 
+                local t = queue[1][2]
+                table.remove(queue, 1)
+                animationTimer = t
+            elseif queue[1][1] == "EndCombat" then 
+                table.remove(queue, 1)
+                EndCombat()
             end
         end
     end
@@ -234,8 +276,11 @@ function love.update(dT)
             px = currentMap.warps[i].target.x 
             py = currentMap.warps[i].target.y
             
-            dofile("maps/"..cm .. ".lua")
+            --dofile("maps/"..cm .. ".lua")
+            m=love.filesystem.load("maps/"..cm..".lua")
+            m()
             LoadMap(cm, currentMap.width)
+            sfx.exit:play()
             AddLog("Entering\n " .. currentMap.name .. "...")
         end
     end
@@ -257,7 +302,10 @@ function love.update(dT)
         keyRepeat = LONG_REPEAT;
     end
 end
-dofile("draw.lua")
+
+--dofile("draw.lua")
+m = love.filesystem.load("draw.lua")
+m()
 
 function CheckCollision(x, y)
     if inCombat == true then 
@@ -542,6 +590,10 @@ function CheckSearch(x, y)
     return true
 end
 
-dofile("input.lua")
+--dofile("input.lua")
+m = love.filesystem.load("input.lua")
+m()
 
-dofile("combat.lua")
+--dofile("combat.lua")
+m = love.filesystem.load("combat.lua")
+m()
