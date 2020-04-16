@@ -46,6 +46,7 @@ end
 sinCounter = 0
 
 function love.draw(dT)
+    --love.graphics.scale(scale, scale)
     love.graphics.translate(x_draw_offset, 0)
     local ofs = ((py-10) * map_w) + (px-10);
     lg.setColor(0, 0, 0, 1);
@@ -85,10 +86,11 @@ function love.draw(dT)
         for d=1,#dmgtxt do 
             local m = 1
             if dmgtxt[d].t < 0.1 then m = 2 end
+            dmgtxt[d].y = dmgtxt[d].y or dmgtxt[d].ya
             lg.setColor(0, 0, 0, 1)
-            lg.print(dmgtxt[d].txt, (scale*(dmgtxt[d].x+0.25)*16)+(dmgtxt[d].t*8*scale), (scale*dmgtxt[d].y*16)-math.floor((math.sin(dmgtxt[d].t)*16*scale)), 0, scale*m);
+            lg.print(dmgtxt[d].txt, dmgtxt[d].x, dmgtxt[d].y, 0, scale*m);
             lg.setColor(1, 1, 1, 1)
-            lg.print(dmgtxt[d].txt, (scale*(dmgtxt[d].x+0.25)*16)+(dmgtxt[d].t*8*scale)+(scale), (scale*dmgtxt[d].y*16)-math.floor((math.sin(dmgtxt[d].t)*16*scale))+(scale), 0, scale*m);            
+            lg.print(dmgtxt[d].txt, dmgtxt[d].x+scale, dmgtxt[d].y+scale, 0, scale*m);
         end
     elseif cameraMode == ZOOM_SMALL then 
     -- SMALL:
@@ -134,12 +136,12 @@ function love.draw(dT)
         end 
     else 
         lg.translate(4*scale, 0);
-        lg.print(party[1].name, 24*8*scale, 8*scale, 0, scale);
-        lg.print(" "..party[1].class.." "..party[1].level, 24*8*scale, 16*scale, 0, scale);
-        lg.print("AC " .. getac(party[1]), 272*scale, 16*scale, 0, scale);
-        --lg.setFont(widefont)
-        lg.print("HP " .. party[1].hp, ((24*8)+(10*8))*scale, 8*scale, 0, scale);
-        --lg.setFont(defaultfont)
+        for b=1,#party do
+            lg.print(party[b].name, 24*8*scale, ((8*(b*2))-8)*scale, 0, scale);
+            lg.print(" "..party[b].class.." "..party[b].level, 24*8*scale, (16*b)*scale, 0, scale);
+            lg.print("AC " .. getac(party[b]), 272*scale, (16*b)*scale, 0, scale);
+            lg.print("HP " .. party[b].hp, ((24*8)+(10*8))*scale, ((8*(b*2))-8)*scale, 0, scale);
+        end
         lg.print("GOLD\nRELICS", 24*8*scale, (8*11)*scale, 0, scale);
         lg.translate(-4*scale, 0);
     end

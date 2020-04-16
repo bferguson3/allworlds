@@ -1,7 +1,8 @@
 -- ALLWORLDS
 --enemies dont collide with each other on world map
 --enemy will move without waiting in combat start if first actor
-
+--damage flash on sprites
+--transition effect
 
 lg = love.graphics;
 
@@ -105,6 +106,87 @@ party = {
         --getac = function()
         --    a = 10 - armor.ac - math.floor( (dex-10)/2); return a;
         --end
+    },
+    {
+        name = "Retainer A",
+        g = "01",
+        hp = 31,
+        mhp = 31,
+        mov = 1,
+        str = 14,
+        dex = 12,
+        con = 12,
+        int = 10,
+        wis = 10,
+        cha = 10,
+        weapon = {
+            name = "Long Sword",
+            dmg_die = 8,
+            type = "melee"
+        },
+        armor = {
+            name = "Quilted Vest",
+            ac = 1 -- 10 - armor - dex bonus
+        },
+        thaco = 20,
+        level = 1,
+        xp = 0,
+        class = "Fighter",
+        player = true,
+    },
+    {
+        name = "Retainer B",
+        g = "01",
+        hp = 29,
+        mhp = 29,
+        mov = 1,
+        str = 16,
+        dex = 12,
+        con = 8,
+        int = 10,
+        wis = 10,
+        cha = 10,
+        weapon = {
+            name = "Long Sword",
+            dmg_die = 8,
+            type = "melee"
+        },
+        armor = {
+            name = "Quilted Vest",
+            ac = 1 -- 10 - armor - dex bonus
+        },
+        thaco = 20,
+        level = 1,
+        xp = 0,
+        class = "Fighter",
+        player = true,
+    },
+    {
+        name = "Retainer C",
+        g = "01",
+        hp = 32,
+        mhp = 32,
+        mov = 1,
+        str = 12,
+        dex = 12,
+        con = 14,
+        int = 10,
+        wis = 10,
+        cha = 10,
+        weapon = {
+            name = "Long Sword",
+            dmg_die = 8,
+            type = "melee"
+        },
+        armor = {
+            name = "Quilted Vest",
+            ac = 1 -- 10 - armor - dex bonus
+        },
+        thaco = 20,
+        level = 1,
+        xp = 0,
+        class = "Fighter",
+        player = true,
     }
     
 }
@@ -223,15 +305,23 @@ function toggleselflash()
 end
 
 function love.update(dT)
+    --if dT > (1/60) then return end
+
     if dT ~= nil then 
         sinCounter = sinCounter + (dT*4);
         animationTimer = animationTimer - dT;
         flashtimer = flashtimer - dT;
-        timeSinceMove = timeSinceMove + dT;
+        --timeSinceMove = timeSinceMove + dT;
     end
+    
     for d=1,#dmgtxt do 
+        --print(math.sin(dmgtxt[d].t))
+        dmgtxt[d].y = dmgtxt[d].y or dmgtxt[d].ya
         dmgtxt[d].t = dmgtxt[d].t + (dT*4)
-        if dmgtxt[d].t > (math.pi) then table.remove(dmgtxt, d) end
+        --lg.print(dmgtxt[d].txt, (scale*(dmgtxt[d].x+0.25)*16)+(dmgtxt[d].t*8*scale), (scale*dmgtxt[d].y*16)-math.floor((math.sin(dmgtxt[d].t)*16*scale)), 0, scale*m);
+        dmgtxt[d].x = dmgtxt[d].x+(dT*scale*16)
+        dmgtxt[d].y = dmgtxt[d].ya-(math.sin(dmgtxt[d].t)*scale*8)
+        if dmgtxt[d].t > 3.2 then table.remove(dmgtxt, d) end
     end
     if sinCounter > (math.pi) then sinCounter = 0 end
     if flashtimer < 0 then flashtimer = 0.1; toggleselflash(); end
@@ -584,7 +674,7 @@ function CreateWMEnemy()
     -- get enemy[1]'s graphic id
     -- spawn it on the edge, if its a 'land' tile
      -- by adding to map objects
-    local e = currentMap.encounters[1]
+    local e = currentMap.encounters[love.math.random(#currentMap.encounters)]
     local enc = {}
     enc.enemies = {}
     enc.g = e.g

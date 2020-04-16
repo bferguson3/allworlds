@@ -1,8 +1,8 @@
 
 function love.keypressed(key)
-    if timeSinceMove < 0.1 then 
-        return
-    end
+    --if timeSinceMove < 0.1 then 
+    --    return
+    --end
     if inputMode == CHAT_INPUT then 
         if key == 'backspace' and #myinput > 0 then 
             log[#log] = string.sub(log[#log], 1, #log[#log]-2) .. '_'
@@ -107,7 +107,8 @@ function love.keypressed(key)
             currentTurn.defend = true;
             AddLog(currentTurn.name.." defends.")
             inputMode = nil
-            animationTimer = 0.5;
+            --animationTimer = 0.5;
+            AddQueue({"wait", 0.5})
             currentTurn.init = -1;
             AddQueue({"nextTurn"});--NextTurn();
         end

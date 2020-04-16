@@ -6,7 +6,11 @@ currentMap = {
         [1] = {
             enemies = { "goblin", "goblin" },
             g = "goblin"
-        }
+        },
+        [2] = {
+            enemies = { "goblin", "goblin","goblin","goblin","goblinshaman","goblin","goblin","goblin" },
+            g = "goblinshaman"
+        },
     },
     {
         g = "01",

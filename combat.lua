@@ -11,7 +11,7 @@ function MeleeTwo(tgt)
         hit = true
     elseif roll == 1 then 
         AddLog("Critical miss!!", 0)
-        table.insert(dmgtxt, {txt="Miss", x=tgt.x-0.5, y=tgt.y, t=0})
+        table.insert(dmgtxt, {txt="Miss", x=scale*(tgt.x-0.5)*16, ya=(scale*tgt.y*16), t=0})
         sfx.miss:play()
     elseif hitac <= getac(tgt) then 
         dmg = GetAttackDamage(currentTurn, tgt) --"attack"=normal attack
@@ -20,15 +20,16 @@ function MeleeTwo(tgt)
         hit = true
     else
         AddLog("Missed!", 0)
-        table.insert(dmgtxt, {txt="Miss", x=tgt.x-0.5, y=tgt.y, t=0})
+        table.insert(dmgtxt, {txt="Miss", x=scale*(tgt.x+0.5)*16, ya=(scale*tgt.y*16), t=0})
         sfx.miss:play()
     end             
     if hit==true then 
         sfx.hurt:play(); 
-        table.insert(dmgtxt, {txt=dmg, x=tgt.x, y=tgt.y, t=0})
+        table.insert(dmgtxt, {txt=dmg, x=scale*(tgt.x+0.25)*16, ya=(scale*tgt.y*16), t=0})
+        --scale*(dmgtxt[d].x+0.25)*16)//(scale*tgt.y*16)
         TestDead(tgt) 
     end
-    AddQueue({"wait", 0.5})
+    AddQueue({"wait", 0.25})
     --GO TO NEXT TURN
 
 end
@@ -52,8 +53,8 @@ function StartCombat(nmes)
     
     px, py = 5, 5;
     
-    epos = {{x=5, y=3}, {x=4,y=2}};
-    ppos = {{x=5, y=8}}
+    epos = {{x=5, y=3}, {x=4,y=2},{x=6,y=2},{x=3,y=1},{x=5,y=1},{x=7,y=1},{x=4,y=0},{x=6,y=0}};
+    ppos = {{x=5, y=8},{x=4,y=9},{x=6,y=9},{x=5,y=9}}
     combat_actors = {}
     --party
     --print(currentTurn.name)
@@ -268,16 +269,16 @@ function EnemyTurn(o)
     -- d has shortest distance from o to c 
     --if anim[1]==false then return end 
     --animationTimer = 0.5
-    AddQueue({"wait", 0.5})
+    AddQueue({"wait", 0.25})
     
     if (math.abs(o.x-c.x) == 1 and math.abs(o.y-c.y)==0) or (math.abs(o.y-c.y)==1 and math.abs(o.x-c.x)==0) then 
         --within melee range
         --AddLog(o.name.." attacks\n"..c.name.."!", 0)    
         currentTurn = o
         AddQueue({"MeleeAttack", c})
-        AddQueue({"wait", 0.5})
+        AddQueue({"wait", 0.25})
         AddQueue({"MeleeTwo", c})
-        AddQueue({"wait", 0.5})
+        AddQueue({"wait", 0.25})
         --AddQueue({"nextTurn"});
         --MeleeAttack(c)
     else
