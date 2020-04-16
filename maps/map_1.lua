@@ -1,5 +1,5 @@
 currentMap = {
-    width = 35,
+    width = 36,
     name = "Shrine of Birth",
     fname = "map_1",
     {
@@ -13,7 +13,7 @@ currentMap = {
             shrine = {"The nearest shrine\nis to the northeast."},
             bye   = {"Farewell, highness."}
         },
-        x = 19,
+        x = 20,
         y = 18
     },
     {
@@ -28,18 +28,18 @@ currentMap = {
             father = {"King Amadeus, of\n course. He's inside."},
             bye   = {"Farewell, highness."}
         },
-        x = 21,
+        x = 22,
         y = 18
     },
     {
         g = "barrel",
-        x = 18,
+        x = 19,
         y = 13, 
         examine = {": \"Just trail rations.\""}
     },
     {
         g = "table",
-        x = 19,
+        x = 20,
         y = 15,
         examine = {": \"Old scrolls written in\n cryptic tongue.\""}
     },
@@ -56,20 +56,20 @@ currentMap = {
             shrine = {"Purify the horrors\nto the northeast.\nOnly you can do this."},
             horrors = {"I wish I had the\nanswers. It is best to\nask others."}
         },
-        x = 20,
+        x = 21,
         y = 13
     },
     rooms = {
         [1] = {
-            x1 = 18,
+            x1 = 19,
             y1 = 13,
-            x2 = 22,
+            x2 = 23,
             y2 = 17
         }
     },
     warps = {
         [1] = {
-            x = 12,
+            x = 13,
             y = 24,
             target = { map="worldmap", x=13, y=22 }
         }

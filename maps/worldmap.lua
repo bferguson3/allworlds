@@ -4,8 +4,8 @@ currentMap = {
     fname = "worldmap",
     encounters = {
         [1] = {
-            enemies = { "guard", "guard" },
-            g = "01"
+            enemies = { "goblin", "goblin" },
+            g = "goblin"
         }
     },
     {
@@ -32,7 +32,7 @@ currentMap = {
         [1] = {
             x = 13,
             y = 21,
-            target = { map="map_1", x=12, y=23 }
+            target = { map="map_1", x=13, y=23 }
         }
     }
 }

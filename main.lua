@@ -1,4 +1,6 @@
 -- ALLWORLDS
+--enemies dont collide with each other on world map
+--enemy will move without waiting in combat start if first actor
 
 
 lg = love.graphics;
@@ -7,16 +9,17 @@ outOfCombatState = {
     map = "worldmap",
     x = 10,
     y = 10
-}
+};
 
-roll = 0
-hitac = 0
-
+roll = 0;
+hitac = 0;
+dmgtxt = {};
 combatXP = 0;
-xpTable = { 1000, 3000, 6000, 10000, 15000, 21000, 28000, 36000, 45000 }
+xpTable = { 1000, 3000, 6000, 10000, 15000, 21000, 28000, 36000, 45000 };
 inCombat = false;
 scale = 1;
-map_w = 35;
+timeSinceMove = 0;
+map_w = 36;
 x_draw_offset = 0;
 tileSize = 8;
 tileSet = {};
@@ -24,7 +27,7 @@ screenmap = {};
 animationTimer = 0;
 bgmap = {};
 currentMap = nil;
-px = 9;
+px = 10;
 py = 10;
 LONG_REPEAT = 0.75;
 SHORT_REPEAT = 0.1;
@@ -32,9 +35,9 @@ initialRepeat = LONG_REPEAT;
 keyRepeat = SHORT_REPEAT;
 keystart = 0;
 lastkey = 0;
-ZOOM_SMALL = 0
-ZOOM_BIG = 1
-ZOOM_FP = 2
+ZOOM_SMALL = 0;
+ZOOM_BIG = 1;
+ZOOM_FP = 2;
 cameraMode = ZOOM_SMALL;
 log = { ".", ".", ".", ".", ".", ".", ".", ".", ".", "> Loaded." }
 MOVE_MODE = 0;
@@ -159,7 +162,7 @@ function love.load(arg)
     if love.filesystem.getInfo("01.sav") == nil then 
         currentSave = love.filesystem.newFile("01.sav")
         love.filesystem.write("01.sav", 'ok')
-        print("k")
+        --print("k")
     end
 
     music:setLooping(true)
@@ -221,10 +224,16 @@ end
 
 function love.update(dT)
     if dT ~= nil then 
+        sinCounter = sinCounter + (dT*4);
         animationTimer = animationTimer - dT;
         flashtimer = flashtimer - dT;
+        timeSinceMove = timeSinceMove + dT;
     end
-    
+    for d=1,#dmgtxt do 
+        dmgtxt[d].t = dmgtxt[d].t + (dT*4)
+        if dmgtxt[d].t > (math.pi) then table.remove(dmgtxt, d) end
+    end
+    if sinCounter > (math.pi) then sinCounter = 0 end
     if flashtimer < 0 then flashtimer = 0.1; toggleselflash(); end
     
     if animationTimer > 0 then 
@@ -255,6 +264,10 @@ function love.update(dT)
             elseif queue[1][1] == "EndCombat" then 
                 table.remove(queue, 1)
                 EndCombat()
+            elseif queue[1][1] == "MoveTowardsP" then 
+                local t = queue[1][2] 
+                table.remove(queue, 1)
+                MoveTowardsP(t)
             end
         end
     end
@@ -357,21 +370,42 @@ end
 
 function AddLog(l, arrow)
     arrow = arrow or 1;
-    shift = 1;
-    for w in string.gmatch(l, "\n") do 
-        shift = shift + 1;
+    local toadd = {}
+    --string.find(string, substring, startloc)
+    --local sl = 1
+    while string.find(l, "\n") do 
+        local po = string.find(l, "\n") -- get location of linebreak
+        --print("lb: "..po)
+        local ps = l:sub(1, po-1)
+        table.insert(toadd, ps)
+        l = l:sub(po+1)
     end
-    for z = 1, shift do 
-        for i = 2, #log do 
-            log[i-1] = log[i]
-        end
-        log[#log] = ""
+    table.insert(toadd, l)
+    for i=1,#toadd do 
+        for i=2,#log do 
+            log[i-1]=log[i]
+        end 
+        log[#log] = toadd[i]
     end
-    shift = shift - 1;
+    --for o=1,#toadd do 
+    --    print(toadd[o])
+    --end
+    
+    -- shift = 1;
+    -- for w in string.gmatch(l, "\n") do 
+    --     shift = shift + 1;
+    -- end
+    -- for z = 1, shift do 
+    --     for i = 2, #log do 
+    --         log[i-1] = log[i]
+    --     end
+    --     log[#log] = ""
+    -- end
+    -- shift = shift - 1;
     if arrow == 1 then     
-        log[#log-shift] = "> " .. l;
+        log[#log] = "> " .. l;
     else
-        log[#log-shift] = l;
+        log[#log] = l;
     end
     
 end
@@ -463,10 +497,12 @@ function TryMoveUD(o, c)
     if o.y - c.y > 0 then 
         -- move up: -y
         if CheckCollision(o.x, o.y-1) == false then 
+            sfx.step:play();
             o.y = o.y - 1;
         end
     else 
         if CheckCollision(o.x, o.y+1) == false then 
+            sfx.step:play();
             o.y = o.y + 1;
         end 
     end 
@@ -554,19 +590,19 @@ function CreateWMEnemy()
     enc.g = e.g
     local r = math.floor(love.math.random(4))
     if (r==1) then 
-        print("left")
+        --print("left")
         enc.y = py-9+love.math.random(19)
         enc.x = px-9
     elseif (r==2) then 
-        print("up")
+        --print("up")
         enc.x = px-9+love.math.random(19)
         enc.y = py-9
     elseif (r==3) then 
-        print("down")
+        --print("down")
         enc.x = px-9+love.math.random(19)
         enc.y = py+9
     elseif (r==4) then 
-        print("right")
+        --print("right")
         enc.y = py-9+love.math.random(19)
         enc.x = px+9
     end

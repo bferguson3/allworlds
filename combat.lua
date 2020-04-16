@@ -1,25 +1,33 @@
 function MeleeTwo(tgt)
     --print(tgt.name)
+    local dmg = 0;
     selector.x, selector.y = tgt.x, tgt.y
     local hit = false;
     if roll == 20 then 
-        local dmg = GetAttackDamage(currentTurn, tgt)
+        dmg = GetAttackDamage(currentTurn, tgt)
         tgt.hp = tgt.hp - dmg*2;
         AddLog("Critical hit!!", 0)
         AddLog(" "..dmg*2 .. " damage!", 0)
         hit = true
     elseif roll == 1 then 
         AddLog("Critical miss!!", 0)
+        table.insert(dmgtxt, {txt="Miss", x=tgt.x-0.5, y=tgt.y, t=0})
+        sfx.miss:play()
     elseif hitac <= getac(tgt) then 
-        local dmg = GetAttackDamage(currentTurn, tgt) --"attack"=normal attack
+        dmg = GetAttackDamage(currentTurn, tgt) --"attack"=normal attack
         tgt.hp = tgt.hp - dmg;
         AddLog("Hit!! " .. dmg .. " damage!", 0)
         hit = true
     else
         AddLog("Missed!", 0)
+        table.insert(dmgtxt, {txt="Miss", x=tgt.x-0.5, y=tgt.y, t=0})
         sfx.miss:play()
     end             
-    if hit==true then sfx.hurt:play(); TestDead(tgt) end
+    if hit==true then 
+        sfx.hurt:play(); 
+        table.insert(dmgtxt, {txt=dmg, x=tgt.x, y=tgt.y, t=0})
+        TestDead(tgt) 
+    end
     AddQueue({"wait", 0.5})
     --GO TO NEXT TURN
 
@@ -278,22 +286,22 @@ function EnemyTurn(o)
             --if <> distance is more than y distance
             if (o.x-c.x) > 0 then -- right
                 if CheckCollision(o.x-1, o.y) == false then 
-                    o.x = o.x - 1
+                    o.x = o.x - 1; sfx.step:play();
                 else TryMoveUD(o, c); end
                 
             else 
                 if CheckCollision(o.x+1, o.y) == false then 
-                    o.x = o.x + 1
+                    o.x = o.x + 1; sfx.step:play();
                 else TryMoveUD(o, c); end
             end
         else 
             if (o.y-c.y)>0 then 
                 if CheckCollision(o.x, o.y-1) == false then 
-                    o.y = o.y -1;
+                    o.y = o.y -1; sfx.step:play();
                 else TryMoveLR(o, c); end
             else
                 if CheckCollision(o.x, o.y+1) == false then 
-                    o.y = o.y + 1;
+                    o.y = o.y + 1; sfx.step:play();
                 else TryMoveLR(o, c); end
             end
         end

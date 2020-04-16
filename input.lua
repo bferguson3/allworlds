@@ -1,5 +1,8 @@
 
 function love.keypressed(key)
+    if timeSinceMove < 0.1 then 
+        return
+    end
     if inputMode == CHAT_INPUT then 
         if key == 'backspace' and #myinput > 0 then 
             log[#log] = string.sub(log[#log], 1, #log[#log]-2) .. '_'
@@ -26,21 +29,25 @@ function love.keypressed(key)
             remainingMov = remainingMov - 1;
             selector.x, selector.y = currentTurn.x, currentTurn.y
             AddLog("Move: Up\nCommand?")
+            sfx.step:play();
         elseif key == "down" and CheckCollision(currentTurn.x, currentTurn.y+1)==false then 
             currentTurn.y = currentTurn.y + 1;
             selector.x, selector.y = currentTurn.x, currentTurn.y
             remainingMov = remainingMov - 1;
             AddLog("Move: Down\nCommand?");
+            sfx.step:play();
         elseif key == "right" and CheckCollision(currentTurn.x+1, currentTurn.y)==false then 
             currentTurn.x = currentTurn.x + 1;
             selector.x, selector.y = currentTurn.x, currentTurn.y
             remainingMov = remainingMov - 1;
             AddLog("Move: Right\nCommand?");
+            sfx.step:play();
         elseif key == "left" and CheckCollision(currentTurn.x-1, currentTurn.y)==false then 
             currentTurn.x = currentTurn.x - 1;
             selector.x, selector.y = currentTurn.x, currentTurn.y
             remainingMov = remainingMov - 1;
             AddLog("Move: Left\nCommand?");
+            sfx.step:play();
         end
         if remainingMov == 0 then 
             inputMode = COMBAT_COMMAND;
@@ -155,6 +162,7 @@ function love.keypressed(key)
             inputMode = MOVE_MODE
         end
     elseif inputMode == MOVE_MODE then 
+        
         local moved = false
         if key == "right" then 
             if CheckCollision(px+1, py) == false then 
@@ -187,7 +195,7 @@ function love.keypressed(key)
             AddLog("Direction?", 0)
             inputMode = TALK_MODE;
         elseif key == "e" then 
-            print(px, py)
+            --print(px, py)
             AddLog("Examine")
             AddLog("Direction?", 0)
             inputMode = EXAMINE_MODE
@@ -203,6 +211,8 @@ function love.keypressed(key)
             SetZoom(0)
         end
         if (moved == true) then 
+            AddQueue({"wait", 0.1})
+            timeSinceMove = 0
             sfx.step:play()
             if currentMap.name == "world map" then 
                 -- random spawn 
@@ -215,7 +225,8 @@ function love.keypressed(key)
                 for p=1,#currentMap do 
                     currentMap[p].encounter = currentMap[p].encounter or false;
                     if currentMap[p].encounter == true then 
-                        MoveTowardsP(currentMap[p])
+                        AddQueue({"MoveTowardsP", currentMap[p]})
+                        --MoveTowardsP(currentMap[p])
                     end
                 end
             end
