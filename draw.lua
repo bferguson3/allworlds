@@ -1,5 +1,6 @@
 
 function DrawMapObjects_Small()
+    --noEnemiesSpawned = 0
     for i=1,#currentMap do
         if ((px + 11) >= currentMap[i].x) and ((px - 11) <= currentMap[i].x) then 
             if ((py+10)>=currentMap[i].y) and ((py-10)<=currentMap[i].y) then
@@ -7,6 +8,20 @@ function DrawMapObjects_Small()
                 lg.draw(lg.newImage(r), 8*scale*(currentMap[i].x-px+10), 8*scale*(currentMap[i].y-py+10), 0, scale);
             end
         end
+    end
+    for i=1,#currentMap do 
+        if currentMap[i].encounter == true then 
+            if (currentMap[i].x > (px + 11)) or (currentMap[i].x < (px-11)) then 
+                table.remove(currentMap, i)
+                noEnemiesSpawned = noEnemiesSpawned - 1;
+                break 
+            end 
+            if (currentMap[i].y > (py + 10)) or (currentMap[i].y < (py-10)) then 
+                table.remove(currentMap, i)
+                noEnemiesSpawned = noEnemiesSpawned - 1;
+                break 
+            end 
+        end 
     end
 end
 
@@ -46,15 +61,12 @@ end
 sinCounter = 0
 
 function love.draw(dT)
+    
     --love.graphics.scale(scale, scale)
     love.graphics.translate(x_draw_offset, 0)
     local ofs = ((py-10) * map_w) + (px-10);
     lg.setColor(0, 0, 0, 1);
     lg.rectangle("fill", 0, 0, 320*scale, 200*scale)
-    --lg.rectangle("fill", 0, 0, 256*scale, 8*scale)
-    --lg.rectangle("fill", 0, 0, 8*scale, 192*scale)
-    --lg.rectangle("fill", 0, 168*scale, 256*scale, 32*scale)
-    --lg.rectangle("fill", 168*scale, 0, 100*scale, 200*scale)
     lg.setColor(1, 1, 1, 1);
     -- BIG:
     lg.translate(16*scale, 8*scale)
@@ -69,7 +81,7 @@ function love.draw(dT)
         end
         DrawMapObjects_Large();
         if inCombat == false then 
-            lg.draw(lg.newImage('assets/00_16x16.png'), 16*scale*5, 16*scale*5, 0, scale);
+            lg.draw(lg.newImage('assets/'..party[activePC].g..'_16x16.png'), 16*scale*5, 16*scale*5, 0, scale);
         else
             if selectorflash == 4 and inputMode == COMBAT_MOVE then 
             -- draw movement box - base on char's mov stat
@@ -79,7 +91,7 @@ function love.draw(dT)
             end
             
             for i=1,#combat_actors do 
-                r = "assets/"..combat_actors[i].g.."_16x16.png";
+                local r = "assets/"..combat_actors[i].g.."_16x16.png";
                 lg.draw(lg.newImage(r), 16*scale*combat_actors[i].x, 16*scale*combat_actors[i].y, 0, scale);
             end
         end
@@ -105,10 +117,9 @@ function love.draw(dT)
         end
         DrawMapObjects_Small();
         if inCombat==false then 
-            lg.draw(lg.newImage('assets/00_8x8.png'), (8*scale*10), (8*scale*10), 0, scale);
-        end
-        
-    end    
+            lg.draw(lg.newImage('assets/'..party[activePC].g..'_8x8.png'), (8*scale*10), (8*scale*10), 0, scale);
+        end        
+    end
     lg.translate(-8*scale, -8*scale)
     --GUI
     for i = 1, 22 do 
@@ -117,7 +128,7 @@ function love.draw(dT)
         lg.draw(tileSet[1].sheet, tileSet[1].quads[7], 0, i*8*scale, 0, scale)
         lg.draw(tileSet[1].sheet, tileSet[1].quads[7], 23*8*scale, i*8*scale, 0, scale)
     end
-    for i=1,10 do 
+    for i=1,13 do 
         lg.draw(tileSet[1].sheet, tileSet[1].quads[6], ((i+23)*8)*scale, 13*8*scale, 0, scale)
     end
     lg.draw(tileSet[1].sheet, tileSet[1].quads[5], 0, 0, 0, scale)
@@ -137,11 +148,26 @@ function love.draw(dT)
     else 
         lg.translate(4*scale, 0);
         for b=1,#party do
+            if inCombat==false then 
+                if b == activePC then 
+                    lg.setColor(0.67, 1, 0.67, 1)
+                else 
+                    lg.setColor(1, 1, 1, 1)
+                end
+            else
+                if party[b]==currentTurn then 
+                    lg.setColor(0.67, 1, 0.67, 1)
+                else 
+                    lg.setColor(1, 1, 1, 1)
+                end 
+            end
+
             lg.print(party[b].name, 24*8*scale, ((8*(b*2))-8)*scale, 0, scale);
-            lg.print(" "..party[b].class.." "..party[b].level, 24*8*scale, (16*b)*scale, 0, scale);
+            lg.print("  "..party[b].class.." "..party[b].level, 24*8*scale, (16*b)*scale, 0, scale);
             lg.print("AC " .. getac(party[b]), 272*scale, (16*b)*scale, 0, scale);
             lg.print("HP " .. party[b].hp, ((24*8)+(10*8))*scale, ((8*(b*2))-8)*scale, 0, scale);
         end
+        lg.setColor(1, 1, 1, 1)
         lg.print("GOLD\nRELICS", 24*8*scale, (8*11)*scale, 0, scale);
         lg.translate(-4*scale, 0);
     end
@@ -177,6 +203,53 @@ function love.draw(dT)
         lg.translate(-16*scale, -8*scale)
         lg.setColor(1, 1, 1, 1);
         lg.print("  ↑→↓←    Direction        Esc Cancel\n  space/enter Select", 0, (8*23)*scale, 0, scale);
+    elseif inputMode == STATS_MAIN then 
+        local s = scale
+        lg.setColor(0, 0, 0, 1);
+        lg.rectangle("fill", 24*s, 16*s, 160*s, 152*s)
+        lg.translate(24*s, 16*s)
+        lg.setColor(1, 1, 1, 1);
+        lg.draw(tileSet[1].sheet, tileSet[1].quads[5], 0, 0, 0, scale)
+        lg.draw(tileSet[1].sheet, tileSet[1].quads[5], 152*s, 0, 0, scale)
+        lg.draw(tileSet[1].sheet, tileSet[1].quads[5], 152*s, 144*s, 0, scale)
+        lg.draw(tileSet[1].sheet, tileSet[1].quads[5], 0, 144*s, 0, scale)
+        --lg.print("Character sheet: " .. party[1].name, 32*s, 0, 0, s)
+        
+        local r = "assets/"
+        r = r..party[activePC].g.."_16x16.png";
+        lg.draw(lg.newImage(r), s*16, s*16, 0, s);
+        lg.print(party[activePC].name, 8*s, 40*s, 0, s);
+        lg.print("Strength\nDexterity\nConstitution\nIntelligence\nWisdom\nCharisma", 8*s, 56*s, 0, s);
+        lg.print(party[activePC].str..'\n'..party[activePC].dex..'\n'..party[activePC].con..'\n'..party[activePC].int..'\n'..party[activePC].wis..'\n'..party[activePC].cha, 72*s, 56*s, 0, s);
+        lg.print("Level:\nXP:\nTNL:", 8*s, 112*s, 0, s)
+        lg.print(party[activePC].level ..'\n'.. party[activePC].xp ..'\n'..(xpTable[party[activePC].level]-party[activePC].xp), (8*8)*s, 112*s, 0, s)
+        lg.print("HP:      /", (8*12)*s, 32*s, 0, s);
+        lg.print(party[activePC].hp, (8*15)*s, 32*s, 0, s);
+        lg.print(party[activePC].mhp, (8*18)*s, 32*s, 0, s);
+        lg.print("Magic:\n 0 / 0 / 0 / 0", (8*12)*s, 40*s, 0, s);
+        lg.print("Inventory:\n      " .. #party[activePC].inventory .. " / 15", (8*12)*s, 64*s, 0, s);
+        lg.print("Equipment:", (8*12)*s, 80*s, 0, s);
+        lg.print(party[activePC].weapon.name, (8*12.5)*s, 88*s, 0, s)
+        lg.print(party[activePC].armor.name, (8*12.5)*s, 96*s, 0, s)
+        lg.print(party[activePC].acc.name, (8*12.5)*s, 104*s, 0, s)
+        lg.print("THAC0:  " .. party[activePC].thaco, (8*12)*s, 120*s, 0, s)
+        lg.print("AC:     " .. getac(party[activePC]), (8*12)*s, 128*s, 0, s)
+        lg.print(" ← →  Select character     Z or Esc) Exit", -24*s, (8*21)*scale, 0, scale)
+    end
+    if (transitionCounter > 0) and (transitioning==true) then 
+        --if its 1...
+        local tc = transitionCounter
+        if tc > 11 then tc = 21-tc end 
+        --print(tc)
+        local s = scale
+        lg.setColor(0, 0, 0, 1)
+        for p=1,tc do 
+            lg.rectangle("fill", 16*s, 8*s, 8*s*p, 168*s)
+            lg.rectangle("fill", (192*s) - (p*8*s), 8*s, 8*s*p, 168*s)
+            lg.rectangle("fill", 16*s, 8*s, 168*s, 8*s*p)
+            lg.rectangle("fill", 16*s, (176*s) - (p*8*s), 168*s, 8*s*p)
+        end
+        lg.setColor(1, 1, 1, 1)
     end
 end --love.draw
 

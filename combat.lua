@@ -5,6 +5,7 @@ function MeleeTwo(tgt)
     local hit = false;
     if roll == 20 then 
         dmg = GetAttackDamage(currentTurn, tgt)
+        if dmg < 1 then dmg = 1 end
         tgt.hp = tgt.hp - dmg*2;
         AddLog("Critical hit!!", 0)
         AddLog(" "..dmg*2 .. " damage!", 0)
@@ -15,6 +16,7 @@ function MeleeTwo(tgt)
         sfx.miss:play()
     elseif hitac <= getac(tgt) then 
         dmg = GetAttackDamage(currentTurn, tgt) --"attack"=normal attack
+        if dmg < 1 then dmg = 1 end
         tgt.hp = tgt.hp - dmg;
         AddLog("Hit!! " .. dmg .. " damage!", 0)
         hit = true
@@ -39,7 +41,7 @@ function MeleeAttack(tgt)
     AddLog(currentTurn.name .. " attacks\n " .. tgt.name .. "!")
     selector.x, selector.y = currentTurn.x, currentTurn.y
     roll = math.ceil(love.math.random()*20)
-    hitac = (currentTurn.thaco - roll - math.floor( (currentTurn.dex-10)/2))
+    hitac = (currentTurn.thaco - roll - math.floor( (currentTurn.str-10)/2))
     AddLog("Roll: " .. roll .. " (AC".. hitac .."+)", 0);
     --animationTimer = 0.5
     sfx.atk:play()
@@ -48,11 +50,9 @@ end
 
 
 function StartCombat(nmes)
+    lastActive = activePC;
     outOfCombatState.map = currentMap.fname
     outOfCombatState.x, outOfCombatState.y = px, py
-    
-    px, py = 5, 5;
-    
     epos = {{x=5, y=3}, {x=4,y=2},{x=6,y=2},{x=3,y=1},{x=5,y=1},{x=7,y=1},{x=4,y=0},{x=6,y=0}};
     ppos = {{x=5, y=8},{x=4,y=9},{x=6,y=9},{x=5,y=9}}
     combat_actors = {}
@@ -69,21 +69,31 @@ function StartCombat(nmes)
         table.insert(combat_actors, n);
     end
     
-    togglezoom("big");
+    
     
     n = math.ceil(love.math.random()*2);
     
-    --map_w = 11;
-    --bgmap = {};
-    --r = "maps/batt"..n..".csv";
-    --bg = love.filesystem.read(r);
-    --for n in bg:gmatch("(%d*).") do
-    --    table.insert(bgmap, n);
-    --end
-    LoadMap("batt"..n, 11)
+    inputMode = INP_TRANSITIONING
+    --sfx.exit:play()
+    transitioning = true;
+    transitionCounter = 0
+    transitionTick = 0
+    --inCombat = true;
+    AddQueue({"wait", 0.35})
+    AddQueue({"FinishTransCombat", "batt"..n})
+
+end
+
+function FinishTransCombat(m)
+    --inCombat = true;
+    LoadMap(m, 11)
+    togglezoom("big");
     --
     AddLog("Combat!!", 0)
     inCombat = true;
+    px, py = 5, 5;
+    
+    
     -- initiative.
     for i=1,#combat_actors do 
         combat_actors[i].init = math.ceil(love.math.random()*10) + math.floor((combat_actors[i].dex-10)/2);
@@ -102,6 +112,11 @@ function StartCombat(nmes)
         remainingMov = next.mov;
         selector.x, selector.y = next.x, next.y;
         currentTurn = next;
+        --for k=1,#party do 
+        --    if party[k] == currentTurn then 
+        --        activePC = k
+        --    end 
+        --end 
     else 
         inputMode = nil
         currentTurn = next;
@@ -247,6 +262,7 @@ function EndCombat()
     m = love.filesystem.load("maps/"..outOfCombatState.map..".lua")
     m()
     LoadMap(outOfCombatState.map, currentMap.width)
+    activePC = lastActive;
 end
 
 function EnemyTurn(o)
@@ -343,9 +359,11 @@ function NextTurn()
         remainingMov = next.mov;
         selector.x, selector.y = next.x, next.y;
         currentTurn = next;
+        --activePC = currentTurn;
     else 
         selector.x, selector.y = next.x, next.y;
         currentTurn = next;
+        --activePC = currentTurn;
         AddLog(next.name.."'s turn...")
         remainingMov = next.mov;
         AddQueue({"enemyTurn"})

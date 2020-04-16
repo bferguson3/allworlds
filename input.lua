@@ -103,6 +103,12 @@ function love.keypressed(key)
             --        break
             --    end  
             --end 
+        elseif key == "z" then 
+            for k=1,#party do 
+                if party[k] == currentTurn then activePC=k end 
+            end 
+            inputMode = STATS_MAIN
+            return
         elseif key == "d" then 
             currentTurn.defend = true;
             AddLog(currentTurn.name.." defends.")
@@ -162,6 +168,23 @@ function love.keypressed(key)
             AddLog("Invalid direction!", 0);
             inputMode = MOVE_MODE
         end
+    elseif inputMode == STATS_MAIN then 
+        if key=='escape' or (key=='z') then--(key == "z") or (key=="esc")then 
+            inputMode = MOVE_MODE 
+            if inCombat then inputMode = COMBAT_MOVE end; return;
+        elseif key == "left" then 
+            --if inCombat then return end
+            activePC = activePC - 1
+            if activePC == 0 then 
+                activePC = #party
+            end 
+        elseif key == "right" then 
+            --if inCombat then return end
+            activePC = activePC + 1
+            if activePC > #party then 
+                activePC = 1
+            end 
+        end
     elseif inputMode == MOVE_MODE then 
         
         local moved = false
@@ -189,10 +212,15 @@ function love.keypressed(key)
                 AddLog("North");
                 moved = true
             end
-        elseif key == "tab" then 
-            togglezoom();
+        --elseif key == "tab" then 
+        --    togglezoom();
         elseif key == "t" then 
             AddLog("Talk")
+            if string.find(party[activePC].name, "Retainer") then 
+                AddLog(":\"I think you'd best do\n the talking, highness.", 0)
+                inputMode = MOVE_MODE 
+                return 
+            end
             AddLog("Direction?", 0)
             inputMode = TALK_MODE;
         elseif key == "e" then 
@@ -200,16 +228,26 @@ function love.keypressed(key)
             AddLog("Examine")
             AddLog("Direction?", 0)
             inputMode = EXAMINE_MODE
+        elseif key == "a" then 
+            AddLog("unimplemented")
+        elseif key == "z" then 
+            inputMode = STATS_MAIN
+            return
         elseif key == "b" then 
             StartCombat({"guard"})
+        elseif key == "tab" then 
+            zoomTab = zoomTab + 1
+            if zoomTab > 3 then zoomTab = 0 end 
+            SetZoom(zoomTab)
+        
         elseif key == "1" then 
-            SetZoom(1)
+            activePC = 1 
         elseif key == "2" then 
-            SetZoom(2)
+            activePC = 2
         elseif key == "3" then 
-            SetZoom(3)
+            activePC = 3
         elseif key == "4" then 
-            SetZoom(0)
+            activePC = 4
         end
         if (moved == true) then 
             AddQueue({"wait", 0.1})

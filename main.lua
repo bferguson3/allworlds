@@ -2,7 +2,10 @@
 --enemies dont collide with each other on world map
 --enemy will move without waiting in combat start if first actor
 --damage flash on sprites
---transition effect
+--proper selection and movement within a defined range 
+--ranged attacks
+--camping - food, camp screen 
+--magic system 
 
 lg = love.graphics;
 
@@ -11,14 +14,14 @@ outOfCombatState = {
     x = 10,
     y = 10
 };
-
+lastActive = nil;
 roll = 0;
 hitac = 0;
 dmgtxt = {};
 combatXP = 0;
 xpTable = { 1000, 3000, 6000, 10000, 15000, 21000, 28000, 36000, 45000 };
 inCombat = false;
-scale = 1;
+scale = 2;
 timeSinceMove = 0;
 map_w = 36;
 x_draw_offset = 0;
@@ -36,18 +39,29 @@ initialRepeat = LONG_REPEAT;
 keyRepeat = SHORT_REPEAT;
 keystart = 0;
 lastkey = 0;
+--cameraMode
 ZOOM_SMALL = 0;
 ZOOM_BIG = 1;
 ZOOM_FP = 2;
+STATUSWINDOW = 3
 cameraMode = ZOOM_SMALL;
+
 log = { ".", ".", ".", ".", ".", ".", ".", ".", ".", "> Loaded." }
+--inputMOde
 MOVE_MODE = 0;
 TALK_MODE = 1;
 COMBAT_MOVE = 2;
 COMBAT_COMMAND = 5;
 COMBAT_MELEE = 6;
 EXAMINE_MODE = 7;
+STATS_MAIN = 8;
+INP_TRANSITIONING = 9;
 inputMode = MOVE_MODE;
+
+transitionCounter = 0;
+transitionTick = 0;
+transitioning = false;
+
 current_npc = nil;
 myinput = ''
 selectorflash = 0;
@@ -55,6 +69,7 @@ flashtimer = 0.1;
 remainingMov = 0;
 selector = { x = 0, y = 0}
 currentTurn = nil;
+activePC = 1;
 --anim = { false, false, false } -- ticks true, true true every second. for animation.
 queue = {}
 maxEnemySpawns = 3
@@ -74,6 +89,9 @@ classes = {
 --print(classes["Fighter"])
 --dofile("enemies.lua")
 m = love.filesystem.load("enemies.lua")
+m()
+
+m = love.filesystem.load("itemdb.lua")
 m()
 
 party = {
@@ -97,6 +115,32 @@ party = {
         armor = {
             name = "Quilted Vest",
             ac = 1 -- 10 - armor - dex bonus
+        },
+        acc = {
+            name = "(none)"
+        },
+        inventory = {
+            
+            { 
+                name = "Long Sword", 
+                dmg_die = 8, 
+                type = "melee",
+                equipped = true
+            },
+            {
+                name = "Quilted Vest",
+                ac = 1,
+                type = "armor",
+                equipped = true
+            },
+            {
+                name = "Small Potion",
+                type = "consumable",
+                target = "ally",
+                range = 1,
+                stack = 2,
+                stackable = true
+            }
         },
         thaco = 20,
         level = 1,
@@ -128,6 +172,24 @@ party = {
             name = "Quilted Vest",
             ac = 1 -- 10 - armor - dex bonus
         },
+        acc = {
+            name = "(none)"
+        },
+        inventory = {
+            
+            { 
+                name = "Long Sword", 
+                dmg_die = 8, 
+                type = "melee",
+                equipped = true
+            },
+            {
+                name = "Quilted Vest",
+                ac = 1,
+                type = "armor",
+                equipped = true
+            }
+        },
         thaco = 20,
         level = 1,
         xp = 0,
@@ -155,6 +217,24 @@ party = {
             name = "Quilted Vest",
             ac = 1 -- 10 - armor - dex bonus
         },
+        acc = {
+            name = "(none)"
+        },
+        inventory = {
+            
+            { 
+                name = "Long Sword", 
+                dmg_die = 8, 
+                type = "melee",
+                equipped = true
+            },
+            {
+                name = "Quilted Vest",
+                ac = 1,
+                type = "armor",
+                equipped = true
+            }
+        },
         thaco = 20,
         level = 1,
         xp = 0,
@@ -181,6 +261,24 @@ party = {
         armor = {
             name = "Quilted Vest",
             ac = 1 -- 10 - armor - dex bonus
+        },
+        acc = {
+            name = "(none)"
+        },
+        inventory = {
+            
+            { 
+                name = "Long Sword", 
+                dmg_die = 8, 
+                type = "melee",
+                equipped = true
+            },
+            {
+                name = "Quilted Vest",
+                ac = 1,
+                type = "armor",
+                equipped = true
+            }
         },
         thaco = 20,
         level = 1,
@@ -225,7 +323,7 @@ function ChangeRichPresence(newrp)
 end
 
 currentSave = nil;
-
+zoomTab = 2
 function SetZoom(z)
     love.window.setMode(320*z, 200*z)
     scr_w, scr_h = lg.getDimensions();
@@ -239,7 +337,7 @@ function love.load(arg)
     --=ANDROID SHIT==-
     --love.window.setMode(0, 0, {fullscreen=false});
     
-    SetZoom(1)
+    SetZoom(2)
 
     if love.filesystem.getInfo("01.sav") == nil then 
         currentSave = love.filesystem.newFile("01.sav")
@@ -304,16 +402,35 @@ function toggleselflash()
     if selectorflash == 5 then selectorflash = 0 end
 end
 
+function FinishTrans(tw)
+    cm = tw.map --worldmap
+    px = tw.x 
+    py = tw.y
+    
+    m=love.filesystem.load("maps/"..cm..".lua")
+    m()
+    AddLog("Entering\n " .. currentMap.name .. "...")
+                
+    LoadMap(cm, currentMap.width)
+end
+
 function love.update(dT)
     --if dT > (1/60) then return end
-
+    if inputMode == COMBAT_MOVE and remainingMov == 0 then inputMode = COMBAT_COMMAND end
     if dT ~= nil then 
         sinCounter = sinCounter + (dT*4);
         animationTimer = animationTimer - dT;
         flashtimer = flashtimer - dT;
-        --timeSinceMove = timeSinceMove + dT;
+        transitionTick = transitionTick + dT;
     end
-    
+    if transitioning == true then 
+        if transitionTick > (1/30) then transitionTick = 0; transitionCounter = transitionCounter + 1; end
+        if transitionCounter > 21 then 
+            transitionCounter = 0; 
+            transitioning = false; 
+            if inCombat == false then inputMode = MOVE_MODE end
+        end;
+    end
     for d=1,#dmgtxt do 
         --print(math.sin(dmgtxt[d].t))
         dmgtxt[d].y = dmgtxt[d].y or dmgtxt[d].ya
@@ -338,6 +455,14 @@ function love.update(dT)
             elseif queue[1][1] == "enemyTurn" then 
                 table.remove(queue, 1);
                 EnemyTurn(currentTurn)
+            elseif queue[1][1] == "FinishTrans" then 
+                local t = queue[1][2] 
+                table.remove(queue, 1)
+                FinishTrans(t)
+            elseif queue[1][1] == "FinishTransCombat" then 
+                local t = queue[1][2] 
+                table.remove(queue, 1)
+                FinishTransCombat(t)
             elseif queue[1][1] == "MeleeAttack" then 
                 local t = queue[1][2]
                 table.remove(queue, 1);
@@ -378,23 +503,19 @@ function love.update(dT)
         togglezoom("small")
     end
     -- am I on a teleporter?
-    for i=1,#currentMap.warps do 
-        w = currentMap.warps[i] 
-        if (px==w.x) and (py==w.y) then 
-            --Warp me!
-            --warps[1].x 
-            --warps[1].target.map 
-            --             .x
-            cm = currentMap.warps[i].target.map --worldmap
-            px = currentMap.warps[i].target.x 
-            py = currentMap.warps[i].target.y
-            
-            --dofile("maps/"..cm .. ".lua")
-            m=love.filesystem.load("maps/"..cm..".lua")
-            m()
-            LoadMap(cm, currentMap.width)
-            sfx.exit:play()
-            AddLog("Entering\n " .. currentMap.name .. "...")
+    if inputMode == MOVE_MODE then 
+        for i=1,#currentMap.warps do 
+            w = currentMap.warps[i] 
+            if (px==w.x) and (py==w.y) then 
+                --AddQueue({"wait", 1})
+                inputMode = INP_TRANSITIONING
+                sfx.exit:play()
+                transitioning = true;
+                transitionCounter = 0
+                transitionTick = 0
+                AddQueue({"wait", 0.35})
+                AddQueue({"FinishTrans", currentMap.warps[i].target})
+            end
         end
     end
     repeatkeys = { "right", "left", "up", "down" };
@@ -435,7 +556,7 @@ function CheckCollision(x, y)
             if x == currentMap[i].x and currentMap[i].y == y then 
                 currentMap[i].encounter = currentMap[i].encounter or false;
                 if currentMap[i].encounter == true then 
-                    inputMode = nil
+                    --inputMode = nil
                     StartCombat(currentMap[i].enemies)
                     return 
                 else
@@ -477,21 +598,6 @@ function AddLog(l, arrow)
         end 
         log[#log] = toadd[i]
     end
-    --for o=1,#toadd do 
-    --    print(toadd[o])
-    --end
-    
-    -- shift = 1;
-    -- for w in string.gmatch(l, "\n") do 
-    --     shift = shift + 1;
-    -- end
-    -- for z = 1, shift do 
-    --     for i = 2, #log do 
-    --         log[i-1] = log[i]
-    --     end
-    --     log[#log] = ""
-    -- end
-    -- shift = shift - 1;
     if arrow == 1 then     
         log[#log] = "> " .. l;
     else
@@ -526,6 +632,7 @@ function love.textinput(t)
 end
 
 function AskNPC(inp)
+    
     current_npc.chat[inp] = current_npc.chat[inp] or {"I don't understand."}
     inp = string.lower(inp)
     if inp == 'hi' or inp == 'hail' or inp == 'greetings' then inp = 'hello' end
@@ -663,7 +770,7 @@ function MoveTowardsP(e)
         end
     end
     if (e.x == px) and (e.y == py) then 
-        print(e.enemies)
+        --print(e.enemies)
         StartCombat(e.enemies)
     end
 end
