@@ -322,6 +322,16 @@ function EnemyTurn(o)
     --NextTurn()
 end
 
+function GetActiveMovTiles()
+    selectTiles = {}
+    local lx, ly
+    for ly=-currentTurn.mov,currentTurn.mov do 
+        for lx=-currentTurn.mov+(math.abs(ly)),currentTurn.mov-(math.abs(ly)) do 
+            table.insert(selectTiles, {x=(currentTurn.x+lx), y=(currentTurn.y+ly)})
+        end
+    end
+end
+
 function NextTurn()
     next = combat_actors[1];
     for i=1,#combat_actors do 
@@ -343,21 +353,16 @@ function NextTurn()
             end
         end
     end
-
+    
     if next.player == true then 
         inputMode = COMBAT_MOVE;
         AddLog(next.name.."'s turn.\nCommand?");
         remainingMov = next.mov;
         selector.x, selector.y = next.x, next.y;
         currentTurn = next;
-        selectTiles = {}
-        --currentTurn.weapon.minRange = currentTurn.weapon.minRange or 0
-        local lx, ly
-        for ly=-currentTurn.mov,currentTurn.mov do 
-            for lx=-currentTurn.mov+(math.abs(ly)),currentTurn.mov-(math.abs(ly)) do 
-                table.insert(selectTiles, {x=(currentTurn.x+lx), y=(currentTurn.y+ly)})
-            end
-        end
+        origPos = {x=currentTurn.x, y=currentTurn.y}
+        GetActiveMovTiles()
+        
         --activePC = currentTurn;
     else 
         selector.x, selector.y = next.x, next.y;

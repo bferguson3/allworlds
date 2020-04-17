@@ -4,8 +4,13 @@ function DrawMapObjects_Small()
     for i=1,#currentMap do
         if ((px + 11) >= currentMap[i].x) and ((px - 11) <= currentMap[i].x) then 
             if ((py+10)>=currentMap[i].y) and ((py-10)<=currentMap[i].y) then
-                r = "assets/"..currentMap[i].g.."_8x8.png"
-                lg.draw(lg.newImage(r), 8*scale*(currentMap[i].x-px+10), 8*scale*(currentMap[i].y-py+10), 0, scale);
+                
+                currentMap[i].img = currentMap[i].img or nil 
+                if currentMap[i].img == nil then 
+                    local r = "assets/"..currentMap[i].g.."_8x8.png"
+                    currentMap[i].img = lg.newImage(r)
+                end
+                lg.draw(currentMap[i].img, 8*scale*(currentMap[i].x-px+10), 8*scale*(currentMap[i].y-py+10), 0, scale);
             end
         end
     end
@@ -29,8 +34,12 @@ function DrawMapObjects_Large()
     for i=1,#currentMap do
         if ((px + 5) >= currentMap[i].x) and ((px - 5) <= currentMap[i].x) then 
             if ((py+5)>=currentMap[i].y) and ((py-5)<=currentMap[i].y) then
-                r = "assets/"..currentMap[i].g.."_16x16.png"
-                lg.draw(lg.newImage(r), 16*scale*(currentMap[i].x-px+5), 16*scale*(currentMap[i].y-py+5), 0, scale);
+                currentMap[i].imgb = currentMap[i].imgb or nil 
+                if currentMap[i].imgb == nil then 
+                    local r = "assets/"..currentMap[i].g.."_16x16.png"
+                    currentMap[i].imgb = lg.newImage(r)
+                end
+                lg.draw(currentMap[i].imgb, 16*scale*(currentMap[i].x-px+5), 16*scale*(currentMap[i].y-py+5), 0, scale);
             end
         end
     end
@@ -78,7 +87,21 @@ function love.draw(dT)
         end
         DrawMapObjects_Large();
         if inCombat == false then 
-            lg.draw(lg.newImage('assets/'..party[activePC].g..'_16x16.png'), 16*scale*5, 16*scale*5, 0, scale);
+            for v=1,#party do 
+                party[v].imgb = party[v].imgb or nil 
+                if party[v].imgb == nil then 
+                    local r = 'assets/'..party[v].g..'_16x16.png'
+                    party[v].imgb = lg.newImage(r)
+                end
+            end
+            if not camping then 
+                lg.draw(party[activePC].imgb, 16*scale*5, 16*scale*5, 0, scale);
+            else 
+                lg.draw(party[1].imgb, 16*scale*6, 16*scale*5, 0, scale);
+                lg.draw(party[2].imgb, 16*scale*5, 16*scale*4, 0, scale);
+                lg.draw(party[3].imgb, 16*scale*5, 16*scale*6, 0, scale);
+                lg.draw(party[4].imgb, 16*scale*4, 16*scale*5, 0, scale);
+            end
         else
             if selectorflash == 4 and inputMode == COMBAT_MOVE then 
             -- draw movement box - base on char's mov stat
@@ -88,8 +111,12 @@ function love.draw(dT)
             end
             
             for i=1,#combat_actors do 
-                local r = "assets/"..combat_actors[i].g.."_16x16.png";
-                lg.draw(lg.newImage(r), 16*scale*combat_actors[i].x, 16*scale*combat_actors[i].y, 0, scale);
+                combat_actors[i].imgb = combat_actors[i].imgb or nil 
+                if combat_actors[i].imgb==nil then 
+                    local r = "assets/"..combat_actors[i].g.."_16x16.png";
+                    combat_actors[i].imgb = lg.newImage(r);
+                end
+                lg.draw(combat_actors[i].imgb, 16*scale*combat_actors[i].x, 16*scale*combat_actors[i].y, 0, scale);
             end
         end
         for d=1,#dmgtxt do 
@@ -114,7 +141,11 @@ function love.draw(dT)
         end
         DrawMapObjects_Small();
         if inCombat==false then 
-            lg.draw(lg.newImage('assets/'..party[activePC].g..'_8x8.png'), (8*scale*10), (8*scale*10), 0, scale);
+            party[activePC].img = party[activePC].img or nil 
+            if party[activePC].img==nil then 
+                party[activePC].img = lg.newImage('assets/'..party[activePC].g..'_8x8.png')
+            end
+            lg.draw(party[activePC].img, (8*scale*10), (8*scale*10), 0, scale);
         end        
     end
     lg.translate(-8*scale, -8*scale)
@@ -126,17 +157,17 @@ function love.draw(dT)
         lg.draw(tileSet[1].sheet, tileSet[1].quads[7], 23*8*scale, i*8*scale, 0, scale)
     end
     for i=1,13 do 
-        lg.draw(tileSet[1].sheet, tileSet[1].quads[6], ((i+23)*8)*scale, 13*8*scale, 0, scale)
+        lg.draw(tileSet[1].sheet, tileSet[1].quads[6], ((i+23)*8)*scale, 12*8*scale, 0, scale)
     end
     lg.draw(tileSet[1].sheet, tileSet[1].quads[5], 0, 0, 0, scale)
     lg.draw(tileSet[1].sheet, tileSet[1].quads[5], 23*8*scale, 0, 0, scale)
     lg.draw(tileSet[1].sheet, tileSet[1].quads[5], 0, 22*8*scale, 0, scale)
     lg.draw(tileSet[1].sheet, tileSet[1].quads[5], 23*8*scale, 22*8*scale, 0, scale)
-    lg.draw(tileSet[1].sheet, tileSet[1].quads[5], 23*8*scale, 13*8*scale, 0, scale)
-    lg.draw(tileSet[1].sheet, tileSet[1].quads[5], 37*8*scale, 13*8*scale, 0, scale)
+    lg.draw(tileSet[1].sheet, tileSet[1].quads[5], 23*8*scale, 12*8*scale, 0, scale)
+    lg.draw(tileSet[1].sheet, tileSet[1].quads[5], 37*8*scale, 12*8*scale, 0, scale)
 
     for i = 1, #log do 
-        lg.print(log[i], 24.5*8*scale, (104+(8*i))*scale, 0, scale);
+        lg.print(log[i], 24.5*8*scale, (96+(8*i))*scale, 0, scale);
     end
     if inputMode == CHAT_INPUT then 
         for i=1, #known_kw do 
@@ -165,13 +196,13 @@ function love.draw(dT)
             lg.print("HP " .. party[b].hp, ((24*8)+(10*8))*scale, ((8*(b*2))-8)*scale, 0, scale);
         end
         lg.setColor(1, 1, 1, 1)
-        lg.print("GOLD\nRELICS", 24*8*scale, (8*11)*scale, 0, scale);
+        lg.print("GOLD\nRELICS", 24*8*scale, (8*10)*scale, 0, scale);
         lg.translate(-4*scale, 0);
     end
     lg.translate(-8*scale, 0)
     if inputMode == MOVE_MODE then 
-        lg.print(" A)ttack  E)xamine  I)nventory\n  M)agic/Skill  Z)tats", 0, (8*23)*scale, 0, scale);
-        lg.print("↑→↓← Move", (8*16)*scale, (8*24)*scale, 0, scale);
+        lg.print(" A)ttack   C)amp   E)xamine   I)nventory\n  M)agic/Skill   Z)tats", 0, (8*23)*scale, 0, scale);
+        lg.print("↑→↓← Move", (8*15)*scale, (8*24)*scale, 0, scale);
     end
     if (inputMode == COMBAT_MOVE) or (inputMode == COMBAT_COMMAND) or (inputMode == nil) then 
         if selectorflash == 1 or selectorflash == 3 then 
@@ -252,6 +283,7 @@ end --love.draw
 
 function togglezoom(cm)
     if inCombat then return end;
+    if camping then return end;
     cm = cm or 0;
     if cm ~= 0 then 
         if cm == "big" then 

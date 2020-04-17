@@ -35,7 +35,7 @@ currentMap = {
         g = "barrel",
         x = 19,
         y = 13, 
-        examine = {": \"Just trail rations.\""}
+        examine = {": \"Used to have food, now\nit just has scraps.\""}
     },
     {
         g = "table",

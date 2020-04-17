@@ -5,11 +5,40 @@ function GetTilesFrom(a, b)
     return (xd+yd)
 end
 
+function TryCamp()
+    -- check 1 udlr for collision
+    -- if ok, return true, if false, addlog return false
+    currentMap.campable = currentMap.campable or false 
+    if currentMap.campable == false then 
+        AddLog("Can't camp here.", 0)
+        return false 
+    end
+    for ly=py-5, py+5 do 
+        for lx=px-5, px+5 do 
+            for m=1,#currentMap do 
+                if currentMap[m].x==lx and currentMap[m].y==ly then 
+                    if currentMap[m].encounter==true then
+                        AddLog("Enemies are near!", 0); return false;
+                    end
+                end
+            end
+        end
+    end
+    for ly=py-1, py+1 do 
+        for lx=px-1, px+1 do 
+            if CheckCollision(lx, ly) then AddLog("No room here!", 0); return false end 
+        end
+    end
+    return true
+    
+end
+
 
 function love.keypressed(key)
     --if timeSinceMove < 0.1 then 
     --    return
     --end
+    if camping then return end 
     if inputMode == CHAT_INPUT then 
         if key == 'backspace' and #myinput > 0 then 
             log[#log] = string.sub(log[#log], 1, #log[#log]-2) .. '_'
@@ -111,8 +140,11 @@ function love.keypressed(key)
         end
         if key == "escape" then 
             inputMode = COMBAT_COMMAND;
-            selector.x, selector.y = currentTurn.x, currentTurn.y
             if remainingMov > 0 then inputMode = COMBAT_MOVE end
+            --currentTurn.x, currentTurn.y = origPos.x, origPos.y
+            selector.x, selector.y = currentTurn.x, currentTurn.y
+            --GetActiveMovTiles()
+            selectTiles = oldTiles
         elseif key == "space" or key == "return" then 
             for i=1,#combat_actors do 
                 if combat_actors[i] ~= nil then 
@@ -137,6 +169,7 @@ function love.keypressed(key)
     end
     if inputMode == COMBAT_COMMAND or inputMode == COMBAT_MOVE then 
         if key == "a" then 
+            oldTiles = selectTiles
             inputMode = COMBAT_MELEE;
             -- if there is a minRange, do a loop to pop those out
             --Now populate attack tiles, and position selector in one of them.
@@ -286,6 +319,23 @@ function love.keypressed(key)
             AddLog("Examine")
             AddLog("Direction?", 0)
             inputMode = EXAMINE_MODE
+        elseif key == "c" then 
+            AddLog("Camp")
+            if TryCamp() then 
+                inputMode = INP_TRANSITIONING
+                AddLog("Setting up camp...", 0)
+                local healed = TryConsumeRations()
+                
+                --AddQueue({"wait", 0.5})
+                AddQueue({"startTrans"})
+                AddQueue({"wait", 0.4})
+                AddQueue({"campZoom"})
+                AddQueue({"wait", 3})
+                
+                AddQueue({"startTrans"})
+                AddQueue({"wait", 0.4})
+                AddQueue({"exitCamp", healed})
+            end
         elseif key == "a" then 
             AddLog("unimplemented")
         elseif key == "z" then 
@@ -304,11 +354,13 @@ function love.keypressed(key)
             activePC = 4
         end
         if (moved == true) then 
-            AddQueue({"wait", 0.1})
-            timeSinceMove = 0
+            
+            
+            --timeSinceMove = 0
             sfx.step:play()
             if currentMap.name == "world map" then 
                 -- random spawn 
+                AddQueue({"wait", 0.1})
                 if noEnemiesSpawned < maxEnemySpawns then 
                     if love.math.random(100) <= 10 then 
                         CreateWMEnemy()

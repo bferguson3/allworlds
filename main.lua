@@ -1,7 +1,8 @@
 -- ALLWORLDS
---enemies dont collide with each other on world map
---damage flash on sprites
 --camping - food, camp screen 
+--damage flash on sprites
+--slimes
+--retainers
 --magic system 
 
 lg = love.graphics;
@@ -12,10 +13,13 @@ outOfCombatState = {
     y = 10
 };
 selectTiles = {};
+oldTiles = {};
 lastActive = nil;
+camping = false
 roll = 0;
 hitac = 0;
 dmgtxt = {};
+origPos = {};
 combatXP = 0;
 xpTable = { 1000, 3000, 6000, 10000, 15000, 21000, 28000, 36000, 45000 };
 inCombat = false;
@@ -44,7 +48,7 @@ ZOOM_FP = 2;
 STATUSWINDOW = 3
 cameraMode = ZOOM_SMALL;
 
-log = { ".", ".", ".", ".", ".", ".", ".", ".", ".", "> Loaded." }
+log = { ".", ".", ".", ".", ".", ".", ".", ".", ".", ".", ".", "> Loaded." }
 --inputMOde
 MOVE_MODE = 0;
 TALK_MODE = 1;
@@ -54,6 +58,7 @@ COMBAT_MELEE = 6;
 EXAMINE_MODE = 7;
 STATS_MAIN = 8;
 INP_TRANSITIONING = 9;
+INPUT_CAMPING = 10;
 inputMode = MOVE_MODE;
 
 transitionCounter = 0;
@@ -92,210 +97,8 @@ m()
 m = love.filesystem.load("itemdb.lua")
 m()
 
-party = {
-    {
-        name = "Alistair",
-        g = "00",
-        hp = 30,
-        mhp = 30,
-        mov = 1,
-        str = 14,
-        dex = 16,
-        con = 9,
-        int = 17,
-        wis = 14,
-        cha = 13,
-        mov = 2,
-        weapon = {
-            name = "Long Sword",
-            dmg_die = 8,
-            type = "melee",
-            range = 2
-        },
-        armor = {
-            name = "Quilted Vest",
-            ac = 1 -- 10 - armor - dex bonus
-        },
-        acc = {
-            name = "(none)"
-        },
-        inventory = {
-            
-            { 
-                name = "Long Sword", 
-                dmg_die = 8, 
-                type = "melee",
-                equipped = true,
-                range = 1
-            },
-            {
-                name = "Quilted Vest",
-                ac = 1,
-                type = "armor",
-                equipped = true
-            },
-            {
-                name = "Small Potion",
-                type = "consumable",
-                target = "ally",
-                range = 1,
-                stack = 2,
-                stackable = true
-            }
-        },
-        thaco = 20,
-        level = 1,
-        xp = 0,
-        class = "Fighter",
-        player = true,
-        --getac = function()
-        --    a = 10 - armor.ac - math.floor( (dex-10)/2); return a;
-        --end
-    },
-    {
-        name = "Retainer A",
-        g = "01",
-        hp = 31,
-        mhp = 31,
-        mov = 1,
-        str = 14,
-        dex = 12,
-        con = 12,
-        int = 10,
-        wis = 10,
-        cha = 10,
-        weapon = {
-            name = "Long Sword",
-            dmg_die = 8,
-            type = "melee",
-            range = 1
-        },
-        armor = {
-            name = "Quilted Vest",
-            ac = 1 -- 10 - armor - dex bonus
-        },
-        acc = {
-            name = "(none)"
-        },
-        inventory = {
-            
-            { 
-                name = "Long Sword", 
-                dmg_die = 8, 
-                type = "melee",
-                equipped = true,
-                range = 1
-            },
-            {
-                name = "Quilted Vest",
-                ac = 1,
-                type = "armor",
-                equipped = true
-            }
-        },
-        thaco = 20,
-        level = 1,
-        xp = 0,
-        class = "Fighter",
-        player = true,
-    },
-    {
-        name = "Retainer B",
-        g = "01",
-        hp = 29,
-        mhp = 29,
-        mov = 1,
-        str = 16,
-        dex = 12,
-        con = 8,
-        int = 10,
-        wis = 10,
-        cha = 10,
-        weapon = {
-            name = "Long Sword",
-            dmg_die = 8,
-            type = "melee",
-            range = 1
-        },
-        armor = {
-            name = "Quilted Vest",
-            ac = 1 -- 10 - armor - dex bonus
-        },
-        acc = {
-            name = "(none)"
-        },
-        inventory = {
-            
-            { 
-                name = "Long Sword", 
-                dmg_die = 8, 
-                type = "melee",
-                equipped = true,
-                range = 1
-            },
-            {
-                name = "Quilted Vest",
-                ac = 1,
-                type = "armor",
-                equipped = true
-            }
-        },
-        thaco = 20,
-        level = 1,
-        xp = 0,
-        class = "Fighter",
-        player = true,
-    },
-    {
-        name = "Retainer C",
-        g = "01",
-        hp = 32,
-        mhp = 32,
-        mov = 1,
-        str = 12,
-        dex = 12,
-        con = 14,
-        int = 10,
-        wis = 10,
-        cha = 10,
-        weapon = {
-            name = "Short Bow",
-            dmg_die = 6,
-            type = "ranged",
-            range = 4,
-            minRange = 3
-        },
-        armor = {
-            name = "Quilted Vest",
-            ac = 1 -- 10 - armor - dex bonus
-        },
-        acc = {
-            name = "(none)"
-        },
-        inventory = {
-            
-            { 
-                name = "Long Sword", 
-                dmg_die = 8, 
-                type = "melee",
-                equipped = true,
-                range = 1
-            },
-            {
-                name = "Quilted Vest",
-                ac = 1,
-                type = "armor",
-                equipped = true
-            }
-        },
-        thaco = 20,
-        level = 1,
-        xp = 0,
-        class = "Fighter",
-        player = true,
-    }
-    
-}
+m = love.filesystem.load("party.lua")
+m()
 
 function getac(o)
     a = 10 - o.armor.ac - math.floor((o.dex-10)/2);
@@ -418,8 +221,58 @@ function FinishTrans(tw)
     m=love.filesystem.load("maps/"..cm..".lua")
     m()
     AddLog("Entering\n " .. currentMap.name .. "...", 0)
+    
+    currentMap.lastcamp = {}
+    --table.insert(currentMap, lastcamp)
                 
     LoadMap(cm, currentMap.width)
+
+end
+
+--lastcamp = nil
+
+function CampZoom()
+    togglezoom("big")
+    camping = true
+    for k=1,#currentMap do 
+        if currentMap[k].g=="campfire" then 
+            table.remove(currentMap, k)
+            break 
+        end
+    end
+    table.insert(currentMap, { g="campfire", x=px, y=py })
+    
+end                
+
+function ExitCamp(h)
+    if h then 
+        for t=1,#party do 
+            party[t].hp = party[t].mhp
+        end
+        AddLog("Fully healed.", 0)
+    end
+    togglezoom("small")
+    camping = false 
+end
+
+function TryConsumeRations()
+    for p=1,#party do 
+        for ii=1,#party[p].inventory do 
+            local c = party[p].inventory[ii]
+            print(c.name)
+            if c.name=="Rations" then 
+                c.stack = c.stack - 1
+                print(party[p].inventory[ii].stack)
+                AddLog("Consuming rations...", 0)
+                if c.stack == 0 then 
+                    table.remove(party[p].inventory, ii)
+                end
+                return true 
+            end
+        end
+    end
+    AddLog("No rations left.\n You go hungry...")
+    return false
 end
 
 function love.update(dT)
@@ -487,6 +340,13 @@ function love.update(dT)
                 local t = queue[1][2]
                 table.remove(queue, 1)
                 animationTimer = t
+            elseif queue[1][1] == "campZoom" then 
+                table.remove(queue, 1);
+                CampZoom()
+            elseif queue[1][1] == "exitCamp" then 
+                local t = queue[1][2]
+                table.remove(queue, 1);
+                ExitCamp(t)
             elseif queue[1][1] == "EndCombat" then 
                 table.remove(queue, 1)
                 EndCombat()
@@ -508,11 +368,15 @@ function love.update(dT)
             end
         end 
     end
+    if camping==true then 
+        b = true 
+    end
     if b == true then 
         togglezoom("big")
     else 
         togglezoom("small")
     end
+    
     -- am I on a teleporter?
     if inputMode == MOVE_MODE then 
         for i=1,#currentMap.warps do 
@@ -570,15 +434,18 @@ function CheckCollision(x, y)
                     StartCombat(currentMap[i].enemies)
                     return 
                 else
-                    AddLog("Blocked!")
-                    return true;
+                    if currentMap[i].g ~= "campfire" then 
+                        AddLog("Blocked!")
+                        return true;
+                    end
+                    
                 end
             end 
         end
     end
     --map_w = 32;
     ofs = (y * map_w) + x+1;
-    if bgmap[ofs] == '3' or bgmap[ofs] == '16' then 
+    if bgmap[ofs] == '3' or bgmap[ofs] == '16' or bgmap[ofs] == '1' then 
         AddLog("Blocked!")
         return true;
     end --7 to 14
@@ -607,6 +474,7 @@ function AddLog(l, arrow)
             log[i-1]=log[i]
         end 
         log[#log] = toadd[i]
+        --love.draw()
     end
     if arrow == 1 then     
         log[#log] = "> " .. l;
@@ -652,7 +520,7 @@ function AskNPC(inp)
         AddLog("Ok.")
         inputMode = MOVE_MODE
     else 
-        AddLog("? _", 0)
+        AddLog("\n? _", 0)
     end
     current_npc.chat[inp][2] = current_npc.chat[inp][2] or nil;
     if current_npc.chat[inp][2] ~= nil then 
@@ -735,7 +603,12 @@ function WmEnemyMove(e, x, y)
     -- otherwise return false and odn't move
     -- 0, 2, 15
     local v = bgmap[((y*map_w)+x)+1]
-    if (v == '0') or (v == '2') or (v == '15') then 
+    if (v == '0') or (v == '2') or (v == '15') or (v=='20') or (v=='21') then 
+        for p=1,#currentMap do 
+            if currentMap[p].x == x and currentMap[p].y == y then 
+                return false 
+            end
+        end
         e.x, e.y = x, y
         return true
     end
