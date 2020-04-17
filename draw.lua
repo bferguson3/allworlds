@@ -38,10 +38,9 @@ end
 
 function DrawMoveBox(o)
     lg.setColor((85/255), 1, (85/255), 1);
-    o.mov = o.mov or 1;
-    if o.mov == 1 then
-        lg.rectangle("fill", o.x*16*scale, o.y*16*scale-(16*scale), scale*16, scale*16*3);
-        lg.rectangle("fill", o.x*16*scale-(16*scale), o.y*16*scale, scale*16*3, scale*16);
+--    o.mov = o.mov or 1;
+    for s=1,#selectTiles do 
+        lg.rectangle("fill", selectTiles[s].x*scale*16, selectTiles[s].y*scale*16, 16*scale, 16*scale)
     end
     --lg.rectangle("fill", o.x*16*scale-(16*scale), o.y*16*scale-(16*scale), scale*16*3, scale*16*3);
     lg.setColor(1, 1, 1, 1);
@@ -49,12 +48,10 @@ end
 
 function DrawAttackBox(o)
     lg.setColor(1, (85/255), (85/255), 1);
-    --o.mov = o.mov or 1;
-    --if o.mov == 1 then
-        lg.rectangle("fill", o.x*16*scale, o.y*16*scale-(16*scale), scale*16, scale*16*3);
-        lg.rectangle("fill", o.x*16*scale-(16*scale), o.y*16*scale, scale*16*3, scale*16);
-    --end
-    --lg.rectangle("fill", o.x*16*scale-(16*scale), o.y*16*scale-(16*scale), scale*16*3, scale*16*3);
+    --loop through selectTiles
+    for s=1,#selectTiles do 
+        lg.rectangle("fill", selectTiles[s].x*scale*16, selectTiles[s].y*scale*16, 16*scale, 16*scale)
+    end
     lg.setColor(1, 1, 1, 1);
 end
 
@@ -227,7 +224,7 @@ function love.draw(dT)
         lg.print(party[activePC].hp, (8*15)*s, 32*s, 0, s);
         lg.print(party[activePC].mhp, (8*18)*s, 32*s, 0, s);
         lg.print("Magic:\n 0 / 0 / 0 / 0", (8*12)*s, 40*s, 0, s);
-        lg.print("Inventory:\n      " .. #party[activePC].inventory .. " / 15", (8*12)*s, 64*s, 0, s);
+        lg.print("Inventory:\n      " .. #party[activePC].inventory .. " / 10", (8*12)*s, 64*s, 0, s);
         lg.print("Equipment:", (8*12)*s, 80*s, 0, s);
         lg.print(party[activePC].weapon.name, (8*12.5)*s, 88*s, 0, s)
         lg.print(party[activePC].armor.name, (8*12.5)*s, 96*s, 0, s)

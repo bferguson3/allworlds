@@ -1,9 +1,6 @@
 -- ALLWORLDS
 --enemies dont collide with each other on world map
---enemy will move without waiting in combat start if first actor
 --damage flash on sprites
---proper selection and movement within a defined range 
---ranged attacks
 --camping - food, camp screen 
 --magic system 
 
@@ -14,6 +11,7 @@ outOfCombatState = {
     x = 10,
     y = 10
 };
+selectTiles = {};
 lastActive = nil;
 roll = 0;
 hitac = 0;
@@ -107,10 +105,12 @@ party = {
         int = 17,
         wis = 14,
         cha = 13,
+        mov = 2,
         weapon = {
             name = "Long Sword",
             dmg_die = 8,
-            type = "melee"
+            type = "melee",
+            range = 2
         },
         armor = {
             name = "Quilted Vest",
@@ -125,7 +125,8 @@ party = {
                 name = "Long Sword", 
                 dmg_die = 8, 
                 type = "melee",
-                equipped = true
+                equipped = true,
+                range = 1
             },
             {
                 name = "Quilted Vest",
@@ -166,7 +167,8 @@ party = {
         weapon = {
             name = "Long Sword",
             dmg_die = 8,
-            type = "melee"
+            type = "melee",
+            range = 1
         },
         armor = {
             name = "Quilted Vest",
@@ -181,7 +183,8 @@ party = {
                 name = "Long Sword", 
                 dmg_die = 8, 
                 type = "melee",
-                equipped = true
+                equipped = true,
+                range = 1
             },
             {
                 name = "Quilted Vest",
@@ -211,7 +214,8 @@ party = {
         weapon = {
             name = "Long Sword",
             dmg_die = 8,
-            type = "melee"
+            type = "melee",
+            range = 1
         },
         armor = {
             name = "Quilted Vest",
@@ -226,7 +230,8 @@ party = {
                 name = "Long Sword", 
                 dmg_die = 8, 
                 type = "melee",
-                equipped = true
+                equipped = true,
+                range = 1
             },
             {
                 name = "Quilted Vest",
@@ -254,9 +259,11 @@ party = {
         wis = 10,
         cha = 10,
         weapon = {
-            name = "Long Sword",
-            dmg_die = 8,
-            type = "melee"
+            name = "Short Bow",
+            dmg_die = 6,
+            type = "ranged",
+            range = 4,
+            minRange = 3
         },
         armor = {
             name = "Quilted Vest",
@@ -271,7 +278,8 @@ party = {
                 name = "Long Sword", 
                 dmg_die = 8, 
                 type = "melee",
-                equipped = true
+                equipped = true,
+                range = 1
             },
             {
                 name = "Quilted Vest",
@@ -409,7 +417,7 @@ function FinishTrans(tw)
     
     m=love.filesystem.load("maps/"..cm..".lua")
     m()
-    AddLog("Entering\n " .. currentMap.name .. "...")
+    AddLog("Entering\n " .. currentMap.name .. "...", 0)
                 
     LoadMap(cm, currentMap.width)
 end
@@ -459,6 +467,9 @@ function love.update(dT)
                 local t = queue[1][2] 
                 table.remove(queue, 1)
                 FinishTrans(t)
+            elseif queue[1][1] == "startTrans" then 
+                table.remove(queue, 1)
+                startTrans()
             elseif queue[1][1] == "FinishTransCombat" then 
                 local t = queue[1][2] 
                 table.remove(queue, 1)
@@ -556,7 +567,6 @@ function CheckCollision(x, y)
             if x == currentMap[i].x and currentMap[i].y == y then 
                 currentMap[i].encounter = currentMap[i].encounter or false;
                 if currentMap[i].encounter == true then 
-                    --inputMode = nil
                     StartCombat(currentMap[i].enemies)
                     return 
                 else

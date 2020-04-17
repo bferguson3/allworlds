@@ -1,3 +1,10 @@
+function GetTilesFrom(a, b)
+--how many tiles away is b from a?
+    local xd = math.abs(b.x - a.x)
+    local yd = math.abs(b.y - a.y)
+    return (xd+yd)
+end
+
 
 function love.keypressed(key)
     --if timeSinceMove < 0.1 then 
@@ -25,29 +32,48 @@ function love.keypressed(key)
     end
     if inputMode == COMBAT_MOVE then
         if key == "up" and CheckCollision(currentTurn.x, currentTurn.y-1) == false then 
-            currentTurn.y = currentTurn.y - 1;
-            remainingMov = remainingMov - 1;
-            selector.x, selector.y = currentTurn.x, currentTurn.y
-            AddLog("Move: Up\nCommand?")
-            sfx.step:play();
+            for h=1,#selectTiles do 
+                if selectTiles[h].x==currentTurn.x and selectTiles[h].y==(currentTurn.y-1) then 
+                    currentTurn.y = currentTurn.y - 1;
+                    --remainingMov = remainingMov - 1;
+                    selector.x, selector.y = currentTurn.x, currentTurn.y
+                    AddLog("Move: Up\nCommand?")
+                    sfx.step:play();
+                    return 
+                end 
+            end
         elseif key == "down" and CheckCollision(currentTurn.x, currentTurn.y+1)==false then 
-            currentTurn.y = currentTurn.y + 1;
-            selector.x, selector.y = currentTurn.x, currentTurn.y
-            remainingMov = remainingMov - 1;
-            AddLog("Move: Down\nCommand?");
-            sfx.step:play();
+            for h=1,#selectTiles do 
+                if selectTiles[h].x==currentTurn.x and selectTiles[h].y==(currentTurn.y+1) then 
+                    currentTurn.y = currentTurn.y + 1;
+                    selector.x, selector.y = currentTurn.x, currentTurn.y
+                    --remainingMov = remainingMov - 1;
+                    AddLog("Move: Down\nCommand?");
+                    sfx.step:play();
+                    return 
+                end 
+            end
         elseif key == "right" and CheckCollision(currentTurn.x+1, currentTurn.y)==false then 
-            currentTurn.x = currentTurn.x + 1;
-            selector.x, selector.y = currentTurn.x, currentTurn.y
-            remainingMov = remainingMov - 1;
-            AddLog("Move: Right\nCommand?");
-            sfx.step:play();
+            for h=1,#selectTiles do 
+                if selectTiles[h].x==(currentTurn.x+1) and selectTiles[h].y==currentTurn.y then 
+                    currentTurn.x = currentTurn.x + 1;
+                    selector.x, selector.y = currentTurn.x, currentTurn.y
+                    --remainingMov = remainingMov - 1;
+                    AddLog("Move: Right\nCommand?");
+                    sfx.step:play();
+                    return 
+                end 
+            end
         elseif key == "left" and CheckCollision(currentTurn.x-1, currentTurn.y)==false then 
-            currentTurn.x = currentTurn.x - 1;
-            selector.x, selector.y = currentTurn.x, currentTurn.y
-            remainingMov = remainingMov - 1;
-            AddLog("Move: Left\nCommand?");
-            sfx.step:play();
+            for h=1,#selectTiles do 
+                if selectTiles[h].x==(currentTurn.x-1) and selectTiles[h].y==currentTurn.y then 
+                    currentTurn.x = currentTurn.x - 1;
+                    selector.x, selector.y = currentTurn.x, currentTurn.y
+                    --remainingMov = remainingMov - 1;
+                    AddLog("Move: Left\nCommand?");
+                    sfx.step:play();
+                end
+            end
         end
         if remainingMov == 0 then 
             inputMode = COMBAT_COMMAND;
@@ -55,16 +81,37 @@ function love.keypressed(key)
     end
     if inputMode == COMBAT_MELEE then 
         if key == "up" then 
-            selector.x, selector.y = currentTurn.x, currentTurn.y-1
+            for p=1,#selectTiles do 
+                if (selectTiles[p].x==selector.x) and (selectTiles[p].y==(selector.y-1)) then 
+                    selector.y = selector.y - 1
+                    return
+                end
+            end
         elseif key == "down" then 
-            selector.x, selector.y = currentTurn.x, currentTurn.y+1
+            for p=1,#selectTiles do 
+                if (selectTiles[p].x==selector.x) and (selectTiles[p].y==(selector.y+1)) then 
+                    selector.y = selector.y + 1
+                    return
+                end
+            end
         elseif key == "left" then 
-            selector.x, selector.y = currentTurn.x-1, currentTurn.y
+            for p=1,#selectTiles do 
+                if (selectTiles[p].x==(selector.x-1)) and (selectTiles[p].y==selector.y) then 
+                    selector.x = selector.x - 1
+                    return
+                end
+            end
         elseif key == "right" then 
-            selector.x, selector.y = currentTurn.x+1, currentTurn.y
+            for p=1,#selectTiles do 
+                if (selectTiles[p].x==(selector.x+1)) and (selectTiles[p].y==selector.y) then 
+                    selector.x = selector.x + 1
+                    return
+                end
+            end
         end
         if key == "escape" then 
             inputMode = COMBAT_COMMAND;
+            selector.x, selector.y = currentTurn.x, currentTurn.y
             if remainingMov > 0 then inputMode = COMBAT_MOVE end
         elseif key == "space" or key == "return" then 
             for i=1,#combat_actors do 
@@ -90,19 +137,22 @@ function love.keypressed(key)
     end
     if inputMode == COMBAT_COMMAND or inputMode == COMBAT_MOVE then 
         if key == "a" then 
-            atktype = currentTurn.weapon.type;
-            if atktype == "melee" then 
-                inputMode = COMBAT_MELEE;
-            else 
-                inputMode = COMBAT_RANGE;
+            inputMode = COMBAT_MELEE;
+            -- if there is a minRange, do a loop to pop those out
+            --Now populate attack tiles, and position selector in one of them.
+            selectTiles = {}
+            currentTurn.weapon.minRange = currentTurn.weapon.minRange or 0
+            local lx, ly
+            for ly=-currentTurn.weapon.range,currentTurn.weapon.range do 
+                for lx=-currentTurn.weapon.range+(math.abs(ly)),currentTurn.weapon.range-(math.abs(ly)) do 
+                    --print(lx, ly)
+                    if math.abs(lx)+math.abs(ly) >= currentTurn.weapon.minRange then
+                        table.insert(selectTiles, {x=(currentTurn.x+lx), y=(currentTurn.y+ly)})
+                    end
+                end
             end
-            selector.x, selector.y = currentTurn.x, currentTurn.y
-            --for k=1,#combat_actors do 
-            --    if combat_actors[k].player == false then 
-            --        selector.x, selector.y = combat_actors[k].x, combat_actors[k].y 
-            --        break
-            --    end  
-            --end 
+            selector.x, selector.y = selectTiles[1].x, selectTiles[1].y
+            
         elseif key == "z" then 
             for k=1,#party do 
                 if party[k] == currentTurn then activePC=k end 
@@ -113,7 +163,6 @@ function love.keypressed(key)
             currentTurn.defend = true;
             AddLog(currentTurn.name.." defends.")
             inputMode = nil
-            --animationTimer = 0.5;
             AddQueue({"wait", 0.5})
             currentTurn.init = -1;
             AddQueue({"nextTurn"});--NextTurn();
@@ -184,6 +233,15 @@ function love.keypressed(key)
             if activePC > #party then 
                 activePC = 1
             end 
+        
+        elseif key == "1" then 
+            activePC = 1 
+        elseif key == "2" then 
+            activePC = 2
+        elseif key == "3" then 
+            activePC = 3
+        elseif key == "4" then 
+            activePC = 4
         end
     elseif inputMode == MOVE_MODE then 
         
@@ -235,10 +293,6 @@ function love.keypressed(key)
             return
         elseif key == "b" then 
             StartCombat({"guard"})
-        elseif key == "tab" then 
-            zoomTab = zoomTab + 1
-            if zoomTab > 3 then zoomTab = 0 end 
-            SetZoom(zoomTab)
         
         elseif key == "1" then 
             activePC = 1 
@@ -272,4 +326,10 @@ function love.keypressed(key)
         end
     end
     lastkey = key;
+    if key == "tab" then 
+        zoomTab = zoomTab + 1
+        if zoomTab > 3 then zoomTab = 0 end 
+        SetZoom(zoomTab)
+    end
+
 end

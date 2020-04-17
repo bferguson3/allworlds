@@ -15,7 +15,8 @@ enemies = {
         cha = 10,
         weapon = {
             dmg_die = 8,
-            type = "melee"
+            type = "melee",
+            range = 1
         },
         thaco = 20,
         armor = {
@@ -39,7 +40,8 @@ enemies = {
         cha = 10,
         weapon = {
             dmg_die = 6,
-            type = "melee"
+            type = "melee",
+            range = 1
         },
         thaco = 20,
         armor = {
@@ -63,7 +65,8 @@ enemies = {
         cha = 10,
         weapon = {
             dmg_die = 6,
-            type = "melee"
+            type = "melee",
+            range = 1
         },
         thaco = 20,
         armor = {

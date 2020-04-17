@@ -105,26 +105,8 @@ function FinishTransCombat(m)
             next = combat_actors[i]
         end
     end
-    
-    if next.player == true then 
-        inputMode = COMBAT_MOVE;
-        AddLog(next.name.."'s turn.\nCommand?");
-        remainingMov = next.mov;
-        selector.x, selector.y = next.x, next.y;
-        currentTurn = next;
-        --for k=1,#party do 
-        --    if party[k] == currentTurn then 
-        --        activePC = k
-        --    end 
-        --end 
-    else 
-        inputMode = nil
-        currentTurn = next;
-        AddLog(next.name.."'s turn...")
-        remainingMov = next.mov;
-        AddQueue({"enemyTurn"})
-        --EnemyTurn(next);
-    end
+    AddQueue({"wait", 1})
+    AddQueue({"nextTurn"})
 end
 
 function GenerateCombatant(n)
@@ -204,6 +186,11 @@ end
 --45
 --nme xp table - 25*lvl
 
+function startTrans()
+    transitioning=true 
+    transitionCounter=0
+end
+
 function TestDead(t)
     if (t.hp < ((t.mhp*0.25)/t.mhp)) and (t.hp > 0) then 
         AddLog("Badly wounded!", 0)
@@ -234,9 +221,13 @@ function TestDead(t)
             --animationTimer = 0.5
             selector.x, selector.y = 99, 99
             queue = {}
-            AddQueue({"wait", 1})
-            AddQueue({"EndCombat"})
             AddLog("Ending combat.")
+            AddQueue({"wait", 1})
+            AddQueue({"startTrans"})
+            AddQueue({"wait", 0.35})
+            AddQueue({"EndCombat"})
+            
+            
             for s=1,#combat_actors do 
                 if combat_actors[s].player == true then -- sanity
                     combat_actors[s].xp = combat_actors[s].xp + combatXP
@@ -359,6 +350,14 @@ function NextTurn()
         remainingMov = next.mov;
         selector.x, selector.y = next.x, next.y;
         currentTurn = next;
+        selectTiles = {}
+        --currentTurn.weapon.minRange = currentTurn.weapon.minRange or 0
+        local lx, ly
+        for ly=-currentTurn.mov,currentTurn.mov do 
+            for lx=-currentTurn.mov+(math.abs(ly)),currentTurn.mov-(math.abs(ly)) do 
+                table.insert(selectTiles, {x=(currentTurn.x+lx), y=(currentTurn.y+ly)})
+            end
+        end
         --activePC = currentTurn;
     else 
         selector.x, selector.y = next.x, next.y;
