@@ -110,8 +110,10 @@ function love.keypressed(key)
     elseif inputMode == TITLE_SCREEN then
         if key == "1" then 
             inputMode = PLAY_INTRO
+            return
         elseif key=="2" then 
             LoadGame()
+            return
         elseif key == "3" then 
             love.event.quit(0)
         end

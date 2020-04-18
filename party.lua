@@ -67,7 +67,7 @@ party = {
     },
     {
         name = "Retainer A",
-        g = "01",
+        g = "reta",
         hp = 31,
         mhp = 31,
         mov = 1,
@@ -114,7 +114,7 @@ party = {
     },
     {
         name = "Retainer B",
-        g = "01",
+        g = "retb",
         hp = 29,
         mhp = 29,
         mov = 1,
@@ -161,7 +161,7 @@ party = {
     },
     {
         name = "Retainer C",
-        g = "01",
+        g = "retc",
         hp = 32,
         mhp = 32,
         mov = 1,
