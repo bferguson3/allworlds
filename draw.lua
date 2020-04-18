@@ -59,12 +59,28 @@ function DrawAttackBox(o)
     lg.setColor(1, (85/255), (85/255), 1);
     --loop through selectTiles
     for s=1,#selectTiles do 
-        lg.rectangle("fill", selectTiles[s].x*scale*16, selectTiles[s].y*scale*16, 16*scale, 16*scale)
+        if (selectTiles[s].x <= 10) and (selectTiles[s].y <= 10) and (selectTiles[s].x >= 0) and (selectTiles[s].y >= 0) then
+            lg.rectangle("fill", selectTiles[s].x*scale*16, selectTiles[s].y*scale*16, 16*scale, 16*scale)
+        end
     end
     lg.setColor(1, 1, 1, 1);
 end
 
 sinCounter = 0
+function DrawGUIWindow(x, y, w, h)
+    local s = scale;
+    for i = x, w do 
+        lg.draw(tileSet[1].sheet, tileSet[1].quads[6], (i)*8*s, y*8*s, 0, scale)
+        lg.draw(tileSet[1].sheet, tileSet[1].quads[6], (i)*8*s, h*8*scale, 0, scale)
+        lg.draw(tileSet[1].sheet, tileSet[1].quads[7], x*8*s, i*8*s, 0, s)
+        lg.draw(tileSet[1].sheet, tileSet[1].quads[7], w*8*s, i*8*s, 0, scale)
+    end
+    lg.draw(tileSet[1].sheet, tileSet[1].quads[5], x*8*s, y*8*s, 0, scale)
+    lg.draw(tileSet[1].sheet, tileSet[1].quads[5], w*8*scale, y*8*s, 0, scale)
+    lg.draw(tileSet[1].sheet, tileSet[1].quads[5], x*8*s, h*8*scale, 0, scale)
+    lg.draw(tileSet[1].sheet, tileSet[1].quads[5], w*8*scale, h*8*scale, 0, scale)    
+
+end
 
 function love.draw(dT)
     
@@ -74,7 +90,62 @@ function love.draw(dT)
     lg.setColor(0, 0, 0, 1);
     lg.rectangle("fill", 0, 0, 320*scale, 200*scale)
     lg.setColor(1, 1, 1, 1);
-    -- BIG:
+    
+    if inputMode == TITLE_SCREEN then 
+        lg.print("  ALLWORLDS 1:\n\nHeir to Horrors", 15*8*scale, 7*8*scale, 0, scale);
+        lg.print("1) New Game\n2) Load Game\n3) Quit", 10*8*scale, 17*8*scale, 0, scale);
+        return
+    elseif inputMode == PLAY_INTRO then
+        --GUI:
+        DrawGUIWindow(1, 1, 38, 24)
+        -- local s = scale;
+        -- for i = 1, 38 do 
+        --     lg.draw(tileSet[1].sheet, tileSet[1].quads[6], (i)*8*s, 8*s, 0, scale)
+        --     lg.draw(tileSet[1].sheet, tileSet[1].quads[6], (i)*8*s, 24*8*scale, 0, scale)
+        --     lg.draw(tileSet[1].sheet, tileSet[1].quads[7], 8*s, i*8*s, 0, s)
+        --     lg.draw(tileSet[1].sheet, tileSet[1].quads[7], 38*8*s, i*8*s, 0, scale)
+        -- end
+        -- lg.draw(tileSet[1].sheet, tileSet[1].quads[5], 8*s, 8*s, 0, scale)
+        -- lg.draw(tileSet[1].sheet, tileSet[1].quads[5], 38*8*scale, 8*s, 0, scale)
+        -- lg.draw(tileSet[1].sheet, tileSet[1].quads[5], 8*s, 24*8*scale, 0, scale)
+        -- lg.draw(tileSet[1].sheet, tileSet[1].quads[5], 38*8*scale, 24*8*scale, 0, scale)    
+        --text display counter is # of lines * 4. 1=black 2=dgr 3=lgr 4=wh
+        local s = scale 
+        for k=1,math.floor(introTicker)-1 do 
+            if k == (math.floor(introTicker)-1) then 
+                local h = introTicker - math.floor(introTicker)
+                --print(h)
+                if h < 0.25 then lg.setColor(0, 0, 0, 1);
+                elseif h < 0.5 then lg.setColor(0.33, 0.33, 0.33, 1) 
+                elseif h < 0.75 then lg.setColor(0.67, 0.67, 0.67, 1)
+                else lg.setColor(1, 1, 1, 1) end 
+            end
+            if k > 10 then return end 
+            lg.print(intro[k], 8*5*s, (16*s*k)+(8*s), 0, s)
+        end
+        
+        return
+    elseif inputMode == MAKE_CHR then 
+        DrawGUIWindow(1, 1, 38, 24)
+        local s = scale
+        lg.print("What sort of training do you recall?", 3*8*s, 3*8*s, 0, s)
+        lg.print("                   Fighter            Rogue              Mage", 3*8*s, 5*8*s, 0, s)
+        lg.print("Strength\nDexterity\nConstitution\nIntelligence\nWisdom\nCharisma", 3*8*s, 7*8*s, 0, s)
+        lg.print("                     16                 12                10", 3*8*s, 7*8*s, 0, s)
+        lg.print("                     12                 14                12", 3*8*s, 8*8*s, 0, s)
+        lg.print("                     14                 12                10", 3*8*s, 9*8*s, 0, s)
+        lg.print("                     10                 12                14", 3*8*s, 10*8*s, 0, s)
+        lg.print("                     10                 10                14", 3*8*s, 11*8*s, 0, s)
+        lg.print("                     10                 12                12", 3*8*s, 12*8*s, 0, s)        
+        lg.print("Bonus HP/LV", 3*8*s, 14*8*s, 0, s)
+        lg.print("                     10                  8                 6", 3*8*s, 14*8*s, 0, s)
+        lg.print("-Uses heavy armor\n-Can use all\nweapons", 10*8*s, 16*8*s, 0, s)        
+        lg.print("-Find and remove\ntraps and secrets\n-Good with ranged", 20*8*s, 16*8*s, 0, s)
+        lg.print("-Uses offensive\nand defensive\nmagic", 30*8*s, 16*8*s, 0, s)
+        lg.print("F)ighter,  R)ogue  or  M)age ?", 8*8*s, 21*8*s, 0, s)
+        return
+    end
+    -- BIG
     lg.translate(16*scale, 8*scale)
     if cameraMode == ZOOM_BIG then 
         

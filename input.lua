@@ -107,8 +107,60 @@ function love.keypressed(key)
         if remainingMov == 0 then 
             inputMode = COMBAT_COMMAND;
         end
-    end
-    if inputMode == COMBAT_MELEE then 
+    elseif inputMode == TITLE_SCREEN then
+        if key == "1" then 
+            inputMode = PLAY_INTRO
+        elseif key=="2" then 
+            LoadGame()
+        elseif key == "3" then 
+            love.event.quit(0)
+        end
+    elseif inputMode == PLAY_INTRO then 
+        if key == "space" then 
+            introSpeed = 8
+            if introTicker > 12 then inputMode = MAKE_CHR; return; end 
+        end
+    elseif inputMode == MAKE_CHR then 
+        if key == "f" then 
+            party[1].str = init.fighter.str
+            party[1].dex = init.fighter.dex
+            party[1].con = init.fighter.con
+            party[1].int = init.fighter.int
+            party[1].wis = init.fighter.wis
+            party[1].cha = init.fighter.cha
+            party[1].mhp = 30 + math.floor((init.fighter.con-10)/2)
+            party[1].hp = party[1].mhp
+            party[1].class = "Fighter"
+            party[1].mov = 1
+            inputMode = MOVE_MODE
+            --AddQueue({"startTrans"})
+        elseif key == "r" then 
+            party[1].str = init.rogue.str
+            party[1].dex = init.rogue.dex
+            party[1].con = init.rogue.con
+            party[1].int = init.rogue.int
+            party[1].wis = init.rogue.wis
+            party[1].cha = init.rogue.cha
+            party[1].mhp = 28 + math.floor((init.rogue.con-10)/2)
+            party[1].hp = party[1].mhp
+            party[1].class = "Rogue"
+            party[1].mov = 2
+            inputMode = MOVE_MODE
+        elseif key == "m" then 
+            party[1].str = init.mage.str
+            party[1].dex = init.mage.dex
+            party[1].con = init.mage.con
+            party[1].int = init.mage.int
+            party[1].wis = init.mage.wis
+            party[1].cha = init.mage.cha
+            party[1].mhp = 26 + math.floor((init.mage.con-10)/2)
+            party[1].hp = party[1].mhp
+            party[1].class = "Mage"
+            party[1].mov = 1
+            inputMode = MOVE_MODE
+        end
+        
+    elseif inputMode == COMBAT_MELEE then 
         if key == "up" then 
             for p=1,#selectTiles do 
                 if (selectTiles[p].x==selector.x) and (selectTiles[p].y==(selector.y-1)) then 

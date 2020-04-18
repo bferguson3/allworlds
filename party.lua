@@ -4,7 +4,6 @@ party = {
         g = "00",
         hp = 30,
         mhp = 30,
-        mov = 1,
         str = 14,
         dex = 16,
         con = 9,
@@ -28,11 +27,11 @@ party = {
         inventory = {
             
             { 
-                name = "Long Sword", 
-                dmg_die = 8, 
+                name = "Rusted Lance",
+                dmg_die = 8,
                 type = "melee",
-                equipped = true,
-                range = 1
+                range = 2,
+                equipped = true
             },
             {
                 name = "Quilted Vest",
@@ -189,11 +188,12 @@ party = {
         inventory = {
             
             { 
-                name = "Long Sword", 
-                dmg_die = 8, 
-                type = "melee",
-                equipped = true,
-                range = 1
+                name = "Short Bow",
+                dmg_die = 6,
+                type = "ranged",
+                range = 4,
+                minRange = 3,
+                equipped = true
             },
             {
                 name = "Quilted Vest",

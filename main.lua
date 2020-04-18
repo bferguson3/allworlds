@@ -1,9 +1,14 @@
 -- ALLWORLDS
---camping - food, camp screen 
 --damage flash on sprites
 --slimes
 --retainers
 --magic system 
+--day/night
+--inventory
+--shops/gold
+--ranged hits melee
+--spellcasting interrupted by melee
+--combat music
 
 lg = love.graphics;
 
@@ -59,8 +64,20 @@ EXAMINE_MODE = 7;
 STATS_MAIN = 8;
 INP_TRANSITIONING = 9;
 INPUT_CAMPING = 10;
-inputMode = MOVE_MODE;
+TITLE_SCREEN = 11;
+PLAY_INTRO = 12;
+MAKE_CHR = 13;
+inputMode = TITLE_SCREEN;
 
+-- str dex con int wis cha 
+init = {}
+init.fighter = { str=16, dex=12, con=14, int=10, wis=10, cha=10}
+init.rogue = { str=12, dex=14, con=12, int=12, wis=10, cha=12}
+init.mage = { str=10, dex=12, con=10, int=14, wis=14, cha=12}
+-- 16  12  14  10  10  10   + 12   12hp/l
+-- 12  14  12  12  10  12   + 12   9hp/l
+-- 10  12  10  14  14  12   + 12   6hp/l
+introTicker = 2;
 transitionCounter = 0;
 transitionTick = 0;
 transitioning = false;
@@ -98,6 +115,9 @@ m = love.filesystem.load("itemdb.lua")
 m()
 
 m = love.filesystem.load("party.lua")
+m()
+
+m = love.filesystem.load("intro.lua")
 m()
 
 function getac(o)
@@ -244,6 +264,8 @@ function CampZoom()
     
 end                
 
+introSpeed = 1
+
 function ExitCamp(h)
     if h then 
         for t=1,#party do 
@@ -275,8 +297,151 @@ function TryConsumeRations()
     return false
 end
 
+eFullscr = false;
+
+function SaveGame()
+    saveData = ''
+    saveData = saveData .. px .. '\x00'
+    saveData = saveData .. py .. '\x00'
+    --saveData = saveData .. partyGold .. '\x00'
+    saveData = saveData .. currentMap.fname .. '\x00'
+    for f=1,#party do 
+        saveData = saveData .. party[f].name .. '\x00'
+        saveData = saveData .. party[f].hp .. '\x00'
+        saveData = saveData .. party[f].mhp .. '\x00'
+        saveData = saveData .. party[f].str .. '\x00'
+        saveData = saveData .. party[f].dex .. '\x00'
+        saveData = saveData .. party[f].con .. '\x00'
+        saveData = saveData .. party[f].int .. '\x00'
+        saveData = saveData .. party[f].wis .. '\x00'
+        saveData = saveData .. party[f].cha .. '\x00'
+        saveData = saveData .. party[f].xp .. '\x00'
+        saveData = saveData .. party[f].level .. '\x00'
+        saveData = saveData .. party[f].g .. '\x00'
+        saveData = saveData .. party[f].mov .. '\x00'
+        saveData = saveData .. party[f].thaco .. '\x00'
+        saveData = saveData .. party[f].class .. '\x00'
+        for u=1,10 do 
+            local im = party[f].inventory[u] or { name="none" }
+            saveData = saveData .. im.name .. '\x00'
+            print(im.name)
+            local st = im.stack or 1
+            saveData = saveData .. st .. '\x00'
+            local e = im.equipped or false 
+            if e == false then e = 0 else e = 1 end 
+            saveData = saveData .. e .. '\x00'
+            --name\stack\equipped
+        end
+        --saveData = saveData .. '\x01'
+    end
+    love.filesystem.write('01.sav', saveData)
+    AddLog("Saved!")
+end
+
+function LoadGame()
+    lD = love.filesystem.read("01.sav")
+    --print(loadData)
+    loadData = {}
+    while string.find(lD, '\x00') do 
+        local loca = string.find(lD, '\x00')
+        table.insert(loadData, lD:sub(1, (loca-1)))
+        lD = lD:sub(loca+1)
+    end
+    local ct = 4;
+    px = tonumber(loadData[1])
+    py = tonumber(loadData[2])
+    local cm = loadData[3]
+    --print(cm)
+    m = love.filesystem.load("maps/"..cm..".lua")
+    m()
+    LoadMap(cm, currentMap.width)
+    party = {{},{},{},{}}
+    for p=1,4 do 
+        party[p].name = loadData[ct]; ct = ct + 1;
+        --print(party[p].name)
+        party[p].hp = tonumber(loadData[ct]); ct = ct + 1;
+        party[p].mhp = tonumber(loadData[ct]); ct = ct + 1;
+        party[p].str = tonumber(loadData[ct]); ct = ct + 1;
+        party[p].dex = tonumber(loadData[ct]); ct = ct + 1;
+        party[p].con = tonumber(loadData[ct]); ct = ct + 1;
+        party[p].int = tonumber(loadData[ct]); ct = ct + 1;
+        party[p].wis = tonumber(loadData[ct]); ct = ct + 1;
+        party[p].cha = tonumber(loadData[ct]); ct = ct + 1;
+        party[p].xp = tonumber(loadData[ct]); ct = ct + 1;
+        party[p].level = tonumber(loadData[ct]); ct = ct + 1;
+        party[p].g = loadData[ct]; ct = ct + 1;
+        --print(party[p].g)
+        party[p].mov = tonumber(loadData[ct]); ct = ct + 1;
+        party[p].thaco = tonumber(loadData[ct]); ct = ct + 1;
+        party[p].class = loadData[ct]; ct = ct + 1;
+        party[p].player = true;
+        party[p].inventory = {}
+        for ic=1,10 do 
+            --local im = party[f].inventory[u] or { name="none" }
+            --saveData = saveData .. im.name .. '\x00'
+            --local st = im.stack or 1
+            --saveData = saveData .. st .. '\x00'
+            --local e = im.equipped or false 
+            --if e == false then e = 0 else e = 1 end 
+            --saveData = saveData .. e .. '\x00'
+            --itemname,count,equipped
+            if loadData[ct] ~= "none" then 
+                o = {}
+                o.name = loadData[ct]; ct = ct + 1
+                o.stack = tonumber(loadData[ct]); ct = ct + 1
+                if loadData[ct]=='1' then 
+                    o.equipped = true 
+                    q = itemdb[o.name]
+                    print(o.name, q.name)
+                    if q.type == "melee" or q.type=="ranged" then 
+                        party[p].weapon = q 
+                    elseif q.type == "armor" then 
+                        party[p].armor = q
+                    else 
+                        party[p].acc = q
+                    end
+                else 
+                    o.equipped = false 
+                end
+                ct = ct + 1
+                table.insert(party[p].inventory, o)
+            else 
+                ct = ct + 3
+            end
+        end
+        party[p].acc = party[p].acc or { name = "(none)"}
+    end
+    inputMode = MOVE_MODE
+end
+
 function love.update(dT)
     --if dT > (1/60) then return end
+    if love.keyboard.isDown("lalt") and love.keyboard.isDown("return") then 
+        if eFullscr == false then 
+            eFullscr = true;
+            SetZoom(2);
+            love.window.setFullscreen(true, "exclusive");
+            return
+        else 
+            eFullscr = false;
+            SetZoom(2);
+            return
+            --love.window.setMode(320*2, 200*2);
+        end
+    end
+    if love.keyboard.isDown("lctrl") and love.keyboard.isDown("s") then 
+        if inputMode == MOVE_MODE then 
+            print("saving")
+            SaveGame()
+            
+            return
+        end
+    elseif love.keyboard.isDown("lctrl") and love.keyboard.isDown("l") then 
+        if inputMode == MOVE_MODE then 
+            print('loading')
+            LoadGame()
+        end
+    end
     if inputMode == COMBAT_MOVE and remainingMov == 0 then inputMode = COMBAT_COMMAND end
     if dT ~= nil then 
         sinCounter = sinCounter + (dT*4);
@@ -304,6 +469,10 @@ function love.update(dT)
     if sinCounter > (math.pi) then sinCounter = 0 end
     if flashtimer < 0 then flashtimer = 0.1; toggleselflash(); end
     
+    if inputMode == PLAY_INTRO then 
+        introTicker = introTicker + ((dT/2) * introSpeed)
+    end
+
     if animationTimer > 0 then 
         love.draw()
         return 
@@ -449,7 +618,7 @@ function CheckCollision(x, y)
         AddLog("Blocked!")
         return true;
     end --7 to 14
-    if (tonumber(bgmap[ofs]) >= 7 and tonumber(bgmap[ofs]) <= 14) or bgmap[ofs]=='17'or bgmap[ofs]=='18'or bgmap[ofs]=='19' then
+    if (tonumber(bgmap[ofs]) >= 7 and tonumber(bgmap[ofs]) <= 14) or bgmap[ofs]=='17'or bgmap[ofs]=='18'or bgmap[ofs]=='19' or ( tonumber(bgmap[ofs])>=23 and tonumber(bgmap[ofs])<=29 )then
         AddLog("Can't swim!")
         return true;
     end
@@ -603,7 +772,7 @@ function WmEnemyMove(e, x, y)
     -- otherwise return false and odn't move
     -- 0, 2, 15
     local v = bgmap[((y*map_w)+x)+1]
-    if (v == '0') or (v == '2') or (v == '15') or (v=='20') or (v=='21') then 
+    if (v == '0') or (v == '2') or (v == '15') or (v=='22') or (v=='21') then 
         for p=1,#currentMap do 
             if currentMap[p].x == x and currentMap[p].y == y then 
                 return false 
