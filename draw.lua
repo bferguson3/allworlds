@@ -94,6 +94,7 @@ function love.draw(dT)
     if inputMode == TITLE_SCREEN then 
         lg.print("  ALLWORLDS 1:\n\nHeir to Horrors", 15*8*scale, 7*8*scale, 0, scale);
         lg.print("1) New Game\n2) Load Game\n3) Quit", 10*8*scale, 17*8*scale, 0, scale);
+        if lightMode then lg.print("Light Mode Enabled", 15*8*scale, 23*8*scale, 0, scale); end
         return
     elseif inputMode == PLAY_INTRO then
         --GUI:

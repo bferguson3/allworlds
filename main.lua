@@ -1,9 +1,13 @@
 -- ALLWORLDS
 --damage flash on sprites
+--save transitions - only save/load once
+--projectile/attack transition
 --slimes
 --retainers
 --magic system 
+--dungeons
 --day/night
+--door sfx
 --inventory
 --shops/gold
 --ranged hits melee
@@ -22,6 +26,7 @@ oldTiles = {};
 lastActive = nil;
 camping = false
 roll = 0;
+lightMode = false;
 hitac = 0;
 dmgtxt = {};
 origPos = {};
@@ -199,9 +204,6 @@ function love.load(arg)
     lg.setDefaultFilter('nearest', 'nearest', 0);
     lg.setBackgroundColor(0.2, 0.2, 0.2);
 
-    --init tileset
-    tileSet[1] = SliceTileSheet(lg.newImage('assets/bg_8x8.png'), 8, 8);
-    tileSet[2] = SliceTileSheet(lg.newImage('assets/bg_16x16.png'), 16, 16);
     
     --defaultfont = lg.setNewFont('ModernDOS8x8.ttf', 16);
     --defaultfont = lg.setNewFont('assets/PxPlus_AmstradPC1512-2y.ttf', 8);

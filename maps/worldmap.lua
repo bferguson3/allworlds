@@ -38,6 +38,11 @@ currentMap = {
             x = 13,
             y = 21,
             target = { map="map_1", x=13, y=23 }
+        },
+        [2] = {
+            x = 20,
+            y = 9,
+            target = { map="shrine1", x=24, y=38 }
         }
     }
 }

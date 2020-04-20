@@ -109,13 +109,31 @@ function love.keypressed(key)
         end
     elseif inputMode == TITLE_SCREEN then
         if key == "1" then 
+            --init tileset
+            if lightMode == true then 
+                tileSet[1] = SliceTileSheet(lg.newImage('assets/bglight_8x8.png'), 8, 8);
+                tileSet[2] = SliceTileSheet(lg.newImage('assets/bglight_16x16.png'), 16, 16);
+            else 
+                tileSet[1] = SliceTileSheet(lg.newImage('assets/bg_8x8.png'), 8, 8);
+                tileSet[2] = SliceTileSheet(lg.newImage('assets/bg_16x16.png'), 16, 16);
+            end
             inputMode = PLAY_INTRO
             return
         elseif key=="2" then 
             LoadGame()
+            --init tileset
+            if lightMode == true then 
+                tileSet[1] = SliceTileSheet(lg.newImage('assets/bglight_8x8.png'), 8, 8);
+                tileSet[2] = SliceTileSheet(lg.newImage('assets/bglight_16x16.png'), 16, 16);
+            else 
+                tileSet[1] = SliceTileSheet(lg.newImage('assets/bg_8x8.png'), 8, 8);
+                tileSet[2] = SliceTileSheet(lg.newImage('assets/bg_16x16.png'), 16, 16);
+            end
             return
         elseif key == "3" then 
             love.event.quit(0)
+        elseif key=="d" then 
+            lightMode = true;
         end
     elseif inputMode == PLAY_INTRO then 
         if key == "space" then 
