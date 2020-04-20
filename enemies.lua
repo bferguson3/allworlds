@@ -73,5 +73,30 @@ enemies = {
             ac = 1
         },
         player = false
+    },
+    gslime = {
+        name = "Green Slime",
+        class = "Fighter",
+        g = "gslime",
+        level = 1,
+        hp = 10,
+        mhp = 30,
+        mov = 1,
+        str = 12,
+        dex = 12,
+        con = 10,
+        int = 10,
+        wis = 16,
+        cha = 10,
+        weapon = {
+            dmg_die = 6,
+            type = "melee",
+            range = 1
+        },
+        thaco = 20,
+        armor = {
+            ac = 2
+        },
+        player = false
     }
 }

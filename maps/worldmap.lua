@@ -3,6 +3,7 @@ currentMap = {
     name = "world map",
     fname = "worldmap",
     campable = true,
+    fights = true,
     encounters = {
         [1] = {
             enemies = { "goblin", "goblin" },

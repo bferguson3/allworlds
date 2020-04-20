@@ -1,9 +1,8 @@
 -- ALLWORLDS
+--p collide with doors/unlock code, enemies dont 
 --damage flash on sprites
 --save transitions - only save/load once
---projectile/attack transition
---slimes
---retainers
+--projectile/attack fx
 --magic system 
 --dungeons
 --day/night

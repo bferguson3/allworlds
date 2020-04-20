@@ -50,6 +50,7 @@ end
 
 
 function StartCombat(nmes)
+    --print(nmes)
     lastActive = activePC;
     outOfCombatState.map = currentMap.fname
     outOfCombatState.x, outOfCombatState.y = px, py
@@ -69,9 +70,7 @@ function StartCombat(nmes)
         table.insert(combat_actors, n);
     end
     
-    
-    
-    n = math.ceil(love.math.random()*2);
+    n = math.ceil(love.math.random()*#currentMap.encounters);
     
     inputMode = INP_TRANSITIONING
     --sfx.exit:play()

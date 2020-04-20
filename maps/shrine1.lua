@@ -2,15 +2,12 @@ currentMap = {
     width = 50,
     name = "Shrine of Innocence",
     fname = "shrine1",
+    fights = true,
     campable = true,
     encounters = {
         [1] = {
-            enemies = { "goblin", "goblin" },
-            g = "goblin"
-        },
-        [2] = {
-            enemies = { "goblin", "goblin","goblin","goblin","goblinshaman","goblin","goblin","goblin" },
-            g = "goblinshaman"
+            --enemies = { enemies.gslime, enemies.gslime,enemies.gslime,enemies.gslime },
+            g = "gslime"
         },
     },
     {
@@ -24,14 +21,20 @@ currentMap = {
             shrine = {"The nearest shrine is to\nthe northeast."},
             bye   = {"Farewell, highness."}
         },
-        x = 1,
-        y = 1
+        x = 99,
+        y = 99
     },
     {
         g = "torch",
         x = 23,
         y = 29,
         examine = {": \"A flaming torch.\""}
+    },
+    {
+        g = "chest",
+        x = 7,
+        y = 16,
+        examine = {": \"Hm. A hidden cache.\""}
     },
     {
         g = "torch",
@@ -41,16 +44,26 @@ currentMap = {
     },
     {
         g = "gslime",
-        x = 26,
+        x = 20,
         y = 30,
-        examine = {": \"A flaming torch.\""}
+        examine = {": \"A group of green slimes.\""},
+        encounter = true,
+        enemies = { "gslime","gslime","gslime","gslime" }
+    },
+    {
+        g = "gslime",
+        x = 30,
+        y = 30,
+        examine = {": \"A group of green slimes.\""},
+        encounter = true,
+        enemies = { "gslime","gslime","gslime","gslime", "gslime" }
     },
     rooms = {
         [1] = {
             x1 = 1,
             y1 = 1,
-            x2 = 99,
-            y2 = 99
+            x2 = 200,
+            y2 = 200
         }
     },
     warps = {

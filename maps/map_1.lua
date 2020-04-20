@@ -1,5 +1,6 @@
 currentMap = {
     width = 36,
+    fights = false,
     name = "Shrine of Birth",
     fname = "map_1",
     {
@@ -21,6 +22,7 @@ currentMap = {
         name = "Guard",
         chat = {
             hello = {"Greetings, highness. Your\n father was looking for you.", "father"},--{{1, 1, 1}, "Greetings, h
+            father = {"King Amadeus, of course.\n He's inside, highness."},
             name  = {"I am not permitted to give\n you that information."},
             horrors={"It's bad luck to discuss it\n openly, highness..."},
             job   = {"Happily in the service of\nour king, highness."},
@@ -50,6 +52,7 @@ currentMap = {
             name  = {"It is I, child. Amadeus,\n your father."},
             job   = {"It is my task, as it will be\nyours someday, to rule \nover this land."},
             bye   = {"Farewell, son."},
+            father = {"My father was little more\n than a puppet for the late\n queen's regime. But that is\n a tale for another time."},
             --awaken = {"You've been in stasis\nfor thirty years. Your\nmemories will return\nin time. It may seem\nsudden, but a\ntask awaits you.", "task"},
             task = {"Indeed. The horrors have\n returned. First, you must\n purify the shrine nearby.", "shrine"},
             shrine = {"Purify the horrors to the\n northeast. Only you can do\n this. You will understand\n in time."},

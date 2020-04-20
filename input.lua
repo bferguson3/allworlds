@@ -430,7 +430,7 @@ function love.keypressed(key)
             
             --timeSinceMove = 0
             sfx.step:play()
-            if currentMap.name == "world map" then 
+            if currentMap.name=='world map' then--currentMap.name == "world map" then 
                 -- random spawn 
                 AddQueue({"wait", 0.1})
                 if noEnemiesSpawned < maxEnemySpawns then 
@@ -447,6 +447,18 @@ function love.keypressed(key)
                     end
                 end
             end
+--            else
+                if currentMap.fights == true and currentMap.name~='world map' then 
+            -- make enemies move randomly otherwise 
+                    AddQueue({"wait", 0.1});
+                    for p=1,#currentMap do 
+                        currentMap[p].encounter = currentMap[p].encounter or false;
+                        if currentMap[p].encounter == true then 
+                            AddQueue({"MoveTowardsP", currentMap[p]})
+                        end
+                    end
+                end
+  --          end
         end
     end
     lastkey = key;
