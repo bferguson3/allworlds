@@ -6,7 +6,7 @@
 --magic system 
 --dungeons
 --day/night
---door sfx
+--door sfx, bump sfx
 --inventory
 --shops/gold
 --ranged hits melee
@@ -71,6 +71,7 @@ INPUT_CAMPING = 10;
 TITLE_SCREEN = 11;
 PLAY_INTRO = 12;
 MAKE_CHR = 13;
+FP_MOVE = 14;
 inputMode = TITLE_SCREEN;
 
 -- str dex con int wis cha 
@@ -227,6 +228,7 @@ function love.load(arg)
         table.insert(bgmap, n);
     end
     --currentMap = map_1;
+    print(currentMap.fname, px, py)
 end -- love.load
 
 function toggleselflash()
@@ -622,6 +624,18 @@ function CheckCollision(x, y)
     if (tonumber(bgmap[ofs]) >= 7 and tonumber(bgmap[ofs]) <= 14) or bgmap[ofs]=='17'or bgmap[ofs]=='18'or bgmap[ofs]=='19' or ( tonumber(bgmap[ofs])>=23 and tonumber(bgmap[ofs])<=29 )then
         AddLog("Can't swim!")
         return true;
+    end
+    if bgmap[ofs] == '31' then
+        --door 
+        --check if there's an object in currentMap that has coords of x, y
+        for d=1,#currentMap do 
+            if currentMap[d].x == x and currentMap[d].y == y then 
+                AddLog("Locked!", 0); return true;
+            end
+        end
+        AddLog("Open!", 0);
+        --if not, we're good - play 'Open!' and sfx
+        --if yes, play 'Locked!' and return true
     end
     return false;
 end
