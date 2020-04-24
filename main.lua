@@ -12,6 +12,9 @@
 --ranged hits melee
 --spellcasting interrupted by melee
 --combat music
+--hp/mp crystals
+--options for: square ranges
+--             non tactical combat
 
 lg = love.graphics;
 

@@ -59,6 +59,26 @@ function love.keypressed(key)
     if lastkey ~= key then 
         keyRepeat = LONG_REPEAT;
     end
+    if inputMode == FP_MOVE then 
+        if key == "down" then 
+            if fpDirection == 0 then py = py + 1
+            elseif fpDirection == 1 then px = px - 1
+            elseif fpDirection == 2 then py = py - 1
+            elseif fpDirection == 3 then px = px + 1 end
+        elseif key == "right" then 
+            fpDirection = fpDirection + 1
+        elseif key == "left" then 
+            --px = px - 1
+            fpDirection = fpDirection - 1
+        elseif key == "up" then 
+            if fpDirection == 0 then py = py - 1
+            elseif fpDirection == 1 then px = px + 1
+            elseif fpDirection == 2 then py = py + 1
+            elseif fpDirection == 3 then px = px - 1 end
+        end
+        if fpDirection > 3 then fpDirection = 0 end 
+        if fpDirection < 0 then fpDirection = 3 end
+    end
     if inputMode == COMBAT_MOVE then
         if key == "up" and CheckCollision(currentTurn.x, currentTurn.y-1) == false then 
             for h=1,#selectTiles do 
