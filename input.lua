@@ -33,6 +33,9 @@ function TryCamp()
     
 end
 
+function SetIMchat()
+    inputMode = CHAT_INPUT;
+end
 
 function love.keypressed(key)
     --if timeSinceMove < 0.1 then 
@@ -60,24 +63,69 @@ function love.keypressed(key)
         keyRepeat = LONG_REPEAT;
     end
     if inputMode == FP_MOVE then 
+        moved = false;
         if key == "down" then 
-            if fpDirection == 0 then py = py + 1
-            elseif fpDirection == 1 then px = px - 1
-            elseif fpDirection == 2 then py = py - 1
-            elseif fpDirection == 3 then px = px + 1 end
+            if fpDirection == 0 and not CheckCollision(px, py+1) then py = py + 1; sfx.step:play(); AddLog("South"); moved=true;
+            elseif fpDirection == 1 and not CheckCollision(px-1, py)  then px = px - 1; sfx.step:play(); AddLog("West"); moved=true;
+            elseif fpDirection == 2 and not CheckCollision(px, py-1)  then py = py - 1; sfx.step:play(); AddLog("North"); moved=true;
+            elseif fpDirection == 3 and not CheckCollision(px+1, py) then px = px + 1; sfx.step:play(); AddLog("East"); moved=true; end
         elseif key == "right" then 
             fpDirection = fpDirection + 1
         elseif key == "left" then 
             --px = px - 1
             fpDirection = fpDirection - 1
         elseif key == "up" then 
-            if fpDirection == 0 then py = py - 1
-            elseif fpDirection == 1 then px = px + 1
-            elseif fpDirection == 2 then py = py + 1
-            elseif fpDirection == 3 then px = px - 1 end
+            if fpDirection == 0  and not CheckCollision(px, py-1) then py = py - 1; AddLog("North"); moved=true;
+            elseif fpDirection == 1 and not CheckCollision(px+1, py) then px = px + 1; AddLog("East"); moved=true;
+            elseif fpDirection == 2 and not CheckCollision(px, py+1) then py = py + 1; AddLog("South"); moved=true;
+            elseif fpDirection == 3 and not CheckCollision(px-1, py) then px = px - 1; AddLog("West"); moved=true; end
+        elseif key == 't' then 
+            AddLog("Talk"); 
+            if fpDirection==0 and CheckTalk(px, py-1) then AddQueue({"wait", 0.25}); AddQueue({"setIMchat"}); return; else AddLog("Nobody there!",0);end
+            if fpDirection==1 and CheckTalk(px+1, py) then AddQueue({"wait", 0.25}); AddQueue({"setIMchat"}); return; else AddLog("Nobody there!",0);end
+            if fpDirection==2 and CheckTalk(px, py+1) then AddQueue({"wait", 0.25}); AddQueue({"setIMchat"}); return; else AddLog("Nobody there!",0);end
+            if fpDirection==3 and CheckTalk(px-1, py) then AddQueue({"wait", 0.25}); AddQueue({"setIMchat"}); return; else AddLog("Nobody there!",0);end
+            return
         end
         if fpDirection > 3 then fpDirection = 0 end 
         if fpDirection < 0 then fpDirection = 3 end
+        if key == '0' then 
+            inputMode = MOVE_MODE
+            cameraMode = 0
+            return
+        end
+        if (moved == true) then 
+--            print('stepped')
+            sfx.step:play()
+            enemyStep = enemyStep - 1
+            if enemyStep == 0 then 
+                enemyStep = 2
+                if currentMap.name=='world map' then--currentMap.name == "world map" then 
+                    AddQueue({"wait", 0.1})
+                    if noEnemiesSpawned < maxEnemySpawns then 
+                        if love.math.random(100) <= 10 then 
+                            CreateWMEnemy()
+                        end
+                    end
+                    for p=1,#currentMap do 
+                        currentMap[p].encounter = currentMap[p].encounter or false;
+                        if currentMap[p].encounter == true then 
+                            AddQueue({"MoveTowardsP", currentMap[p]})
+                        end
+                    end
+                end
+                if currentMap.fights == true and currentMap.name~='world map' then 
+                    AddQueue({"wait", 0.1});
+                    for p=1,#currentMap do 
+                        currentMap[p].encounter = currentMap[p].encounter or false;
+                        if currentMap[p].encounter == true then 
+                            AddQueue({"MoveRandomly", currentMap[p]})
+                        end
+                    end
+                end
+            end
+        end
+        print(inputMode, cameraMode, moved)
     end
     if inputMode == COMBAT_MOVE then
         if key == "up" and CheckCollision(currentTurn.x, currentTurn.y-1) == false then 
@@ -433,11 +481,9 @@ function love.keypressed(key)
         elseif key == "z" then 
             inputMode = STATS_MAIN
             return
-        elseif key == "b" then 
-            StartCombat({"guard"})
         
         elseif key == "1" then 
-            activePC = 1 
+            activePC = 1
         elseif key == "2" then 
             activePC = 2
         elseif key == "3" then 
@@ -445,40 +491,50 @@ function love.keypressed(key)
         elseif key == "4" then 
             activePC = 4
         end
+        if key == '0' then 
+            inputMode = FP_MOVE
+            cameraMode = 3
+        end
         if (moved == true) then 
-            
-            
-            --timeSinceMove = 0
+            print('stepped')
             sfx.step:play()
-            if currentMap.name=='world map' then--currentMap.name == "world map" then 
-                -- random spawn 
-                AddQueue({"wait", 0.1})
-                if noEnemiesSpawned < maxEnemySpawns then 
-                    if love.math.random(100) <= 10 then 
-                        CreateWMEnemy()
+
+            enemyStep = enemyStep - 1
+            if enemyStep == 0 then 
+                enemyStep = 2
+                if currentMap.name=='world map' then--currentMap.name == "world map" then 
+                    -- random spawn 
+                    AddQueue({"wait", 0.1})
+                    if noEnemiesSpawned < maxEnemySpawns then 
+                        if love.math.random(100) <= 10 then 
+                            CreateWMEnemy()
+                        end
                     end
-                end
-                -- move spawns
-                for p=1,#currentMap do 
-                    currentMap[p].encounter = currentMap[p].encounter or false;
-                    if currentMap[p].encounter == true then 
-                        AddQueue({"MoveTowardsP", currentMap[p]})
-                        --MoveTowardsP(currentMap[p])
-                    end
-                end
-            end
---            else
-                if currentMap.fights == true and currentMap.name~='world map' then 
-            -- make enemies move randomly otherwise 
-                    AddQueue({"wait", 0.1});
+                    -- move spawns
                     for p=1,#currentMap do 
                         currentMap[p].encounter = currentMap[p].encounter or false;
                         if currentMap[p].encounter == true then 
                             AddQueue({"MoveTowardsP", currentMap[p]})
+                            --MoveTowardsP(currentMap[p])
                         end
                     end
                 end
-  --          end
+            
+                if currentMap.fights == true and currentMap.name~='world map' then 
+                -- make enemies move randomly otherwise 
+                    AddQueue({"wait", 0.1});
+                    --enemyStep = enemyStep - 1
+                    --if enemyStep == 0 then 
+                    --    enemyStep = 2;
+                        for p=1,#currentMap do 
+                            currentMap[p].encounter = currentMap[p].encounter or false;
+                            if currentMap[p].encounter == true then 
+                                AddQueue({"MoveRandomly", currentMap[p]})
+                            end
+                        end
+                    --end
+                end
+            end
         end
     end
     lastkey = key;

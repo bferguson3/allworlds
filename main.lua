@@ -9,12 +9,12 @@
 --door sfx, bump sfx
 --inventory
 --shops/gold
---ranged hits melee
---spellcasting interrupted by melee
 --combat music
 --hp/mp crystals
 --options for: square ranges
 --             non tactical combat
+--ranged hits melee
+--spellcasting interrupted by melee
 
 lg = love.graphics;
 
@@ -30,6 +30,7 @@ camping = false
 roll = 0;
 lightMode = false;
 hitac = 0;
+enemyStep = 1;
 dmgtxt = {};
 origPos = {};
 combatXP = 0;
@@ -89,6 +90,30 @@ introTicker = 2;
 transitionCounter = 0;
 transitionTick = 0;
 transitioning = false;
+
+-- define wall quads
+g = lg
+IMM_LEFT_WALL = g.newQuad(0, 0, 20, 160, 160, 160);
+ONE_LEFT_WALL = g.newQuad(20, 20, 25, 120, 160, 160)
+TWO_LEFT_WALL = g.newQuad(45, 45, 15, 115-45, 160, 160) --60,115
+THREE_LEFT_WALL = g.newQuad(60, 60, 10, 40, 160, 160) --70, 100
+FAR_BACK_WALL = g.newQuad(68, 70, 22, 23, 160, 160)
+TWO_LEFT2_FLOOR = g.newQuad(0, 100, 20, 12, 160, 160)
+TWO_LEFT1_FLOOR = g.newQuad(0, 100, 60, 15, 160, 160)
+WALL_THREE = g.newQuad(0, 60, 40, 40, 160, 160)
+THREE_SIDE = g.newQuad(122, 60, 18, 40, 160, 160)
+--ONE_FRONT_WALL = g.newQuad(60, 60, 10, 4)
+FRONT_WALL = g.newQuad(45, 45, 70, 70, 160, 160)--90,90
+IMM_FRONT_FLOOR = g.newQuad(0, 140, 160, 20, 160, 160);
+IMM_LEFT_FLOOR = g.newQuad(0, 140, 20, 20, 160, 160)
+ONE_FRONT_FLOOR = g.newQuad(20, 115, 120, 25, 160, 160);
+TWO_FRONT_FLOOR = g.newQuad(45, 100, 70, 15, 160, 160)
+ONE_LEFT_FLOOR = g.newQuad(0, 115, 45, 25, 160, 160);
+FRONT_WALL_REDGE = g.newQuad(85, 45, 20/(1.72), 70, 160, 160)
+ROW2_SIDEWALL_R = g.newQuad(140, 50, 20, 60, 160, 160)
+THREE_LEFT2_FLOOR = g.newQuad(0, 90, 37, 10, 160, 160)
+THREE_LEFT1_FLOOR = g.newQuad(20, 90, 50, 10, 160, 160)
+THREE_FRONT_FLOOR = g.newQuad(60, 90, 40, 10, 160, 160)
 
 current_npc = nil;
 myinput = ''
@@ -420,6 +445,54 @@ function LoadGame()
     inputMode = MOVE_MODE
 end
 
+function MoveRandomly(e)
+    local ds = { [0]=true, [2]=true, [3]=true, [1]=true }
+    -- check active objects
+    for i=1,#currentMap do 
+        if e.x+1 == currentMap[i].x and e.y == currentMap[i].y then 
+            ds[1]=false--right bad 
+        elseif e.x-1 == currentMap[i].x and e.y == currentMap[i].y then 
+            ds[3]=false--left bad
+        elseif e.y+1 == currentMap[i].y and e.x == currentMap[i].x then 
+            ds[2]=false--down bad
+        elseif e.y-1 == currentMap[i].y and e.x == currentMap[i].x then 
+            ds[0]=false--up bad 
+        end
+    end
+    --check map collisions
+    local tr = bgmap[(e.y*map_w)+e.x+2]
+    local tl = bgmap[(e.y*map_w)+e.x]
+    local tu = bgmap[((e.y-1)*map_w)+e.x+1]
+    local td = bgmap[((e.y+1)*map_w)+e.x+1]
+    if tr ~= '0' and tr ~= '2' and tr ~= '30' then ds[1] = false end
+    if tl ~= '0' and tl ~= '2' and tl ~= '30' then ds[3] = false end
+    if tu ~= '0' and tu ~= '2' and tu ~= '30' then ds[0] = false end
+    if td ~= '0' and td ~= '2' and td ~= '30' then ds[2] = false end
+    --randomly pick open dir
+    local rr = love.math.random(4)-1
+    while ds[rr] ~= true do 
+        rr = love.math.random(4)-1
+    end
+    --set pos
+    if rr==0 then 
+        e.y=e.y-1
+    elseif rr==1 then 
+        e.x=e.x+1
+    elseif rr==2 then 
+        e.y=e.y+1
+    elseif rr==3 then 
+        e.x=e.x-1
+    end
+    if px == e.x and py == e.y then 
+        f = e.enemies
+        table.remove(currentMap, h)
+        print('trouble here')
+        StartCombat(f)
+    end 
+end
+
+distanceTest = 0
+
 function love.update(dT)
     --if dT > (1/60) then return end
     if love.keyboard.isDown("lalt") and love.keyboard.isDown("return") then 
@@ -435,6 +508,8 @@ function love.update(dT)
             --love.window.setMode(320*2, 200*2);
         end
     end
+    distanceTest = distanceTest + dT
+    if distanceTest > 4 then distanceTest = 0 end
     if love.keyboard.isDown("lctrl") and love.keyboard.isDown("s") then 
         if inputMode == MOVE_MODE then 
             print("saving")
@@ -454,13 +529,20 @@ function love.update(dT)
         animationTimer = animationTimer - dT;
         flashtimer = flashtimer - dT;
         transitionTick = transitionTick + dT;
+        --print(transitionTick)
     end
     if transitioning == true then 
         if transitionTick > (1/30) then transitionTick = 0; transitionCounter = transitionCounter + 1; end
         if transitionCounter > 21 then 
             transitionCounter = 0; 
             transitioning = false; 
-            if inCombat == false then inputMode = MOVE_MODE end
+            if inCombat == false then 
+                if cameraMode~=ZOOM_FP then 
+                    inputMode = MOVE_MODE 
+                else 
+                    inputMode = FP_MOVE 
+                end 
+            end
         end;
     end
     for d=1,#dmgtxt do 
@@ -522,9 +604,16 @@ function love.update(dT)
                 local t = queue[1][2]
                 table.remove(queue, 1);
                 ExitCamp(t)
+            elseif queue[1][1] == "setIMchat" then 
+                table.remove(queue, 1);
+                SetIMchat();
             elseif queue[1][1] == "EndCombat" then 
                 table.remove(queue, 1)
                 EndCombat()
+            elseif queue[1][1] == "MoveRandomly" then 
+                local t = queue[1][2] 
+                table.remove(queue, 1)
+                MoveRandomly(t)
             elseif queue[1][1] == "MoveTowardsP" then 
                 local t = queue[1][2] 
                 table.remove(queue, 1)
@@ -533,27 +622,31 @@ function love.update(dT)
         end
     end
     -- am I in a room?
-    local b = false
-    for i=1,#currentMap.rooms do 
-        r = currentMap.rooms[i]
-        if (px >= r.x1) and (px <= r.x2) then 
-            if (py >= r.y1) and (py <= r.y2) then 
-                b = true 
-                --togglezoom("big")
-            end
-        end 
+    if inputMode == FP_MOVE then cameraMode = ZOOM_FP end 
+    if cameraMode ~= ZOOM_FP then
+        local b = false
+        for i=1,#currentMap.rooms do 
+            r = currentMap.rooms[i]
+            if (px >= r.x1) and (px <= r.x2) then 
+                if (py >= r.y1) and (py <= r.y2) then 
+                    b = true 
+                    --togglezoom("big")
+                end
+            end 
+        end
+        if camping==true then 
+            b = true 
+        end
+        if b == true then 
+            togglezoom("big")
+        else 
+            togglezoom("small")
+        end
+
     end
-    if camping==true then 
-        b = true 
-    end
-    if b == true then 
-        togglezoom("big")
-    else 
-        togglezoom("small")
-    end
-    
+    --print(cameraMode, inputMode)
     -- am I on a teleporter?
-    if inputMode == MOVE_MODE then 
+    if inputMode == MOVE_MODE or inputMode==FP_MOVE then 
         for i=1,#currentMap.warps do 
             w = currentMap.warps[i] 
             if (px==w.x) and (py==w.y) then 
@@ -585,7 +678,18 @@ function love.update(dT)
     if p == false then 
         keyRepeat = LONG_REPEAT;
     end
-end
+    if inCombat == false then 
+        for ii=1,#currentMap do 
+            currentMap[ii].encounter = currentMap[ii].encounter or false 
+            if currentMap[ii].x == px and currentMap[ii].y == py and currentMap[ii].encounter==true then 
+                f = currentMap[ii].enemies
+                table.remove(currentMap, ii)
+                StartCombat(f)
+                break
+            end
+        end
+    end
+end -- love.update
 
 --dofile("draw.lua")
 m = love.filesystem.load("draw.lua")
@@ -606,14 +710,27 @@ function CheckCollision(x, y)
             if x == currentMap[i].x and currentMap[i].y == y then 
                 currentMap[i].encounter = currentMap[i].encounter or false;
                 if currentMap[i].encounter == true then 
-                    StartCombat(currentMap[i].enemies)
-                    return 
+                    --local t = currentMap[i].enemies
+                    --table.remove(currentMap, i)
+                    --print('trouble over here')
+                    --StartCombat(t)
+                    --return false;
                 else
                     if currentMap[i].g ~= "campfire" then 
+                        if inputMode == FP_MOVE then 
+                            currentMap[i].examine = currentMap[i].examine or {}
+                            currentMap[i].name = currentMap[i].name or currentMap[i].g
+                            local df = "You see " .. currentMap[i].name 
+                            currentMap[i].examine[1] = currentMap[i].examine[1] or df
+                            if currentMap[i].examine[1] ~= df then 
+                                currentMap[i].examine[1] = "> Examine " .. currentMap[i].name .. "\n"..currentMap[i].examine[1]
+                            end
+                            AddLog(currentMap[i].examine[1], 0)
+                            return true 
+                        end
                         AddLog("Blocked!")
                         return true;
                     end
-                    
                 end
             end 
         end
@@ -705,7 +822,7 @@ function AskNPC(inp)
     AddLog("\""..current_npc.chat[inp][1].."\"", 0)
     if inp == "bye" then 
         AddLog("Ok.")
-        inputMode = MOVE_MODE
+        if cameraMode == ZOOM_FP then inputMode = FP_MOVE else inputMode = MOVE_MODE end
     else 
         AddLog("\n? _", 0)
     end
@@ -841,7 +958,14 @@ function MoveTowardsP(e)
     end
     if (e.x == px) and (e.y == py) then 
         --print(e.enemies)
-        StartCombat(e.enemies)
+        for h=1,#currentMap do 
+            if currentMap[h] == e then 
+                f = e.enemies
+                table.remove(currentMap, h)
+                print('no here')
+                StartCombat(f)
+            end 
+        end     
     end
 end
 

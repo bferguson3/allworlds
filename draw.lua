@@ -154,7 +154,7 @@ function DrawFloors()
         end
         if long == FR_THREE then --row 3
             if lat == LEFTTWO then 
-                if ct == '1' then 
+                if ct == '1' or (tonumber(ct) >= 7 and tonumber(ct) <=14) then --7 thru 14-then 
                     g.draw(FP_WATER_FLOOR3, THREE_LEFT2_FLOOR, 0*scale, 90*scale, 0, scale); --floor
                 elseif ct == '0' then 
                     g.draw(FP_GRASS_FLOOR3, THREE_LEFT2_FLOOR, 0*scale, 90*scale, 0, scale); --floor
@@ -164,7 +164,7 @@ function DrawFloors()
                     g.draw(FP_DIRT_FLOOR3, THREE_LEFT2_FLOOR, 0*scale, 90*scale, 0, scale); --floor
                 end
             elseif lat == LEFTONE then 
-                if ct=='1' then 
+                if ct == '1' or (tonumber(ct) >= 7 and tonumber(ct) <=14) then
                     g.draw(FP_WATER_FLOOR2, THREE_LEFT1_FLOOR, 20*scale, 90*scale, 0, scale); --floor
                 elseif ct == '0' then 
                     g.draw(FP_GRASS_FLOOR2, THREE_LEFT1_FLOOR, 20*scale, 90*scale, 0, scale); --floor
@@ -174,7 +174,7 @@ function DrawFloors()
                     g.draw(FP_DIRT_FLOOR2, THREE_LEFT1_FLOOR, 20*scale, 90*scale, 0, scale); --floor
                 end
             elseif lat == STRAIGHT then 
-                if ct=='1' then 
+                if ct == '1' or (tonumber(ct) >= 7 and tonumber(ct) <=14) then
                     g.draw(FP_WATER_FLOOR, THREE_FRONT_FLOOR, 60*scale, 90*scale, 0, scale); --floor          
                 elseif ct == '0' then 
                     g.draw(FP_GRASS_FLOOR, THREE_FRONT_FLOOR, 60*scale, 90*scale, 0, scale); --floor          
@@ -185,7 +185,7 @@ function DrawFloors()
                 end
             elseif lat == RIGHTONE then
                 local tn = FP_BLANK
-                if ct=='1' then 
+                if ct == '1' or (tonumber(ct) >= 7 and tonumber(ct) <=14) then
                     tn = FP_WATER_FLOOR2
                 elseif ct == '0' then 
                     tn = FP_GRASS_FLOOR2 
@@ -197,7 +197,7 @@ function DrawFloors()
                 g.draw(tn, THREE_LEFT1_FLOOR, 140*scale, 90*scale, 0, -scale, scale); --floor
             elseif lat == RIGHTTWO then 
                 local tn = FP_BLANK
-                if ct=='1' then 
+                if ct == '1' or (tonumber(ct) >= 7 and tonumber(ct) <=14) then
                     tn = FP_WATER_FLOOR3
                 elseif ct == '0' then 
                     tn = FP_GRASS_FLOOR3
@@ -212,7 +212,7 @@ function DrawFloors()
         elseif long == FR_TWO then 
             if lat==LEFTTWO then 
                 local tn = FP_BLANK
-                if ct=='1' then 
+                if ct == '1' or (tonumber(ct) >= 7 and tonumber(ct) <=14) then
                     tn = FP_WATER_FLOOR3
                 elseif ct == '0' then 
                     tn = FP_GRASS_FLOOR3 
@@ -225,7 +225,7 @@ function DrawFloors()
                 
             elseif lat==LEFTONE then 
                 local tn = FP_BLANK
-                if ct=='1' then 
+                if ct == '1' or (tonumber(ct) >= 7 and tonumber(ct) <=14) then
                     tn = FP_WATER_FLOOR2
                 elseif ct == '0' then 
                     tn = FP_GRASS_FLOOR2 
@@ -238,7 +238,7 @@ function DrawFloors()
                 
             elseif lat==STRAIGHT then 
                 --print(ct)
-                if ct=='1' then 
+                if ct == '1' or (tonumber(ct) >= 7 and tonumber(ct) <=14) then
                     --print('test')
                     g.draw(FP_WATER_FLOOR, TWO_FRONT_FLOOR, 45*scale, 100*scale, 0, scale);
                 elseif ct=='0' then 
@@ -250,7 +250,7 @@ function DrawFloors()
                 end
             elseif lat==RIGHTONE then 
                 local tn = FP_BLANK
-                if ct=='1' then 
+                if ct == '1' or (tonumber(ct) >= 7 and tonumber(ct) <=14) then
                     tn = FP_WATER_FLOOR2
                 elseif ct == '0' then 
                     tn = FP_GRASS_FLOOR2 
@@ -263,7 +263,7 @@ function DrawFloors()
                 
             elseif lat==RIGHTTWO then 
                 local tn = FP_BLANK
-                if ct=='1' then 
+                if ct == '1' or (tonumber(ct) >= 7 and tonumber(ct) <=14) then
                     tn = FP_WATER_FLOOR3
                 elseif ct == '0' then 
                     tn = FP_GRASS_FLOOR3 
@@ -278,7 +278,7 @@ function DrawFloors()
         elseif long==FR_ONE then 
             if lat==LEFTONE then 
                 local tn = FP_BLANK
-                if ct=='1' then 
+                if ct == '1' or (tonumber(ct) >= 7 and tonumber(ct) <=14) then
                     tn = FP_WATER_FLOOR2
                 elseif ct == '0' then 
                     tn = FP_GRASS_FLOOR2 
@@ -291,7 +291,7 @@ function DrawFloors()
                 
             elseif lat==STRAIGHT then 
                 local tn = FP_BLANK
-                if ct=='1' then 
+                if ct == '1' or (tonumber(ct) >= 7 and tonumber(ct) <=14) then
                     tn = FP_WATER_FLOOR
                 elseif ct == '0' then 
                     tn = FP_GRASS_FLOOR
@@ -304,7 +304,7 @@ function DrawFloors()
                 
             elseif lat==RIGHTONE then 
                 local tn = FP_BLANK
-                if ct=='1' then 
+                if ct == '1' or (tonumber(ct) >= 7 and tonumber(ct) <=14) then
                     tn = FP_WATER_FLOOR2
                 elseif ct == '0' then 
                     tn = FP_GRASS_FLOOR2
@@ -319,7 +319,7 @@ function DrawFloors()
         elseif long==FZERO then 
             if lat==LEFTONE then 
                 local tn = FP_BLANK
-                if ct=='1' then 
+                if ct == '1' or (tonumber(ct) >= 7 and tonumber(ct) <=14) then
                     tn = FP_WATER_FLOOR2
                 elseif ct == '0' then 
                     tn = FP_GRASS_FLOOR2
@@ -333,7 +333,7 @@ function DrawFloors()
             elseif lat==STRAIGHT then 
                 if ct=='0' then
                     g.draw(FP_GRASS_FLOOR, IMM_FRONT_FLOOR, 0, 140*scale, 0, scale);
-                elseif ct=='1' then 
+                elseif (ct == '1') or (tonumber(ct) >= 7 and tonumber(ct) <=14) then
                     g.draw(FP_WATER_FLOOR, IMM_FRONT_FLOOR, 0, 140*scale, 0, scale);
                 elseif ct=='2' then 
                     g.draw(FP_BLACKTILE_FLOOR, IMM_FRONT_FLOOR, 0, 140*scale, 0, scale);
@@ -342,7 +342,7 @@ function DrawFloors()
                 end
             elseif lat==RIGHTONE then 
                 local tn = FP_BLANK
-                if ct=='1' then 
+                if (ct == '1') or (tonumber(ct) >= 7 and tonumber(ct) <=14) then
                     tn = FP_WATER_FLOOR2
                 elseif ct == '0' then 
                     tn = FP_GRASS_FLOOR2
@@ -360,6 +360,7 @@ function DrawFloors()
 end
 
 function DrawWalls()
+    --
     local LEFTTWO, LEFTONE, STRAIGHT, RIGHTONE, RIGHTTWO, FZERO, FR_ONE, FR_TWO, FR_THREE, FR_FOUR = 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
     if fpDirection == 0 then 
         LEFTTWO = px-2
@@ -409,134 +410,300 @@ function DrawWalls()
     local lat = 0
     local long = 0
     
-
-    for vt=1,#viewableTiles do 
-        if fpDirection == 0 or fpDirection==2 then 
-            lat = viewableTiles[vt].x 
-            long = viewableTiles[vt].y 
-        else 
-            lat = viewableTiles[vt].y 
-            long = viewableTiles[vt].x 
-        end
-        --print(lat, viewableTiles[vt].y, vt)
-        local ct = bgmap[(viewableTiles[vt].y*map_w)+viewableTiles[vt].x+1]
-        if long == FR_FOUR then --back row 
-            if lat == LEFTTWO then 
-                --back row, tile 1
-                if ct == '3' then 
-                    --stone wall?
-                    g.draw(FP_WALL_STONE, FAR_BACK_WALL, 0*scale, 70*scale, 0, scale*1.68, scale); 
-                end 
-            elseif lat == LEFTONE then 
-                if ct == '3' then 
-                    g.draw(FP_WALL_STONE, FAR_BACK_WALL, 37*scale, 70*scale, 0, scale*1.5, scale); 
-                end
-            elseif lat == STRAIGHT then 
-                if ct == '3' then 
-                    g.draw(FP_WALL_STONE, FAR_BACK_WALL, 70*scale, 70*scale, 0, scale);
-                end
-            elseif lat == RIGHTONE then 
-                if ct == '3' then 
-                    g.draw(FP_WALL_STONE, FAR_BACK_WALL, 90*scale, 70*scale, 0, scale*1.5, scale);
-                end
-            elseif lat == RIGHTTWO then 
-                if ct == '3' then 
-                    g.draw(FP_WALL_STONE, FAR_BACK_WALL, 123*scale, 70*scale, 0, scale*1.68, scale);
-                end
-            end
-
-        elseif long == FR_THREE then --row 3
-            if lat == LEFTTWO then 
-                if ct == '3' then 
-                    g.draw(FP_WALL_STONE2, WALL_THREE, -18*scale, 60*scale, 0, scale); --facing wall
-                    g.draw(FP_WALL_STONE, THREE_SIDE, 40*scale, 60*scale, 0, -scale, scale); --side wall
+    drawOrder = {
+        { LEFTTWO, FR_FOUR },
+        { LEFTONE, FR_FOUR },
+        { STRAIGHT, FR_FOUR },
+        { RIGHTONE, FR_FOUR },
+        { RIGHTTWO, FR_FOUR },
+        { LEFTTWO, FR_THREE },
+        { RIGHTTWO, FR_THREE },
+        { LEFTONE, FR_THREE },
+        { RIGHTONE, FR_THREE },
+        { STRAIGHT, FR_THREE },
+        { LEFTTWO, FR_TWO },
+        { RIGHTTWO, FR_TWO },
+        { LEFTONE, FR_TWO },
+        { RIGHTONE, FR_TWO },
+        { STRAIGHT, FR_TWO },
+        { LEFTONE, FR_ONE },
+        { RIGHTONE, FR_ONE },
+        { STRAIGHT, FR_ONE },
+        { LEFTONE, FZERO },
+        { RIGHTONE, FZERO },
+        { STRAIGHT, FZERO }
+    }
+    --for d=1,#drawOrder do 
+    --    for vt=1,#viewableTiles do 
+    --        if viewableTiles[vt].x == drawOrder[d][1] then 
                 
-                end
-            elseif lat == LEFTONE then 
-                if ct=='3' then 
-                    g.draw(FP_WALL_STONE2, WALL_THREE, 20*scale, 60*scale, 0, scale); --facing wall
-                    g.draw(FP_WALL_STONE, THREE_LEFT_WALL, 60*scale, 60*scale, 0, scale)
-                    
-                end
-            elseif lat == STRAIGHT then 
-                if ct=='3' then 
-                    g.draw(FP_WALL_STONE2, WALL_THREE, 60*scale, 60*scale, 0, scale)
-                
-                end
-            elseif lat == RIGHTONE then 
-                if ct=='3' then 
-                    g.draw(FP_WALL_STONE2, WALL_THREE, 140*scale, 60*scale, 0, -scale, scale); --facing wall
-                    g.draw(FP_WALL_STONE, THREE_LEFT_WALL, 100*scale, 60*scale, 0, -scale, scale)
-                
-                end
-            elseif lat == RIGHTTWO then 
-                if ct=='3' then 
-                    g.draw(FP_WALL_STONE2, WALL_THREE, 178*scale, 60*scale, 0, -scale, scale); --facing wall
-                    g.draw(FP_WALL_STONE, THREE_SIDE, 120*scale, 60*scale, 0, scale); --side wall      
-                
-                end
-            end
-        elseif long == FR_TWO then 
-            if lat==LEFTTWO then 
-                if ct=='3' then 
-                    g.draw(FP_WALL_STONE, ROW2_SIDEWALL_R, 20*scale, 50*scale, 0, -scale, scale);
-                
-                end
-            elseif lat==LEFTONE then 
-                if ct=='3' then 
-                    g.draw(FP_WALL_STONE2, FRONT_WALL, -25*scale, 45*scale, 0, scale)--front wall
-                    g.draw(FP_WALL_STONE, TWO_LEFT_WALL, 45*scale, 45*scale, 0, scale)--side wall
-                
-                end
-            elseif lat==STRAIGHT then 
-                if ct=='3' then 
-                    g.draw(FP_WALL_STONE2, FRONT_WALL, 45*scale, 45*scale, 0, scale)--back wall
-                
-                end
-            elseif lat==RIGHTONE then 
-                if ct=='3' then 
-                    g.draw(FP_WALL_STONE2, FRONT_WALL, 185*scale, 45*scale, 0, -scale, scale)--front wall
-                    g.draw(FP_WALL_STONE, TWO_LEFT_WALL, 115*scale, 45*scale, 0, -scale, scale)--side wall
-                
-                end
-            elseif lat==RIGHTTWO then 
-                if ct=='3' then 
-                    g.draw(FP_WALL_STONE, ROW2_SIDEWALL_R, 140*scale, 50*scale, 0, scale);              
-                
-                end
-            end
-        elseif long==FR_ONE then 
-            if lat==LEFTONE then 
-                if ct=='3' then 
-                    g.draw(FP_WALL_STONE2, FRONT_WALL_REDGE, 0, 20*scale, 0, scale*1.72)--front wall
-                    g.draw(FP_WALL_STONE, ONE_LEFT_WALL, 20*scale, 20*scale, 0, scale)--side wall
-                
-                end
-            elseif lat==STRAIGHT then 
-                if ct=='3' then 
-                    g.draw(FP_WALL_STONE2, FRONT_WALL, 20*scale, 20*scale, 0, scale*1.72)--front wall
+   --         end
+   --     end
+   -- end
     
-                end
-            elseif lat==RIGHTONE then 
-                if ct=='3' then 
-                    g.draw(FP_WALL_STONE2, FRONT_WALL_REDGE, 160*scale, 20*scale, 0, -scale*1.72, scale*1.72)--front wall
-                    g.draw(FP_WALL_STONE, ONE_LEFT_WALL, 140*scale, 20*scale, 0, -scale, scale)--side wall
-                end
-            end
-        elseif long==FZERO then 
-            if lat==LEFTONE then 
-                --print(LEFTONE, py, ct)
-                if ct=='3' then 
-                    g.draw(FP_WALL_STONE, IMM_LEFT_WALL, 0, 0, 0, scale)--lefthand wall
-                end
+     for vt=1,#viewableTiles do 
+         if fpDirection == 0 or fpDirection==2 then 
+             lat = viewableTiles[vt].x 
+             long = viewableTiles[vt].y 
+         else 
+             lat = viewableTiles[vt].y 
+             long = viewableTiles[vt].x 
+         end
+    --     --print(lat, viewableTiles[vt].y, vt)
+         local ct = bgmap[(viewableTiles[vt].y*map_w)+viewableTiles[vt].x+1]
+         if long == FR_FOUR then --back row 
+             if lat == LEFTTWO then 
+    --             --back row, tile 1
+                 if ct == '3' then 
+    --                 --stone wall?
+                     g.draw(FP_WALL_STONE, FAR_BACK_WALL, 0*scale, 70*scale, 0, scale*1.5, scale); 
+                 end 
+             elseif lat == LEFTONE then 
+                 if ct == '3' then 
+                     g.draw(FP_WALL_STONE, FAR_BACK_WALL, 34*scale, 70*scale, 0, scale*1.35, scale); 
+                 end
+             elseif lat == STRAIGHT then 
+                 if ct == '3' then 
+                     g.draw(FP_WALL_STONE, FAR_BACK_WALL, 64*scale, 70*scale, 0, scale*1.25, scale);
+                 end
+             elseif lat == RIGHTONE then 
+                 if ct == '3' then 
+                     g.draw(FP_WALL_STONE, FAR_BACK_WALL, 92*scale, 70*scale, 0, scale*1.5, scale);
+                 end
+             elseif lat == RIGHTTWO then 
+                 if ct == '3' then 
+                     g.draw(FP_WALL_STONE, FAR_BACK_WALL, 126*scale, 70*scale, 0, scale*1.5, scale);
+                 end
+             end
+          end
+        end
+    --     elseif long == FR_THREE then --row 3
+    --         if lat == LEFTTWO then 
+    --             if ct == '3' then 
+    --                 g.draw(FP_WALL_STONE2, WALL_THREE, -18*scale, 60*scale, 0, scale); --facing wall
+    --                 g.draw(FP_WALL_STONE, THREE_SIDE, 40*scale, 60*scale, 0, -scale, scale); --side wall
+                
+    --             end
+    --         elseif lat == LEFTONE then 
+    --             if ct=='3' then 
+    --                 g.draw(FP_WALL_STONE2, WALL_THREE, 20*scale, 60*scale, 0, scale); --facing wall
+    --                 g.draw(FP_WALL_STONE, THREE_LEFT_WALL, 60*scale, 60*scale, 0, scale)
+                    
+    --             end
+    --         elseif lat == RIGHTONE then 
+    --             if ct=='3' then 
+    --                 g.draw(FP_WALL_STONE2, WALL_THREE, 140*scale, 60*scale, 0, -scale, scale); --facing wall
+    --                 g.draw(FP_WALL_STONE, THREE_LEFT_WALL, 100*scale, 60*scale, 0, -scale, scale)
+                
+    --             end
+    --         elseif lat == RIGHTTWO then 
+    --             if ct=='3' then 
+    --                 g.draw(FP_WALL_STONE2, WALL_THREE, 178*scale, 60*scale, 0, -scale, scale); --facing wall
+    --                 g.draw(FP_WALL_STONE, THREE_SIDE, 120*scale, 60*scale, 0, scale); --side wall      
+                
+    --             end
+    --         end
+    --     elseif long == FR_TWO then 
+    --         if lat==LEFTTWO then 
+    --             if ct=='3' then 
+    --                 g.draw(FP_WALL_STONE, ROW2_SIDEWALL_R, 20*scale, 50*scale, 0, -scale, scale);
+    --             end
+    --         elseif lat==LEFTONE then 
+    --             if ct=='3' then 
+    --                 g.draw(FP_WALL_STONE2, FRONT_WALL, -25*scale, 45*scale, 0, scale)--front wall
+    --                 g.draw(FP_WALL_STONE, TWO_LEFT_WALL, 45*scale, 45*scale, 0, scale)--side wall
+    --             end
+    --         elseif lat==RIGHTONE then 
+    --             if ct=='3' then 
+    --                 g.draw(FP_WALL_STONE2, FRONT_WALL, 185*scale, 45*scale, 0, -scale, scale)--front wall
+    --                 g.draw(FP_WALL_STONE, TWO_LEFT_WALL, 115*scale, 45*scale, 0, -scale, scale)--side wall
+    --             end
+    --         elseif lat==RIGHTTWO then 
+    --             if ct=='3' then 
+    --                 g.draw(FP_WALL_STONE, ROW2_SIDEWALL_R, 140*scale, 50*scale, 0, scale);              
+    --             end
+    --         end
+    --     elseif long==FR_ONE then 
+    --         if lat==LEFTONE then 
+    --             if ct=='3' then 
+    --                 g.draw(FP_WALL_STONE2, FRONT_WALL_REDGE, 0, 20*scale, 0, scale*1.72)--front wall
+    --                 g.draw(FP_WALL_STONE, ONE_LEFT_WALL, 20*scale, 20*scale, 0, scale)--side wall
+    --         --        print('a')
+    --             end
+    --         elseif lat==RIGHTONE then 
+    --             if ct=='3' then 
+    --                 g.draw(FP_WALL_STONE2, FRONT_WALL_REDGE, 160*scale, 20*scale, 0, -scale*1.72, scale*1.72)--front wall
+    --                 g.draw(FP_WALL_STONE, ONE_LEFT_WALL, 140*scale, 20*scale, 0, -scale, scale)--side wall
+    --             end
+    --         end
             
-            elseif lat==RIGHTONE then 
-                if ct=='3' then 
-                    g.draw(FP_WALL_STONE, IMM_LEFT_WALL, 160*scale, 0, 0, -scale, scale)--right-hand wall
-                end
-            end
+    --     elseif long==FZERO then 
+    --         if lat==LEFTONE then 
+    --             --print(LEFTONE, py, ct)
+    --             if ct=='3' then 
+    --                 g.draw(FP_WALL_STONE, IMM_LEFT_WALL, 0, 0, 0, scale)--lefthand wall
+    --         --        print('b')
+    --             end
+            
+    --         elseif lat==RIGHTONE then 
+    --             if ct=='3' then 
+    --                 g.draw(FP_WALL_STONE, IMM_LEFT_WALL, 160*scale, 0, 0, -scale, scale)--right-hand wall
+    --             end
+    --         end
+    --     end
+    -- end
+    
+    --Draw front walls in front of the rest
+    if fpDirection == 0 or fpDirection==2 then 
+        
+        local v = bgmap[(FR_THREE*map_w)+LEFTTWO+1]
+        if v=='3' then 
+            g.draw(FP_WALL_STONE2, WALL_THREE, -18*scale, 60*scale, 0, scale); --facing wall
+            g.draw(FP_WALL_STONE, THREE_SIDE, 40*scale, 60*scale, 0, -scale, scale); --side wall
+        end
+        local v = bgmap[(FR_THREE*map_w)+RIGHTTWO+1]
+        if v=='3' then 
+            g.draw(FP_WALL_STONE2, WALL_THREE, 178*scale, 60*scale, 0, -scale, scale); --facing wall
+            g.draw(FP_WALL_STONE, THREE_SIDE, 120*scale, 60*scale, 0, scale); --side wall      
+        end
+        local v = bgmap[(FR_THREE*map_w)+RIGHTONE+1]
+        if v=='3' then 
+            g.draw(FP_WALL_STONE2, WALL_THREE, 140*scale, 60*scale, 0, -scale, scale); --facing wall
+            g.draw(FP_WALL_STONE, THREE_LEFT_WALL, 100*scale, 60*scale, 0, -scale, scale)
+        end
+        v = bgmap[(FR_THREE*map_w)+LEFTONE+1]
+        if v=='3' then 
+            g.draw(FP_WALL_STONE2, WALL_THREE, 20*scale, 60*scale, 0, scale); --facing wall
+            g.draw(FP_WALL_STONE, THREE_LEFT_WALL, 60*scale, 60*scale, 0, scale)
+        end
+        local v = bgmap[(FR_THREE*map_w)+STRAIGHT+1]
+        if v=='3' then 
+            g.draw(FP_WALL_STONE2, WALL_THREE, 60*scale, 60*scale, 0, scale)
+        end
+        local v = bgmap[(FR_TWO*map_w)+LEFTTWO+1]
+        if v=='3' then 
+            g.draw(FP_WALL_STONE, ROW2_SIDEWALL_R, 20*scale, 50*scale, 0, -scale, scale);
+        end
+        local v = bgmap[(FR_TWO*map_w)+RIGHTTWO+1]
+        if v=='3' then 
+            g.draw(FP_WALL_STONE, ROW2_SIDEWALL_R, 140*scale, 50*scale, 0, scale);
+        end
+        v = bgmap[(FR_TWO*map_w)+LEFTONE+1]
+        if v=='3' then 
+            g.draw(FP_WALL_STONE2, FRONT_WALL, -25*scale, 45*scale, 0, scale)--front wall
+            g.draw(FP_WALL_STONE, TWO_LEFT_WALL, 45*scale, 45*scale, 0, scale)--side wall
+        end
+        v = bgmap[(FR_TWO*map_w)+RIGHTONE+1]
+        if v=='3' then 
+            g.draw(FP_WALL_STONE2, FRONT_WALL, 185*scale, 45*scale, 0, -scale, scale)--front wall
+            g.draw(FP_WALL_STONE, TWO_LEFT_WALL, 115*scale, 45*scale, 0, -scale, scale)--side wall
+        end
+        v = bgmap[(FR_TWO*map_w)+RIGHTTWO+1]
+        if v=='3' then 
+            --g.draw(FP_WALL_STONE2, FRONT_WALL, 185*scale, 45*scale, 0, -scale, scale)--front wall
+            --g.draw(FP_WALL_STONE, TWO_LEFT_WALL, 115*scale, 45*scale, 0, -scale, scale)--side wall
+        end
+        v = bgmap[(FR_TWO*map_w)+STRAIGHT+1]
+        if v=='3' then 
+            g.draw(FP_WALL_STONE2, FRONT_WALL, 45*scale, 45*scale, 0, scale)--back wall
+        end
+        v = bgmap[(FR_ONE*map_w)+RIGHTONE+1]
+        if v=='3' then 
+            g.draw(FP_WALL_STONE2, FRONT_WALL_REDGE, 160*scale, 20*scale, 0, -scale*1.72, scale*1.72)--front wall
+            g.draw(FP_WALL_STONE, ONE_LEFT_WALL, 140*scale, 20*scale, 0, -scale, scale)--side wall
+        end
+        v = bgmap[(FR_ONE*map_w)+LEFTONE+1]
+        if v=='3' then 
+            g.draw(FP_WALL_STONE2, FRONT_WALL_REDGE, 0, 20*scale, 0, scale*1.72)--front wall
+            g.draw(FP_WALL_STONE, ONE_LEFT_WALL, 20*scale, 20*scale, 0, scale)--side wall
+        end
+        v = bgmap[(FR_ONE*map_w)+STRAIGHT+1]
+        if v=='3' then 
+            g.draw(FP_WALL_STONE2, FRONT_WALL, 20*scale, 20*scale, 0, scale*1.72)--front wall
+        end
+        v = bgmap[(FZERO*map_w)+LEFTONE+1]
+        if v=='3' then 
+            g.draw(FP_WALL_STONE, IMM_LEFT_WALL, 0, 0, 0, scale)--lefthand wall
+        end
+        v = bgmap[(FZERO*map_w)+RIGHTONE+1]
+        if v=='3' then 
+            g.draw(FP_WALL_STONE, IMM_LEFT_WALL, 160*scale, 0, 0, -scale, scale)--lefthand wall
+        end
+    elseif fpDirection == 1 or fpDirection==3 then 
+        local v = bgmap[(LEFTTWO*map_w)+FR_THREE+1]
+        if v=='3' then 
+            g.draw(FP_WALL_STONE2, WALL_THREE, -18*scale, 60*scale, 0, scale); --facing wall
+            g.draw(FP_WALL_STONE, THREE_SIDE, 40*scale, 60*scale, 0, -scale, scale); --side wall
+        end
+        local v = bgmap[(RIGHTTWO*map_w)+FR_THREE+1]
+        if v=='3' then 
+            g.draw(FP_WALL_STONE2, WALL_THREE, 178*scale, 60*scale, 0, -scale, scale); --facing wall
+            g.draw(FP_WALL_STONE, THREE_SIDE, 120*scale, 60*scale, 0, scale); --side wall      
+        end
+        local v = bgmap[(RIGHTONE*map_w)+FR_THREE+1]
+        if v=='3' then 
+            g.draw(FP_WALL_STONE2, WALL_THREE, 140*scale, 60*scale, 0, -scale, scale); --facing wall
+            g.draw(FP_WALL_STONE, THREE_LEFT_WALL, 100*scale, 60*scale, 0, -scale, scale)
+        end
+        v = bgmap[(LEFTONE*map_w)+FR_THREE+1]
+        if v=='3' then 
+            g.draw(FP_WALL_STONE2, WALL_THREE, 20*scale, 60*scale, 0, scale); --facing wall
+            g.draw(FP_WALL_STONE, THREE_LEFT_WALL, 60*scale, 60*scale, 0, scale)
+        end
+        local v = bgmap[(STRAIGHT*map_w)+FR_THREE+1]
+        if v=='3' then 
+            g.draw(FP_WALL_STONE2, WALL_THREE, 60*scale, 60*scale, 0, scale)
+        end
+        local v = bgmap[(LEFTTWO*map_w)+FR_TWO+1]
+        if v=='3' then 
+            g.draw(FP_WALL_STONE, ROW2_SIDEWALL_R, 20*scale, 50*scale, 0, -scale, scale);
+        end
+        local v = bgmap[(RIGHTTWO*map_w)+FR_TWO+1]
+        if v=='3' then 
+            g.draw(FP_WALL_STONE, ROW2_SIDEWALL_R, 140*scale, 50*scale, 0, scale);
+        end
+        v = bgmap[(LEFTONE*map_w)+FR_TWO+1]
+        if v=='3' then 
+            g.draw(FP_WALL_STONE2, FRONT_WALL, -25*scale, 45*scale, 0, scale)--front wall
+            g.draw(FP_WALL_STONE, TWO_LEFT_WALL, 45*scale, 45*scale, 0, scale)--side wall
+        end
+        v = bgmap[(RIGHTONE*map_w)+FR_TWO+1]
+        if v=='3' then 
+            g.draw(FP_WALL_STONE2, FRONT_WALL, 185*scale, 45*scale, 0, -scale, scale)--front wall
+            g.draw(FP_WALL_STONE, TWO_LEFT_WALL, 115*scale, 45*scale, 0, -scale, scale)--side wall
+        end
+        
+        v = bgmap[(STRAIGHT*map_w)+FR_TWO+1]
+        if v=='3' then 
+            g.draw(FP_WALL_STONE2, FRONT_WALL, 45*scale, 45*scale, 0, scale)--back wall
+        end
+        v = bgmap[(RIGHTONE*map_w)+FR_ONE+1]
+        if v=='3' then 
+            g.draw(FP_WALL_STONE2, FRONT_WALL_REDGE, 160*scale, 20*scale, 0, -scale*1.72, scale*1.72)--front wall
+            g.draw(FP_WALL_STONE, ONE_LEFT_WALL, 140*scale, 20*scale, 0, -scale, scale)--side wall
+        end
+        v = bgmap[(LEFTONE*map_w)+FR_ONE+1]
+        if v=='3' then 
+            g.draw(FP_WALL_STONE2, FRONT_WALL_REDGE, 0, 20*scale, 0, scale*1.72)--front wall
+            g.draw(FP_WALL_STONE, ONE_LEFT_WALL, 20*scale, 20*scale, 0, scale)--side wall
+        end
+        v = bgmap[(STRAIGHT*map_w)+FR_ONE+1]
+        if v=='3' then 
+            g.draw(FP_WALL_STONE2, FRONT_WALL, 20*scale, 20*scale, 0, scale*1.72)--front wall
+        end
+        v = bgmap[(LEFTONE*map_w)+FZERO+1]
+        if v=='3' then 
+            g.draw(FP_WALL_STONE, IMM_LEFT_WALL, 0, 0, 0, scale)--lefthand wall
+        end
+        v = bgmap[(RIGHTONE*map_w)+FZERO+1]
+        if v=='3' then 
+            g.draw(FP_WALL_STONE, IMM_LEFT_WALL, 160*scale, 0, 0, -scale, scale)--lefthand wall
         end
     end
+    --FR_TWO, RIGHTONE and FR_TWO, LEFTONE
+    lg.setColor(0,0,0,1)
+    lg.rectangle("fill", 0, 0, -32*scale, 200*scale)
+    lg.setColor(1, 1, 1, 1)
 end
 
 function love.draw(dT)
@@ -547,9 +714,9 @@ function love.draw(dT)
     lg.setColor(0, 0, 0, 1);
     lg.rectangle("fill", 0, 0, 320*scale, 200*scale)
     lg.setColor(1, 1, 1, 1);
-    inputMode = FP_MOVE;
-    cameraMode = nil;
-    if inputMode == FP_MOVE then 
+    --inputMode = FP_MOVE;
+    --cameraMode = nil;
+    if cameraMode == ZOOM_FP then 
         -- initialize fp graphics
         tileSet[1] = SliceTileSheet(lg.newImage('assets/bg_8x8.png'), 8, 8);
         --tileSet[2] = SliceTileSheet(lg.newImage('assets/bg_16x16.png'), 16, 16);
@@ -574,28 +741,7 @@ function love.draw(dT)
         FP_DIRT_FLOOR2 = g.newImage('assets/fpdirtb.png');
         FP_DIRT_FLOOR3 = g.newImage('assets/fpdirtc.png');
         FP_BLANK = g.newImage('assets/fptmp.png')
-        -- define wall quads
-        IMM_LEFT_WALL = g.newQuad(0, 0, e/scale, e/scale*8, 160, 160);
-        ONE_LEFT_WALL = g.newQuad(20, 20, 25, 120, 160, 160)
-        TWO_LEFT_WALL = g.newQuad(45, 45, 15, 115-45, 160, 160) --60,115
-        THREE_LEFT_WALL = g.newQuad(60, 60, 10, 40, 160, 160) --70, 100
-        FAR_BACK_WALL = g.newQuad(68, 70, 22, 23, 160, 160)
-        TWO_LEFT2_FLOOR = g.newQuad(0, 100, 20, 12, 160, 160)
-        TWO_LEFT1_FLOOR = g.newQuad(0, 100, 60, 15, 160, 160)
-        WALL_THREE = g.newQuad(0, 60, 40, 40, 160, 160)
-        THREE_SIDE = g.newQuad(122, 60, 18, 40, 160, 160)
-        --ONE_FRONT_WALL = g.newQuad(60, 60, 10, 4)
-        FRONT_WALL = g.newQuad(45, 45, 70, 70, 160, 160)--90,90
-        IMM_FRONT_FLOOR = g.newQuad(0, 140, 160, 20, 160, 160);
-        IMM_LEFT_FLOOR = g.newQuad(0, 140, 20, 20, 160, 160)
-        ONE_FRONT_FLOOR = g.newQuad(20, 115, 120, 25, 160, 160);
-        TWO_FRONT_FLOOR = g.newQuad(45, 100, 70, 15, 160, 160)
-        ONE_LEFT_FLOOR = g.newQuad(0, 115, 45, 25, 160, 160);
-        FRONT_WALL_REDGE = g.newQuad(85, 45, 20/(1.72), 70, 160, 160)
-        ROW2_SIDEWALL_R = g.newQuad(140, 50, 20, 60, 160, 160)
-        THREE_LEFT2_FLOOR = g.newQuad(0, 90, 37, 10, 160, 160)
-        THREE_LEFT1_FLOOR = g.newQuad(20, 90, 50, 10, 160, 160)
-        THREE_FRONT_FLOOR = g.newQuad(60, 90, 40, 10, 160, 160)
+        
         --x, y / w, h / 160, 160
         --skybox
         g.push()
@@ -708,28 +854,166 @@ function love.draw(dT)
             end
         end
         
-        table.sort(viewableTiles, function (a, b) return a.y<b.y end)
-        --table.sort(viewableTiles, function (a, b) return a.z<b.z end)
-        --for k=1,#viewableTiles do 
-        --    print(viewableTiles[k].x, viewableTiles[k].y)
-        --end
         --then sort floor first, then wall
         DrawFloors()
         DrawWalls()
+        local lat = nil 
+        local long = nil 
+                        
+        --sort viewable tiles by front distance from p
+        -- if up, y ascending, if down, y descending
+        --if right, x descending, if left, x ascending
+        if fpDirection==0 then 
+            table.sort(viewableTiles, function(a,b) return a.y<b.y end)
+        elseif fpDirection==1 then 
+            table.sort(viewableTiles, function(a,b) return a.x>b.x end)
+        elseif fpDirection==2 then 
+            table.sort(viewableTiles, function(a,b) return a.y>b.y end)
+        elseif fpDirection==3 then 
+            table.sort(viewableTiles, function(a,b) return a.x<b.x end)
+        end
 
+        for m=1,#viewableTiles do 
+            for n=1,#currentMap do 
+                if viewableTiles[m].x == currentMap[n].x then 
+                    if viewableTiles[m].y == currentMap[n].y then 
+                        --print("I SEE SOMETHING!")
+                        FR_ONE = 1
+                        FR_TWO = 2
+                        FR_THREE = 3
+                        FR_FOUR = 4
+                        RIGHTTWO = -2
+                        RIGHTONE = -1
+                        STRAIGHT = 0
+                        LEFTONE = 1
+                        LEFTTWO = 2
+                        if px == currentMap[n].x and py == currentMap[n].y then 
+                            currentMap[n].examine = currentMap[n].examine or {}
+                            currentMap[n].examine[1] = currentMap[n].examine[1] or 'You see ' .. currentMap[n].name
+                            AddLog(currentMap[n].examine[1]) 
+                        end 
+                        --figure out relative forward, l/r distance from player
+                        local dy = py - currentMap[n].y 
+                        local dx = px - currentMap[n].x
+                       
+                        if fpDirection == 1 or fpDirection==3 then 
+                            --if fpDirection == 3 then dx = dx - 1 end 
+                            --print(dx, dy)
+                            if fpDirection == 1 then 
+                                if dy == -2 then long = RIGHTTWO end
+                                if dy == -1 then long = RIGHTONE end
+                                if dy == 0 then long = STRAIGHT end
+                                if dy == 2 then long = LEFTTWO end
+                                if dy == 1 then long = LEFTONE end
+                            else 
+                                if dy == -2 then long = LEFTTWO end
+                                if dy == -1 then long = LEFTONE end
+                                if dy == 0 then long = STRAIGHT end
+                                if dy == 2 then long = RIGHTTWO end
+                                if dy == 1 then long = RIGHTONE end
+                            end
+                            if math.abs(dx) == 4 then lat = FR_FOUR end 
+                            if math.abs(dx) == 3 then lat = FR_THREE end 
+                            if math.abs(dx) == 2 then lat = FR_TWO end 
+                            if math.abs(dx) == 1 then lat = FR_ONE end 
+                            if math.abs(dx) == 0 then lat = FZERO end 
+                        else
+                            if fpDirection == 0 then 
+                                if dx == -2 then long = RIGHTTWO end
+                                if dx == -1 then long = RIGHTONE end
+                                if dx == 0 then long = STRAIGHT end
+                                if dx == 2 then long = LEFTTWO end
+                                if dx == 1 then long = LEFTONE end
+                            else
+                                if dx == -2 then long = LEFTTWO end
+                                if dx == -1 then long = LEFTONE end
+                                if dx == 0 then long = STRAIGHT end
+                                if dx == 2 then long = RIGHTTWO end
+                                if dx == 1 then long = RIGHTONE end
+                            end
+                            if math.abs(dy) == 4 then lat = FR_FOUR end 
+                            if math.abs(dy) == 3 then lat = FR_THREE end 
+                            if math.abs(dy) == 2 then lat = FR_TWO end 
+                            if math.abs(dy) == 1 then lat = FR_ONE end 
+                            if math.abs(dy) == 0 then lat = FZERO end 
+                        end
+                        local ex, ey = 56, 60
+                        local mod = ''
+                        currentMap[n].encounter = currentMap[n].encounter or false 
+                        currentMap[n].object = currentMap[n].object or false 
+                        if currentMap[n].encounter == true then 
+                            mod = 'e'
+                        elseif currentMap[n].object == true then 
+                            mod = 'q'
+                        else
+                            mod = 'n'
+                        end
+                        --currentMap[n].examine = currentMap[n].examine or nil 
+                        --if currentMap[n].examine ~= nil then mod = 'q' end
+                        if lat == FR_ONE and long == STRAIGHT then 
+                            lg.draw(lg.newImage('assets/fp_indicator_'..mod..'.png'), (ex-8)*scale, ey*scale, 0, scale*2)
+                        elseif lat == FR_TWO and long == STRAIGHT then 
+                            lg.draw(lg.newImage('assets/fp_indicator_'..mod..'.png'), (ex+10)*scale, (ey+16)*scale, 0, scale)
+                        elseif lat == FR_ONE and long == LEFTONE then 
+                            lg.draw(lg.newImage('assets/fp_indicator_'..mod..'.png'), (ex-82)*scale, ey*scale, 0, scale*2)
+                        elseif lat == FR_ONE and long == RIGHTONE then 
+                            lg.draw(lg.newImage('assets/fp_indicator_'..mod..'.png'), (ex+64)*scale, ey*scale, 0, scale*2)
+                        elseif lat == FR_TWO and long == LEFTONE then 
+                            lg.draw(lg.newImage('assets/fp_indicator_'..mod..'.png'), (ex-36)*scale, (ey+16)*scale, 0, scale)
+                        elseif lat == FR_TWO and long==RIGHTONE then 
+                            lg.draw(lg.newImage('assets/fp_indicator_'..mod..'.png'), (ex+56)*scale, (ey+16)*scale, 0, scale)
+                        elseif lat == FR_THREE and long == RIGHTONE then 
+                            lg.draw(lg.newImage('assets/fp_indicatorb.png'), (ex+46)*scale, (ey+18)*scale, 0, scale)
+                        elseif lat == FR_THREE and long == RIGHTTWO then 
+                            lg.draw(lg.newImage('assets/fp_indicatorb.png'), (ex+86)*scale, (ey+18)*scale, 0, scale)
+                        elseif lat == FR_THREE and long == LEFTONE then 
+                            lg.draw(lg.newImage('assets/fp_indicatorb.png'), (ex-16)*scale, (ey+18)*scale, 0, scale)
+                        elseif lat == FR_THREE and long == LEFTTWO then 
+                            lg.draw(lg.newImage('assets/fp_indicatorb.png'), (ex-58)*scale, (ey+18)*scale, 0, scale)
+                        elseif lat == FR_THREE and long == STRAIGHT then 
+                            lg.draw(lg.newImage('assets/fp_indicatorb.png'), (ex+16)*scale, (ey+18)*scale, 0, scale)
+                        
+                        end
+                        -- local ex, ey = 56, 60
+                        -- if long == LEFTTWO then ex = ex - 30 end
+                        -- if lat == FR_THREE then 
+                        --     lg.draw(lg.newImage('assets/fp_indicatorb.png'), (ex+16)*scale, (ey+18)*scale, 0, scale)
+                        -- elseif lat == FR_TWO then 
+                        --     lg.draw(lg.newImage('assets/fp_indicator.png'), (ex+10)*scale, (ey+16)*scale, 0, scale)
+                        -- elseif lat == FR_ONE then 
+                        --     lg.draw(lg.newImage('assets/fp_indicator.png'), ex*scale, ey*scale, 0, scale*2)
+                        -- end
+                    end
+                end
+            end
+        end
         local ft=bgmap[ ((py-1) * map_w) + (px+1)]
-        --if ft=='3' then 
-        --    g.draw(FP_WALL_STONE2, FRONT_WALL, 20*scale, 20*scale, 0, scale*1.72)--front wall
-        --end
         -- clean
         g.setColor(0, 0, 0, 1);
         g.rectangle("fill", 160*scale, 0, 90*scale, 190*scale)
         g.setColor(1, 1, 1, 1);
         g.pop();
+        --TEST
+        -- party[1].imgb = party[1].imgb or nil 
+        -- party[1].imga = party[1].imga or nil 
+        -- if party[1].imgb == nil then 
+        --     local r = 'assets/'..party[1].g..'_16x16.png'
+        --     party[1].imgb = lg.newImage(r)
+        -- end
+        -- if party[1].imga == nil then 
+        --     local r = 'assets/'..party[1].g..'_8x8.png'
+        --     party[1].imga = lg.newImage(r)
+        -- end
+        -- if distanceTest >= 3 then 
+        --     lg.draw(lg.newImage('assets/table_16x16.png'), 97*scale, 94*scale, 0, scale);
+        -- elseif distanceTest >= 2 then 
+        --     lg.draw(lg.newImage('assets/table_16x16.png'), 90*scale, 94*scale, 0, scale*2);
+        -- elseif distanceTest >= 1 then 
+        --     lg.draw(lg.newImage('assets/table_16x16.png'), 74*scale, 90*scale, 0, scale*4);
+        
+        -- end
         --return
-    end
-
-    if inputMode == TITLE_SCREEN then 
+    elseif inputMode == TITLE_SCREEN then 
         lg.print("  ALLWORLDS 1:\n\nHeir to Horrors", 15*8*scale, 7*8*scale, 0, scale);
         lg.print("1) New Game\n2) Load Game\n3) Quit", 10*8*scale, 17*8*scale, 0, scale);
         if lightMode then lg.print("Light Mode Enabled", 15*8*scale, 23*8*scale, 0, scale); end
@@ -1005,5 +1289,5 @@ function togglezoom(cm)
         end 
     end 
     cameraMode = cameraMode + 1;
-    if cameraMode == 2 then cameraMode = 0 end
+    if cameraMode == 3 then cameraMode = 0 end
 end

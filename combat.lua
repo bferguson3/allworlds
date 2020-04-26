@@ -78,34 +78,41 @@ function StartCombat(nmes)
     transitionCounter = 0
     transitionTick = 0
     --inCombat = true;
+    
     AddQueue({"wait", 0.35})
     AddQueue({"FinishTransCombat", "batt"..n})
 
 end
-
+mapstate = {}
 function FinishTransCombat(m)
     --inCombat = true;
+    mapstate = currentMap;
     LoadMap(m, 11)
     togglezoom("big");
     --
     AddLog("Combat!!", 0)
     inCombat = true;
     px, py = 5, 5;
-    
+    print('debug1')
     
     -- initiative.
     for i=1,#combat_actors do 
         combat_actors[i].init = math.ceil(love.math.random()*10) + math.floor((combat_actors[i].dex-10)/2);
         --print(combat_actors[i].name.." "..combat_actors[i].init)
     end
+    --print('debug2')
     next = combat_actors[1];
+    --print('debug3')
     for i=1,#combat_actors do 
         if combat_actors[i].init > next.init then 
             next = combat_actors[i]
         end
     end
+    --print('debug4')
     AddQueue({"wait", 1})
+    
     AddQueue({"nextTurn"})
+    --print('debug5')
 end
 
 function GenerateCombatant(n)
@@ -253,6 +260,7 @@ function EndCombat()
     m()
     LoadMap(outOfCombatState.map, currentMap.width)
     activePC = lastActive;
+    currentMap = mapstate;
 end
 
 function EnemyTurn(o)
@@ -333,12 +341,13 @@ end
 
 function NextTurn()
     next = combat_actors[1];
+    print('debug a')
     for i=1,#combat_actors do 
         if combat_actors[i].init > next.init then 
             next = combat_actors[i]
         end
     end
-
+    print('debug b')
     if next.init == -1 then 
         AddLog("New round!", 0)
         for i=1,#combat_actors do 

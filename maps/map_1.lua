@@ -34,12 +34,14 @@ currentMap = {
     },
     {
         g = "barrel",
+        object = true,
         x = 19,
         y = 13, 
         examine = {": \"Used to have food, now\nit just has scraps.\""}
     },
     {
         g = "table",
+        object = true,
         x = 20,
         y = 15,
         examine = {": \"Old scrolls written in\n cryptic tongue.\""}
