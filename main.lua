@@ -77,7 +77,7 @@ PLAY_INTRO = 12;
 MAKE_CHR = 13;
 FP_MOVE = 14;
 inputMode = TITLE_SCREEN;
-
+INDICATOR_FAR = nil
 -- str dex con int wis cha 
 init = {}
 init.fighter = { str=16, dex=12, con=14, int=10, wis=10, cha=10}
@@ -114,6 +114,12 @@ ROW2_SIDEWALL_R = g.newQuad(140, 50, 20, 60, 160, 160)
 THREE_LEFT2_FLOOR = g.newQuad(0, 90, 37, 10, 160, 160)
 THREE_LEFT1_FLOOR = g.newQuad(20, 90, 50, 10, 160, 160)
 THREE_FRONT_FLOOR = g.newQuad(60, 90, 40, 10, 160, 160)
+
+FP_WALL_STONE, FP_WALL_STONE2, FP_GRASS_FLOOR, FP_GRASS_FLOOR2, FP_GRASS_FLOOR3 = nil, nil, nil, nil, nil 
+FP_WATER_FLOOR, FP_WATER_FLOOR2, FP_WATER_FLOOR3 = nil, nil, nil 
+FP_BLACKTILE_FLOOR, FP_BLACKTILE_FLOOR2, FP_BLACKTILE_FLOOR3 = nil, nil, nil 
+FP_DIRT_FLOOR, FP_DIRT_FLOOR2, FP_DIRT_FLOOR3 = nil, nil, nil 
+FP_BLANK = nil
 
 current_npc = nil;
 myinput = ''
@@ -230,9 +236,28 @@ function love.load(arg)
     ChangeRichPresence("WIP");
 
     lg.setDefaultFilter('nearest', 'nearest', 0);
-    lg.setBackgroundColor(0.2, 0.2, 0.2);
-
-    
+    lg.setBackgroundColor(0.2, 0.2, 0.2); 
+    INDICATOR_FAR = lg.newImage('assets/fp_indicatorb.png')
+    a = love.image.newImageData('assets/fpstnwl.png');
+    a:mapPixel(changeTransparent);
+    FP_WALL_STONE = g.newImage(a);
+    a = love.image.newImageData('assets/fpstnwl2.png');
+    a:mapPixel(changeTransparent);
+    FP_WALL_STONE2 = g.newImage(a);
+    FP_GRASS_FLOOR = g.newImage('assets/fpgrassa.png');
+    FP_GRASS_FLOOR2 = g.newImage('assets/fpgrassb.png');
+    FP_GRASS_FLOOR3 = g.newImage('assets/fpgrassc.png');
+    FP_WATER_FLOOR = g.newImage('assets/fpwatera.png');
+    FP_WATER_FLOOR2 = g.newImage('assets/fpwaterb.png');
+    FP_WATER_FLOOR3 = g.newImage('assets/fpwaterc.png');
+    FP_BLACKTILE_FLOOR = g.newImage('assets/fpblacktilea.png');
+    FP_BLACKTILE_FLOOR2 = g.newImage('assets/fpblacktileb.png');
+    FP_BLACKTILE_FLOOR3 = g.newImage('assets/fpblacktilec.png');
+    FP_DIRT_FLOOR = g.newImage('assets/fpdirta.png');
+    FP_DIRT_FLOOR2 = g.newImage('assets/fpdirtb.png');
+    FP_DIRT_FLOOR3 = g.newImage('assets/fpdirtc.png');
+    FP_BLANK = g.newImage('assets/fptmp.png')
+        
     --defaultfont = lg.setNewFont('ModernDOS8x8.ttf', 16);
     --defaultfont = lg.setNewFont('assets/PxPlus_AmstradPC1512-2y.ttf', 8);
     --defaultfont = lg.setNewFont('assets/Px437_ATI_SmallW_6x8.ttf', 8);
@@ -723,9 +748,10 @@ function CheckCollision(x, y)
                             local df = "You see " .. currentMap[i].name 
                             currentMap[i].examine[1] = currentMap[i].examine[1] or df
                             if currentMap[i].examine[1] ~= df then 
-                                currentMap[i].examine[1] = "> Examine " .. currentMap[i].name .. "\n"..currentMap[i].examine[1]
+                                print(currentMap[i].examine[1])
+                                df = "> Examine " .. currentMap[i].name .. "\n"..currentMap[i].examine[1]
                             end
-                            AddLog(currentMap[i].examine[1], 0)
+                            AddLog(df, 0)
                             return true 
                         end
                         AddLog("Blocked!")
@@ -790,7 +816,7 @@ end
 
 function CheckTalk(x, y)
     for i = 1, #currentMap do 
-        if x == currentMap[i].x and currentMap[i].y == y then 
+        if x == currentMap[i].x and currentMap[i].y == y and currentMap[i].object==false then 
             if currentMap[i].name then 
                 AddLog("You greet "..currentMap[i].name..".");
                 --AddLog("\""..currentMap[i].chat["hello"][1].."\"", 0);
@@ -798,7 +824,8 @@ function CheckTalk(x, y)
                 AskNPC("hello")
                 return true;
             end
-        end 
+        end
+        
     end
 end
 

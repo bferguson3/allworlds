@@ -116,30 +116,6 @@ function FinishTransCombat(m)
 end
 
 function GenerateCombatant(n)
-    -- guard = {
-    --     name = "Guard",
-    --     class = "Fighter",
-    --     g = "01",
-    --     hp = 30,
-    --     mhp = 30,
-    --     mov = 1,
-    --     str = 10,
-    --     dex = 10,
-    --     con = 10,
-    --     int = 10,
-    --     wis = 10,
-    --     cha = 10,
-    --     weapon = {
-    --         dmg_die = 8,
-    --         type = "melee"
-    --     },
-    --     thaco = 20,
-    --     armor = {
-    --         ac = 1
-    --     },
-    --     player = false
-    -- }
-    --also level
     nn = {}
     nn.name = n.name 
     nn.level = n.level;
@@ -264,21 +240,6 @@ function EndCombat()
 end
 
 function EnemyTurn(o)
-    --print(o.name);
-    -- AI is based on o.class 
-    -- if fighter: 
-       -- 1. in melee range?
-       -- 2. (move towards closest player)
-       -- 3. attack if can
-    --local c = NextPlayer();--combat_actors[1]
-    --local d = (c.x-o.x)^2 + (c.y-o.y)^2
-    --for i=1,#combat_actors do 
-    --    -- d = (ex-px)^2+(ey-py)^2
-    --    if combat_actors[i].player == true then 
-    --        dt = (combat_actors[i].x-o.x)^2 + (combat_actors[i].y-o.y)^2;
-    --        if dt < d then d = dt; c = combat_actors[i]; end 
-    --    end
-    --end
     local c, d = FindNearestPlayerTo(o)
     -- d has shortest distance from o to c 
     --if anim[1]==false then return end 

@@ -81,10 +81,11 @@ function love.keypressed(key)
             elseif fpDirection == 3 and not CheckCollision(px-1, py) then px = px - 1; AddLog("West"); moved=true; end
         elseif key == 't' then 
             AddLog("Talk"); 
-            if fpDirection==0 and CheckTalk(px, py-1) then AddQueue({"wait", 0.25}); AddQueue({"setIMchat"}); return; else AddLog("Nobody there!",0);end
-            if fpDirection==1 and CheckTalk(px+1, py) then AddQueue({"wait", 0.25}); AddQueue({"setIMchat"}); return; else AddLog("Nobody there!",0);end
-            if fpDirection==2 and CheckTalk(px, py+1) then AddQueue({"wait", 0.25}); AddQueue({"setIMchat"}); return; else AddLog("Nobody there!",0);end
-            if fpDirection==3 and CheckTalk(px-1, py) then AddQueue({"wait", 0.25}); AddQueue({"setIMchat"}); return; else AddLog("Nobody there!",0);end
+            if fpDirection==0 and CheckTalk(px, py-1) then AddQueue({"wait", 0.25}); AddQueue({"setIMchat"}); return; 
+            elseif fpDirection==1 and CheckTalk(px+1, py) then AddQueue({"wait", 0.25}); AddQueue({"setIMchat"}); return; 
+            elseif fpDirection==2 and CheckTalk(px, py+1) then AddQueue({"wait", 0.25}); AddQueue({"setIMchat"}); return; 
+            elseif fpDirection==3 and CheckTalk(px-1, py) then AddQueue({"wait", 0.25}); AddQueue({"setIMchat"}); return; 
+            else AddLog("Nobody there!",0); end
             return
         end
         if fpDirection > 3 then fpDirection = 0 end 

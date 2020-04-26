@@ -28,18 +28,21 @@ currentMap = {
         g = "torch",
         x = 23,
         y = 29,
+        object=true,
         examine = {": \"A flaming torch.\""}
     },
     {
         g = "chest",
         x = 7,
         y = 16,
+        object=true,
         examine = {": \"Hm. A hidden cache.\""}
     },
     {
         g = "torch",
         x = 25,
         y = 29,
+        object=true,
         examine = {": \"A flaming torch.\""}
     },
     {

@@ -410,37 +410,6 @@ function DrawWalls()
     local lat = 0
     local long = 0
     
-    drawOrder = {
-        { LEFTTWO, FR_FOUR },
-        { LEFTONE, FR_FOUR },
-        { STRAIGHT, FR_FOUR },
-        { RIGHTONE, FR_FOUR },
-        { RIGHTTWO, FR_FOUR },
-        { LEFTTWO, FR_THREE },
-        { RIGHTTWO, FR_THREE },
-        { LEFTONE, FR_THREE },
-        { RIGHTONE, FR_THREE },
-        { STRAIGHT, FR_THREE },
-        { LEFTTWO, FR_TWO },
-        { RIGHTTWO, FR_TWO },
-        { LEFTONE, FR_TWO },
-        { RIGHTONE, FR_TWO },
-        { STRAIGHT, FR_TWO },
-        { LEFTONE, FR_ONE },
-        { RIGHTONE, FR_ONE },
-        { STRAIGHT, FR_ONE },
-        { LEFTONE, FZERO },
-        { RIGHTONE, FZERO },
-        { STRAIGHT, FZERO }
-    }
-    --for d=1,#drawOrder do 
-    --    for vt=1,#viewableTiles do 
-    --        if viewableTiles[vt].x == drawOrder[d][1] then 
-                
-   --         end
-   --     end
-   -- end
-    
      for vt=1,#viewableTiles do 
          if fpDirection == 0 or fpDirection==2 then 
              lat = viewableTiles[vt].x 
@@ -477,82 +446,6 @@ function DrawWalls()
              end
           end
         end
-    --     elseif long == FR_THREE then --row 3
-    --         if lat == LEFTTWO then 
-    --             if ct == '3' then 
-    --                 g.draw(FP_WALL_STONE2, WALL_THREE, -18*scale, 60*scale, 0, scale); --facing wall
-    --                 g.draw(FP_WALL_STONE, THREE_SIDE, 40*scale, 60*scale, 0, -scale, scale); --side wall
-                
-    --             end
-    --         elseif lat == LEFTONE then 
-    --             if ct=='3' then 
-    --                 g.draw(FP_WALL_STONE2, WALL_THREE, 20*scale, 60*scale, 0, scale); --facing wall
-    --                 g.draw(FP_WALL_STONE, THREE_LEFT_WALL, 60*scale, 60*scale, 0, scale)
-                    
-    --             end
-    --         elseif lat == RIGHTONE then 
-    --             if ct=='3' then 
-    --                 g.draw(FP_WALL_STONE2, WALL_THREE, 140*scale, 60*scale, 0, -scale, scale); --facing wall
-    --                 g.draw(FP_WALL_STONE, THREE_LEFT_WALL, 100*scale, 60*scale, 0, -scale, scale)
-                
-    --             end
-    --         elseif lat == RIGHTTWO then 
-    --             if ct=='3' then 
-    --                 g.draw(FP_WALL_STONE2, WALL_THREE, 178*scale, 60*scale, 0, -scale, scale); --facing wall
-    --                 g.draw(FP_WALL_STONE, THREE_SIDE, 120*scale, 60*scale, 0, scale); --side wall      
-                
-    --             end
-    --         end
-    --     elseif long == FR_TWO then 
-    --         if lat==LEFTTWO then 
-    --             if ct=='3' then 
-    --                 g.draw(FP_WALL_STONE, ROW2_SIDEWALL_R, 20*scale, 50*scale, 0, -scale, scale);
-    --             end
-    --         elseif lat==LEFTONE then 
-    --             if ct=='3' then 
-    --                 g.draw(FP_WALL_STONE2, FRONT_WALL, -25*scale, 45*scale, 0, scale)--front wall
-    --                 g.draw(FP_WALL_STONE, TWO_LEFT_WALL, 45*scale, 45*scale, 0, scale)--side wall
-    --             end
-    --         elseif lat==RIGHTONE then 
-    --             if ct=='3' then 
-    --                 g.draw(FP_WALL_STONE2, FRONT_WALL, 185*scale, 45*scale, 0, -scale, scale)--front wall
-    --                 g.draw(FP_WALL_STONE, TWO_LEFT_WALL, 115*scale, 45*scale, 0, -scale, scale)--side wall
-    --             end
-    --         elseif lat==RIGHTTWO then 
-    --             if ct=='3' then 
-    --                 g.draw(FP_WALL_STONE, ROW2_SIDEWALL_R, 140*scale, 50*scale, 0, scale);              
-    --             end
-    --         end
-    --     elseif long==FR_ONE then 
-    --         if lat==LEFTONE then 
-    --             if ct=='3' then 
-    --                 g.draw(FP_WALL_STONE2, FRONT_WALL_REDGE, 0, 20*scale, 0, scale*1.72)--front wall
-    --                 g.draw(FP_WALL_STONE, ONE_LEFT_WALL, 20*scale, 20*scale, 0, scale)--side wall
-    --         --        print('a')
-    --             end
-    --         elseif lat==RIGHTONE then 
-    --             if ct=='3' then 
-    --                 g.draw(FP_WALL_STONE2, FRONT_WALL_REDGE, 160*scale, 20*scale, 0, -scale*1.72, scale*1.72)--front wall
-    --                 g.draw(FP_WALL_STONE, ONE_LEFT_WALL, 140*scale, 20*scale, 0, -scale, scale)--side wall
-    --             end
-    --         end
-            
-    --     elseif long==FZERO then 
-    --         if lat==LEFTONE then 
-    --             --print(LEFTONE, py, ct)
-    --             if ct=='3' then 
-    --                 g.draw(FP_WALL_STONE, IMM_LEFT_WALL, 0, 0, 0, scale)--lefthand wall
-    --         --        print('b')
-    --             end
-            
-    --         elseif lat==RIGHTONE then 
-    --             if ct=='3' then 
-    --                 g.draw(FP_WALL_STONE, IMM_LEFT_WALL, 160*scale, 0, 0, -scale, scale)--right-hand wall
-    --             end
-    --         end
-    --     end
-    -- end
-    
     --Draw front walls in front of the rest
     if fpDirection == 0 or fpDirection==2 then 
         
@@ -701,9 +594,7 @@ function DrawWalls()
         end
     end
     --FR_TWO, RIGHTONE and FR_TWO, LEFTONE
-    lg.setColor(0,0,0,1)
-    lg.rectangle("fill", 0, 0, -32*scale, 200*scale)
-    lg.setColor(1, 1, 1, 1)
+    
 end
 
 function love.draw(dT)
@@ -717,30 +608,8 @@ function love.draw(dT)
     --inputMode = FP_MOVE;
     --cameraMode = nil;
     if cameraMode == ZOOM_FP then 
-        -- initialize fp graphics
-        tileSet[1] = SliceTileSheet(lg.newImage('assets/bg_8x8.png'), 8, 8);
-        --tileSet[2] = SliceTileSheet(lg.newImage('assets/bg_16x16.png'), 16, 16);
         g = lg;
         e = (160/8)*scale
-        a = love.image.newImageData('assets/fpstnwl.png');
-        a:mapPixel(changeTransparent);
-        FP_WALL_STONE = g.newImage(a);
-        a = love.image.newImageData('assets/fpstnwl2.png');
-        a:mapPixel(changeTransparent);
-        FP_WALL_STONE2 = g.newImage(a);
-        FP_GRASS_FLOOR = g.newImage('assets/fpgrassa.png');
-        FP_GRASS_FLOOR2 = g.newImage('assets/fpgrassb.png');
-        FP_GRASS_FLOOR3 = g.newImage('assets/fpgrassc.png');
-        FP_WATER_FLOOR = g.newImage('assets/fpwatera.png');
-        FP_WATER_FLOOR2 = g.newImage('assets/fpwaterb.png');
-        FP_WATER_FLOOR3 = g.newImage('assets/fpwaterc.png');
-        FP_BLACKTILE_FLOOR = g.newImage('assets/fpblacktilea.png');
-        FP_BLACKTILE_FLOOR2 = g.newImage('assets/fpblacktileb.png');
-        FP_BLACKTILE_FLOOR3 = g.newImage('assets/fpblacktilec.png');
-        FP_DIRT_FLOOR = g.newImage('assets/fpdirta.png');
-        FP_DIRT_FLOOR2 = g.newImage('assets/fpdirtb.png');
-        FP_DIRT_FLOOR3 = g.newImage('assets/fpdirtc.png');
-        FP_BLANK = g.newImage('assets/fptmp.png')
         
         --x, y / w, h / 160, 160
         --skybox
@@ -889,6 +758,7 @@ function love.draw(dT)
                         LEFTTWO = 2
                         if px == currentMap[n].x and py == currentMap[n].y then 
                             currentMap[n].examine = currentMap[n].examine or {}
+                            currentMap[n].name = currentMap[n].name or 'nothing special'
                             currentMap[n].examine[1] = currentMap[n].examine[1] or 'You see ' .. currentMap[n].name
                             AddLog(currentMap[n].examine[1]) 
                         end 
@@ -950,68 +820,47 @@ function love.draw(dT)
                         end
                         --currentMap[n].examine = currentMap[n].examine or nil 
                         --if currentMap[n].examine ~= nil then mod = 'q' end
+                        currentMap[n].fpg = currentMap[n].fpg or nil 
+                        if currentMap[n].fpg == nil then 
+                            currentMap[n].fpg = lg.newImage('assets/fp_indicator_'..mod..'.png');
+                        end 
+                        --local other = 
                         if lat == FR_ONE and long == STRAIGHT then 
-                            lg.draw(lg.newImage('assets/fp_indicator_'..mod..'.png'), (ex-8)*scale, ey*scale, 0, scale*2)
+                            lg.draw(currentMap[n].fpg, (ex-8)*scale, ey*scale, 0, scale*2)
                         elseif lat == FR_TWO and long == STRAIGHT then 
-                            lg.draw(lg.newImage('assets/fp_indicator_'..mod..'.png'), (ex+10)*scale, (ey+16)*scale, 0, scale)
+                            lg.draw(currentMap[n].fpg, (ex+10)*scale, (ey+16)*scale, 0, scale)
                         elseif lat == FR_ONE and long == LEFTONE then 
-                            lg.draw(lg.newImage('assets/fp_indicator_'..mod..'.png'), (ex-82)*scale, ey*scale, 0, scale*2)
+                            lg.draw(currentMap[n].fpg, (ex-82)*scale, ey*scale, 0, scale*2)
                         elseif lat == FR_ONE and long == RIGHTONE then 
-                            lg.draw(lg.newImage('assets/fp_indicator_'..mod..'.png'), (ex+64)*scale, ey*scale, 0, scale*2)
+                            lg.draw(currentMap[n].fpg, (ex+64)*scale, ey*scale, 0, scale*2)
                         elseif lat == FR_TWO and long == LEFTONE then 
-                            lg.draw(lg.newImage('assets/fp_indicator_'..mod..'.png'), (ex-36)*scale, (ey+16)*scale, 0, scale)
+                            lg.draw(currentMap[n].fpg, (ex-36)*scale, (ey+16)*scale, 0, scale)
                         elseif lat == FR_TWO and long==RIGHTONE then 
-                            lg.draw(lg.newImage('assets/fp_indicator_'..mod..'.png'), (ex+56)*scale, (ey+16)*scale, 0, scale)
+                            lg.draw(currentMap[n].fpg, (ex+56)*scale, (ey+16)*scale, 0, scale)
                         elseif lat == FR_THREE and long == RIGHTONE then 
-                            lg.draw(lg.newImage('assets/fp_indicatorb.png'), (ex+46)*scale, (ey+18)*scale, 0, scale)
+                            lg.draw(INDICATOR_FAR, (ex+46)*scale, (ey+18)*scale, 0, scale)
                         elseif lat == FR_THREE and long == RIGHTTWO then 
-                            lg.draw(lg.newImage('assets/fp_indicatorb.png'), (ex+86)*scale, (ey+18)*scale, 0, scale)
+                            lg.draw(INDICATOR_FAR, (ex+86)*scale, (ey+18)*scale, 0, scale)
                         elseif lat == FR_THREE and long == LEFTONE then 
-                            lg.draw(lg.newImage('assets/fp_indicatorb.png'), (ex-16)*scale, (ey+18)*scale, 0, scale)
+                            lg.draw(INDICATOR_FAR, (ex-16)*scale, (ey+18)*scale, 0, scale)
                         elseif lat == FR_THREE and long == LEFTTWO then 
-                            lg.draw(lg.newImage('assets/fp_indicatorb.png'), (ex-58)*scale, (ey+18)*scale, 0, scale)
+                            lg.draw(INDICATOR_FAR, (ex-58)*scale, (ey+18)*scale, 0, scale)
                         elseif lat == FR_THREE and long == STRAIGHT then 
-                            lg.draw(lg.newImage('assets/fp_indicatorb.png'), (ex+16)*scale, (ey+18)*scale, 0, scale)
+                            lg.draw(INDICATOR_FAR, (ex+16)*scale, (ey+18)*scale, 0, scale)
                         
                         end
-                        -- local ex, ey = 56, 60
-                        -- if long == LEFTTWO then ex = ex - 30 end
-                        -- if lat == FR_THREE then 
-                        --     lg.draw(lg.newImage('assets/fp_indicatorb.png'), (ex+16)*scale, (ey+18)*scale, 0, scale)
-                        -- elseif lat == FR_TWO then 
-                        --     lg.draw(lg.newImage('assets/fp_indicator.png'), (ex+10)*scale, (ey+16)*scale, 0, scale)
-                        -- elseif lat == FR_ONE then 
-                        --     lg.draw(lg.newImage('assets/fp_indicator.png'), ex*scale, ey*scale, 0, scale*2)
-                        -- end
                     end
                 end
             end
         end
-        local ft=bgmap[ ((py-1) * map_w) + (px+1)]
+    --local ft=bgmap[ ((py-1) * map_w) + (px+1)]
         -- clean
         g.setColor(0, 0, 0, 1);
         g.rectangle("fill", 160*scale, 0, 90*scale, 190*scale)
+        lg.rectangle("fill", 0, 0, -32*scale, 200*scale)
         g.setColor(1, 1, 1, 1);
         g.pop();
-        --TEST
-        -- party[1].imgb = party[1].imgb or nil 
-        -- party[1].imga = party[1].imga or nil 
-        -- if party[1].imgb == nil then 
-        --     local r = 'assets/'..party[1].g..'_16x16.png'
-        --     party[1].imgb = lg.newImage(r)
-        -- end
-        -- if party[1].imga == nil then 
-        --     local r = 'assets/'..party[1].g..'_8x8.png'
-        --     party[1].imga = lg.newImage(r)
-        -- end
-        -- if distanceTest >= 3 then 
-        --     lg.draw(lg.newImage('assets/table_16x16.png'), 97*scale, 94*scale, 0, scale);
-        -- elseif distanceTest >= 2 then 
-        --     lg.draw(lg.newImage('assets/table_16x16.png'), 90*scale, 94*scale, 0, scale*2);
-        -- elseif distanceTest >= 1 then 
-        --     lg.draw(lg.newImage('assets/table_16x16.png'), 74*scale, 90*scale, 0, scale*4);
         
-        -- end
         --return
     elseif inputMode == TITLE_SCREEN then 
         lg.print("  ALLWORLDS 1:\n\nHeir to Horrors", 15*8*scale, 7*8*scale, 0, scale);
@@ -1021,18 +870,6 @@ function love.draw(dT)
     elseif inputMode == PLAY_INTRO then
         --GUI:
         DrawGUIWindow(1, 1, 38, 24)
-        -- local s = scale;
-        -- for i = 1, 38 do 
-        --     lg.draw(tileSet[1].sheet, tileSet[1].quads[6], (i)*8*s, 8*s, 0, scale)
-        --     lg.draw(tileSet[1].sheet, tileSet[1].quads[6], (i)*8*s, 24*8*scale, 0, scale)
-        --     lg.draw(tileSet[1].sheet, tileSet[1].quads[7], 8*s, i*8*s, 0, s)
-        --     lg.draw(tileSet[1].sheet, tileSet[1].quads[7], 38*8*s, i*8*s, 0, scale)
-        -- end
-        -- lg.draw(tileSet[1].sheet, tileSet[1].quads[5], 8*s, 8*s, 0, scale)
-        -- lg.draw(tileSet[1].sheet, tileSet[1].quads[5], 38*8*scale, 8*s, 0, scale)
-        -- lg.draw(tileSet[1].sheet, tileSet[1].quads[5], 8*s, 24*8*scale, 0, scale)
-        -- lg.draw(tileSet[1].sheet, tileSet[1].quads[5], 38*8*scale, 24*8*scale, 0, scale)    
-        --text display counter is # of lines * 4. 1=black 2=dgr 3=lgr 4=wh
         local s = scale 
         for k=1,math.floor(introTicker)-1 do 
             if k == (math.floor(introTicker)-1) then 
@@ -1239,7 +1076,7 @@ function love.draw(dT)
         
         local r = "assets/"
         r = r..party[activePC].g.."_16x16.png";
-        lg.draw(lg.newImage(r), s*16, s*16, 0, s);
+        lg.draw(party[activePC].imgb, s*16, s*16, 0, s);
         lg.print(party[activePC].name, 8*s, 40*s, 0, s);
         lg.print("Strength\nDexterity\nConstitution\nIntelligence\nWisdom\nCharisma", 8*s, 56*s, 0, s);
         lg.print(party[activePC].str..'\n'..party[activePC].dex..'\n'..party[activePC].con..'\n'..party[activePC].int..'\n'..party[activePC].wis..'\n'..party[activePC].cha, 72*s, 56*s, 0, s);
