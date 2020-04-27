@@ -359,6 +359,33 @@ function DrawFloors()
     
 end
 
+function GetFPObj(x, y)
+    for i=1,#currentMap do 
+        if currentMap[i].x == x and currentMap[i].y == y then 
+            --there is an object on this tile.
+            o = currentMap[i]
+            if o.encounter == true then 
+                return INDICATOR_NME
+            elseif o.object == true then 
+                return INDICATOR_OBJ 
+            else
+                return INDICATOR_NPC
+            end
+        end
+    end
+    return false;
+end
+
+function GetFarFPObj(x, y)
+    for i=1,#currentMap do 
+        o = currentMap[i] 
+        if o.x==x and o.y==y then 
+            return INDICATOR_FAR
+        end
+    end
+    return false;
+end
+
 function DrawWalls()
     --
     local LEFTTWO, LEFTONE, STRAIGHT, RIGHTONE, RIGHTTWO, FZERO, FR_ONE, FR_TWO, FR_THREE, FR_FOUR = 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
@@ -409,7 +436,7 @@ function DrawWalls()
     end
     local lat = 0
     local long = 0
-    
+    local ex,ey=56,60
      for vt=1,#viewableTiles do 
          if fpDirection == 0 or fpDirection==2 then 
              lat = viewableTiles[vt].x 
@@ -419,29 +446,42 @@ function DrawWalls()
              long = viewableTiles[vt].x 
          end
     --     --print(lat, viewableTiles[vt].y, vt)
+         
          local ct = bgmap[(viewableTiles[vt].y*map_w)+viewableTiles[vt].x+1]
          if long == FR_FOUR then --back row 
              if lat == LEFTTWO then 
     --             --back row, tile 1
-                 if ct == '3' then 
+                if ct == '3' then 
     --                 --stone wall?
-                     g.draw(FP_WALL_STONE, FAR_BACK_WALL, 0*scale, 70*scale, 0, scale*1.5, scale); 
-                 end 
+                    g.draw(FP_WALL_STONE, FAR_BACK_WALL, 0*scale, 70*scale, 0, scale*1.5, scale); 
+                elseif ct == '31' then 
+                    g.draw(FP_WALL_STONEDOOR, FAR_BACK_WALL, 0*scale, 70*scale, 0, scale*1.5, scale); 
+                end
+                --new function
+                
              elseif lat == LEFTONE then 
                  if ct == '3' then 
                      g.draw(FP_WALL_STONE, FAR_BACK_WALL, 34*scale, 70*scale, 0, scale*1.35, scale); 
+                 elseif ct == '31' then 
+                    g.draw(FP_WALL_STONEDOOR, FAR_BACK_WALL, 34*scale, 70*scale, 0, scale*1.35, scale); 
                  end
              elseif lat == STRAIGHT then 
                  if ct == '3' then 
                      g.draw(FP_WALL_STONE, FAR_BACK_WALL, 64*scale, 70*scale, 0, scale*1.25, scale);
+                 elseif ct=='31' then 
+                    g.draw(FP_WALL_STONEDOOR, FAR_BACK_WALL, 64*scale, 70*scale, 0, scale*1.25, scale);
                  end
              elseif lat == RIGHTONE then 
                  if ct == '3' then 
                      g.draw(FP_WALL_STONE, FAR_BACK_WALL, 92*scale, 70*scale, 0, scale*1.5, scale);
+                 elseif ct == '31' then 
+                    g.draw(FP_WALL_STONEDOOR, FAR_BACK_WALL, 92*scale, 70*scale, 0, scale*1.5, scale);
                  end
              elseif lat == RIGHTTWO then 
                  if ct == '3' then 
                      g.draw(FP_WALL_STONE, FAR_BACK_WALL, 126*scale, 70*scale, 0, scale*1.5, scale);
+                 elseif ct=='31' then 
+                    g.draw(FP_WALL_STONEDOOR, FAR_BACK_WALL, 126*scale, 70*scale, 0, scale*1.5, scale);
                  end
              end
           end
@@ -453,144 +493,284 @@ function DrawWalls()
         if v=='3' then 
             g.draw(FP_WALL_STONE2, WALL_THREE, -18*scale, 60*scale, 0, scale); --facing wall
             g.draw(FP_WALL_STONE, THREE_SIDE, 40*scale, 60*scale, 0, -scale, scale); --side wall
+        elseif v=='31' then 
+            g.draw(FP_WALL_STONEDOOR2, WALL_THREE, -18*scale, 60*scale, 0, scale); --facing wall
+            g.draw(FP_WALL_STONEDOOR, THREE_SIDE, 40*scale, 60*scale, 0, -scale, scale); --side wall
         end
+        local icon = GetFarFPObj(LEFTTWO, FR_THREE)
+        if icon ~= false then lg.draw(INDICATOR_FAR, (ex-58)*scale, (ey+18)*scale, 0, scale) end
+        
         local v = bgmap[(FR_THREE*map_w)+RIGHTTWO+1]
         if v=='3' then 
             g.draw(FP_WALL_STONE2, WALL_THREE, 178*scale, 60*scale, 0, -scale, scale); --facing wall
             g.draw(FP_WALL_STONE, THREE_SIDE, 120*scale, 60*scale, 0, scale); --side wall      
+        elseif v=='31' then 
+            g.draw(FP_WALL_STONEDOOR2, WALL_THREE, 178*scale, 60*scale, 0, -scale, scale); --facing wall
+            g.draw(FP_WALL_STONEDOOR, THREE_SIDE, 120*scale, 60*scale, 0, scale); --side wall      
         end
+        icon = GetFarFPObj(RIGHTTWO, FR_THREE)
+        if icon ~= false then lg.draw(INDICATOR_FAR, (ex+86)*scale, (ey+18)*scale, 0, scale) end
+
         local v = bgmap[(FR_THREE*map_w)+RIGHTONE+1]
         if v=='3' then 
             g.draw(FP_WALL_STONE2, WALL_THREE, 140*scale, 60*scale, 0, -scale, scale); --facing wall
             g.draw(FP_WALL_STONE, THREE_LEFT_WALL, 100*scale, 60*scale, 0, -scale, scale)
+        elseif v=='31' then 
+            g.draw(FP_WALL_STONEDOOR2, WALL_THREE, 140*scale, 60*scale, 0, -scale, scale); --facing wall
+            g.draw(FP_WALL_STONEDOOR, THREE_LEFT_WALL, 100*scale, 60*scale, 0, -scale, scale)
         end
+        icon = GetFarFPObj(RIGHTONE, FR_THREE)
+        if icon ~= false then lg.draw(INDICATOR_FAR, (ex+46)*scale, (ey+18)*scale, 0, scale) end
+
         v = bgmap[(FR_THREE*map_w)+LEFTONE+1]
         if v=='3' then 
             g.draw(FP_WALL_STONE2, WALL_THREE, 20*scale, 60*scale, 0, scale); --facing wall
             g.draw(FP_WALL_STONE, THREE_LEFT_WALL, 60*scale, 60*scale, 0, scale)
+        elseif v=='31' then 
+            g.draw(FP_WALL_STONEDOOR2, WALL_THREE, 20*scale, 60*scale, 0, scale); --facing wall
+            g.draw(FP_WALL_STONEDOOR, THREE_LEFT_WALL, 60*scale, 60*scale, 0, scale)
         end
+        icon = GetFarFPObj(LEFTONE, FR_THREE)
+        if icon ~= false then lg.draw(INDICATOR_FAR, (ex-16)*scale, (ey+18)*scale, 0, scale) end
+
         local v = bgmap[(FR_THREE*map_w)+STRAIGHT+1]
         if v=='3' then 
             g.draw(FP_WALL_STONE2, WALL_THREE, 60*scale, 60*scale, 0, scale)
+        elseif v=='31' then 
+            g.draw(FP_WALL_STONEDOOR2, WALL_THREE, 60*scale, 60*scale, 0, scale)
         end
+        icon = GetFarFPObj(STRAIGHT, FR_THREE)
+        if icon ~= false then lg.draw(INDICATOR_FAR, (ex+16)*scale, (ey+18)*scale, 0, scale) end
+
         local v = bgmap[(FR_TWO*map_w)+LEFTTWO+1]
         if v=='3' then 
             g.draw(FP_WALL_STONE, ROW2_SIDEWALL_R, 20*scale, 50*scale, 0, -scale, scale);
+        elseif v=='31' then 
+            g.draw(FP_WALL_STONEDOOR, ROW2_SIDEWALL_R, 20*scale, 50*scale, 0, -scale, scale);
         end
+        
         local v = bgmap[(FR_TWO*map_w)+RIGHTTWO+1]
         if v=='3' then 
             g.draw(FP_WALL_STONE, ROW2_SIDEWALL_R, 140*scale, 50*scale, 0, scale);
+        elseif v=='31' then 
+            g.draw(FP_WALL_STONEDOOR, ROW2_SIDEWALL_R, 140*scale, 50*scale, 0, scale);
         end
+        
         v = bgmap[(FR_TWO*map_w)+LEFTONE+1]
         if v=='3' then 
             g.draw(FP_WALL_STONE2, FRONT_WALL, -25*scale, 45*scale, 0, scale)--front wall
             g.draw(FP_WALL_STONE, TWO_LEFT_WALL, 45*scale, 45*scale, 0, scale)--side wall
+        elseif v=='31' then 
+            g.draw(FP_WALL_STONEDOOR2, FRONT_WALL, -25*scale, 45*scale, 0, scale)--front wall
+            g.draw(FP_WALL_STONEDOOR, TWO_LEFT_WALL, 45*scale, 45*scale, 0, scale)--side wall
         end
+        icon = GetFPObj(LEFTONE, FR_TWO)
+        if icon ~= false then lg.draw(icon, (ex-36)*scale, (ey+16)*scale, 0, scale) end
+
         v = bgmap[(FR_TWO*map_w)+RIGHTONE+1]
         if v=='3' then 
             g.draw(FP_WALL_STONE2, FRONT_WALL, 185*scale, 45*scale, 0, -scale, scale)--front wall
             g.draw(FP_WALL_STONE, TWO_LEFT_WALL, 115*scale, 45*scale, 0, -scale, scale)--side wall
+        elseif v=='31' then 
+            g.draw(FP_WALL_STONEDOOR2, FRONT_WALL, 185*scale, 45*scale, 0, -scale, scale)--front wall
+            g.draw(FP_WALL_STONEDOOR, TWO_LEFT_WALL, 115*scale, 45*scale, 0, -scale, scale)--side wall
         end
-        v = bgmap[(FR_TWO*map_w)+RIGHTTWO+1]
-        if v=='3' then 
-            --g.draw(FP_WALL_STONE2, FRONT_WALL, 185*scale, 45*scale, 0, -scale, scale)--front wall
-            --g.draw(FP_WALL_STONE, TWO_LEFT_WALL, 115*scale, 45*scale, 0, -scale, scale)--side wall
-        end
+        icon = GetFPObj(RIGHTONE, FR_TWO)
+        if icon ~= false then lg.draw(icon, (ex+52)*scale, (ey+16)*scale, 0, scale) end
+
         v = bgmap[(FR_TWO*map_w)+STRAIGHT+1]
         if v=='3' then 
             g.draw(FP_WALL_STONE2, FRONT_WALL, 45*scale, 45*scale, 0, scale)--back wall
+        elseif v=='31' then 
+            g.draw(FP_WALL_STONEDOOR2, FRONT_WALL, 45*scale, 45*scale, 0, scale)--back wall
         end
+        icon = GetFPObj(STRAIGHT, FR_TWO)
+        if icon ~= false then lg.draw(icon, (ex+10)*scale, (ey+16)*scale, 0, scale) end
+        
         v = bgmap[(FR_ONE*map_w)+RIGHTONE+1]
         if v=='3' then 
             g.draw(FP_WALL_STONE2, FRONT_WALL_REDGE, 160*scale, 20*scale, 0, -scale*1.72, scale*1.72)--front wall
             g.draw(FP_WALL_STONE, ONE_LEFT_WALL, 140*scale, 20*scale, 0, -scale, scale)--side wall
+        elseif v=='31' then 
+            g.draw(FP_WALL_STONEDOOR2, FRONT_WALL_REDGE, 160*scale, 20*scale, 0, -scale*1.72, scale*1.72)--front wall
+            g.draw(FP_WALL_STONEDOOR, ONE_LEFT_WALL, 140*scale, 20*scale, 0, -scale, scale)--side wall
         end
+        icon = GetFPObj(RIGHTONE, FR_ONE)
+        if icon ~= false then lg.draw(icon, (ex+64)*scale, ey*scale, 0, scale*2) end
+        
         v = bgmap[(FR_ONE*map_w)+LEFTONE+1]
         if v=='3' then 
             g.draw(FP_WALL_STONE2, FRONT_WALL_REDGE, 0, 20*scale, 0, scale*1.72)--front wall
             g.draw(FP_WALL_STONE, ONE_LEFT_WALL, 20*scale, 20*scale, 0, scale)--side wall
+        elseif v=='31' then 
+            g.draw(FP_WALL_STONEDOOR2, FRONT_WALL_REDGE, 0, 20*scale, 0, scale*1.72)--front wall
+            g.draw(FP_WALL_STONEDOOR, ONE_LEFT_WALL, 20*scale, 20*scale, 0, scale)--side wall
         end
+        icon = GetFPObj(LEFTONE, FR_ONE)
+        if icon ~= false then lg.draw(icon, (ex-82)*scale, ey*scale, 0, scale*2) end
+        
         v = bgmap[(FR_ONE*map_w)+STRAIGHT+1]
         if v=='3' then 
             g.draw(FP_WALL_STONE2, FRONT_WALL, 20*scale, 20*scale, 0, scale*1.72)--front wall
+        elseif v=='31' then 
+            g.draw(FP_WALL_STONEDOOR2, FRONT_WALL, 20*scale, 20*scale, 0, scale*1.72)--front wall
         end
+        icon = GetFPObj(STRAIGHT, FR_ONE)
+        if icon ~= false then lg.draw(icon, (ex-8)*scale, ey*scale, 0, scale*2) end
+        
         v = bgmap[(FZERO*map_w)+LEFTONE+1]
         if v=='3' then 
             g.draw(FP_WALL_STONE, IMM_LEFT_WALL, 0, 0, 0, scale)--lefthand wall
+        elseif v=='31' then 
+            g.draw(FP_WALL_STONEDOOR, IMM_LEFT_WALL, 0, 0, 0, scale)--lefthand wall
         end
         v = bgmap[(FZERO*map_w)+RIGHTONE+1]
         if v=='3' then 
             g.draw(FP_WALL_STONE, IMM_LEFT_WALL, 160*scale, 0, 0, -scale, scale)--lefthand wall
+        elseif v=='31' then 
+            g.draw(FP_WALL_STONEDOOR, IMM_LEFT_WALL, 160*scale, 0, 0, -scale, scale)--lefthand wall
         end
     elseif fpDirection == 1 or fpDirection==3 then 
         local v = bgmap[(LEFTTWO*map_w)+FR_THREE+1]
         if v=='3' then 
             g.draw(FP_WALL_STONE2, WALL_THREE, -18*scale, 60*scale, 0, scale); --facing wall
             g.draw(FP_WALL_STONE, THREE_SIDE, 40*scale, 60*scale, 0, -scale, scale); --side wall
+        elseif v=='31' then 
+            g.draw(FP_WALL_STONEDOOR2, WALL_THREE, -18*scale, 60*scale, 0, scale); --facing wall
+            g.draw(FP_WALL_STONEDOOR, THREE_SIDE, 40*scale, 60*scale, 0, -scale, scale); --side wall
         end
+        local icon = GetFarFPObj(FR_THREE, LEFTTWO)
+        if icon ~= false then lg.draw(INDICATOR_FAR, (ex-58)*scale, (ey+18)*scale, 0, scale) end
+        
         local v = bgmap[(RIGHTTWO*map_w)+FR_THREE+1]
         if v=='3' then 
             g.draw(FP_WALL_STONE2, WALL_THREE, 178*scale, 60*scale, 0, -scale, scale); --facing wall
             g.draw(FP_WALL_STONE, THREE_SIDE, 120*scale, 60*scale, 0, scale); --side wall      
+        elseif v=='31' then 
+            g.draw(FP_WALL_STONEDOOR2, WALL_THREE, 178*scale, 60*scale, 0, -scale, scale); --facing wall
+            g.draw(FP_WALL_STONEDOOR, THREE_SIDE, 120*scale, 60*scale, 0, scale); --side wall      
         end
+        icon = GetFarFPObj(FR_THREE, RIGHTTWO)
+        if icon ~= false then lg.draw(INDICATOR_FAR, (ex+86)*scale, (ey+18)*scale, 0, scale) end
+
         local v = bgmap[(RIGHTONE*map_w)+FR_THREE+1]
         if v=='3' then 
             g.draw(FP_WALL_STONE2, WALL_THREE, 140*scale, 60*scale, 0, -scale, scale); --facing wall
             g.draw(FP_WALL_STONE, THREE_LEFT_WALL, 100*scale, 60*scale, 0, -scale, scale)
+        elseif v=='31' then 
+            g.draw(FP_WALL_STONEDOOR2, WALL_THREE, 140*scale, 60*scale, 0, -scale, scale); --facing wall
+            g.draw(FP_WALL_STONEDOOR, THREE_LEFT_WALL, 100*scale, 60*scale, 0, -scale, scale)
         end
+        icon = GetFarFPObj(FR_THREE, RIGHTONE)
+        if icon ~= false then lg.draw(INDICATOR_FAR, (ex+46)*scale, (ey+18)*scale, 0, scale) end
+
         v = bgmap[(LEFTONE*map_w)+FR_THREE+1]
         if v=='3' then 
             g.draw(FP_WALL_STONE2, WALL_THREE, 20*scale, 60*scale, 0, scale); --facing wall
             g.draw(FP_WALL_STONE, THREE_LEFT_WALL, 60*scale, 60*scale, 0, scale)
+        elseif v=='31' then 
+            g.draw(FP_WALL_STONEDOOR2, WALL_THREE, 20*scale, 60*scale, 0, scale); --facing wall
+            g.draw(FP_WALL_STONEDOOR, THREE_LEFT_WALL, 60*scale, 60*scale, 0, scale)
         end
+        icon = GetFarFPObj(FR_THREE, LEFTONE)
+        if icon ~= false then lg.draw(INDICATOR_FAR, (ex-16)*scale, (ey+18)*scale, 0, scale) end
+
         local v = bgmap[(STRAIGHT*map_w)+FR_THREE+1]
         if v=='3' then 
             g.draw(FP_WALL_STONE2, WALL_THREE, 60*scale, 60*scale, 0, scale)
+        elseif v=='31' then 
+            g.draw(FP_WALL_STONEDOOR2, WALL_THREE, 60*scale, 60*scale, 0, scale)
         end
+        icon = GetFarFPObj(FR_THREE, STRAIGHT)
+        if icon ~= false then lg.draw(INDICATOR_FAR, (ex+16)*scale, (ey+18)*scale, 0, scale) end
+
         local v = bgmap[(LEFTTWO*map_w)+FR_TWO+1]
         if v=='3' then 
             g.draw(FP_WALL_STONE, ROW2_SIDEWALL_R, 20*scale, 50*scale, 0, -scale, scale);
+        elseif v=='31' then 
+            g.draw(FP_WALL_STONEDOOR, ROW2_SIDEWALL_R, 20*scale, 50*scale, 0, -scale, scale);
         end
+
         local v = bgmap[(RIGHTTWO*map_w)+FR_TWO+1]
         if v=='3' then 
             g.draw(FP_WALL_STONE, ROW2_SIDEWALL_R, 140*scale, 50*scale, 0, scale);
+        elseif v=='31' then 
+            g.draw(FP_WALL_STONEDOOR, ROW2_SIDEWALL_R, 140*scale, 50*scale, 0, scale);
         end
+
         v = bgmap[(LEFTONE*map_w)+FR_TWO+1]
         if v=='3' then 
             g.draw(FP_WALL_STONE2, FRONT_WALL, -25*scale, 45*scale, 0, scale)--front wall
             g.draw(FP_WALL_STONE, TWO_LEFT_WALL, 45*scale, 45*scale, 0, scale)--side wall
+        elseif v=='31' then 
+            g.draw(FP_WALL_STONEDOOR2, FRONT_WALL, -25*scale, 45*scale, 0, scale)--front wall
+            g.draw(FP_WALL_STONEDOOR, TWO_LEFT_WALL, 45*scale, 45*scale, 0, scale)--side wall
         end
+        icon = GetFPObj(FR_TWO, LEFTONE)
+        if icon ~= false then lg.draw(icon, (ex-36)*scale, (ey+16)*scale, 0, scale) end
+
         v = bgmap[(RIGHTONE*map_w)+FR_TWO+1]
         if v=='3' then 
             g.draw(FP_WALL_STONE2, FRONT_WALL, 185*scale, 45*scale, 0, -scale, scale)--front wall
             g.draw(FP_WALL_STONE, TWO_LEFT_WALL, 115*scale, 45*scale, 0, -scale, scale)--side wall
+        elseif v=='31' then 
+            g.draw(FP_WALL_STONEDOOR2, FRONT_WALL, 185*scale, 45*scale, 0, -scale, scale)--front wall
+            g.draw(FP_WALL_STONEDOOR, TWO_LEFT_WALL, 115*scale, 45*scale, 0, -scale, scale)--side wall
         end
-        
+        icon = GetFPObj(FR_TWO, RIGHTONE)
+        if icon ~= false then lg.draw(icon, (ex+52)*scale, (ey+16)*scale, 0, scale) end
+
         v = bgmap[(STRAIGHT*map_w)+FR_TWO+1]
         if v=='3' then 
             g.draw(FP_WALL_STONE2, FRONT_WALL, 45*scale, 45*scale, 0, scale)--back wall
+        elseif v=='31' then 
+            g.draw(FP_WALL_STONEDOOR2, FRONT_WALL, 45*scale, 45*scale, 0, scale)--back wall
         end
+        icon = GetFPObj(FR_TWO, STRAIGHT)
+        if icon ~= false then lg.draw(icon, (ex+10)*scale, (ey+16)*scale, 0, scale) end
+
         v = bgmap[(RIGHTONE*map_w)+FR_ONE+1]
         if v=='3' then 
             g.draw(FP_WALL_STONE2, FRONT_WALL_REDGE, 160*scale, 20*scale, 0, -scale*1.72, scale*1.72)--front wall
             g.draw(FP_WALL_STONE, ONE_LEFT_WALL, 140*scale, 20*scale, 0, -scale, scale)--side wall
+        elseif v=='31' then 
+            g.draw(FP_WALL_STONEDOOR2, FRONT_WALL_REDGE, 160*scale, 20*scale, 0, -scale*1.72, scale*1.72)--front wall
+            g.draw(FP_WALL_STONEDOOR, ONE_LEFT_WALL, 140*scale, 20*scale, 0, -scale, scale)--side wall
         end
+        icon = GetFPObj(FR_ONE, RIGHTONE)
+        if icon ~= false then lg.draw(icon, (ex+64)*scale, ey*scale, 0, scale*2) end
+
         v = bgmap[(LEFTONE*map_w)+FR_ONE+1]
         if v=='3' then 
             g.draw(FP_WALL_STONE2, FRONT_WALL_REDGE, 0, 20*scale, 0, scale*1.72)--front wall
             g.draw(FP_WALL_STONE, ONE_LEFT_WALL, 20*scale, 20*scale, 0, scale)--side wall
+        elseif v=='31' then 
+            g.draw(FP_WALL_STONEDOOR2, FRONT_WALL_REDGE, 0, 20*scale, 0, scale*1.72)--front wall
+            g.draw(FP_WALL_STONEDOOR, ONE_LEFT_WALL, 20*scale, 20*scale, 0, scale)--side wall
         end
+        icon = GetFPObj(FR_ONE, LEFTONE)
+        if icon ~= false then lg.draw(icon, (ex-82)*scale, ey*scale, 0, scale*2) end
+
         v = bgmap[(STRAIGHT*map_w)+FR_ONE+1]
         if v=='3' then 
             g.draw(FP_WALL_STONE2, FRONT_WALL, 20*scale, 20*scale, 0, scale*1.72)--front wall
+        elseif v=='31' then 
+            g.draw(FP_WALL_STONEDOOR2, FRONT_WALL, 20*scale, 20*scale, 0, scale*1.72)--front wall
         end
+        icon = GetFPObj(FR_ONE, STRAIGHT)
+        if icon ~= false then lg.draw(icon, (ex-8)*scale, ey*scale, 0, scale*2) end
+
         v = bgmap[(LEFTONE*map_w)+FZERO+1]
         if v=='3' then 
             g.draw(FP_WALL_STONE, IMM_LEFT_WALL, 0, 0, 0, scale)--lefthand wall
+        elseif v=='31' then 
+            g.draw(FP_WALL_STONEDOOR, IMM_LEFT_WALL, 0, 0, 0, scale)--lefthand wall
         end
         v = bgmap[(RIGHTONE*map_w)+FZERO+1]
         if v=='3' then 
             g.draw(FP_WALL_STONE, IMM_LEFT_WALL, 160*scale, 0, 0, -scale, scale)--lefthand wall
+        elseif v=='31' then 
+            g.draw(FP_WALL_STONEDOOR, IMM_LEFT_WALL, 160*scale, 0, 0, -scale, scale)--lefthand wall
         end
     end
     --FR_TWO, RIGHTONE and FR_TWO, LEFTONE
@@ -725,7 +905,6 @@ function love.draw(dT)
         
         --then sort floor first, then wall
         DrawFloors()
-        DrawWalls()
         local lat = nil 
         local long = nil 
                         
@@ -741,119 +920,120 @@ function love.draw(dT)
         elseif fpDirection==3 then 
             table.sort(viewableTiles, function(a,b) return a.x<b.x end)
         end
-
-        for m=1,#viewableTiles do 
-            for n=1,#currentMap do 
-                if viewableTiles[m].x == currentMap[n].x then 
-                    if viewableTiles[m].y == currentMap[n].y then 
-                        --print("I SEE SOMETHING!")
-                        FR_ONE = 1
-                        FR_TWO = 2
-                        FR_THREE = 3
-                        FR_FOUR = 4
-                        RIGHTTWO = -2
-                        RIGHTONE = -1
-                        STRAIGHT = 0
-                        LEFTONE = 1
-                        LEFTTWO = 2
-                        if px == currentMap[n].x and py == currentMap[n].y then 
-                            currentMap[n].examine = currentMap[n].examine or {}
-                            currentMap[n].name = currentMap[n].name or 'nothing special'
-                            currentMap[n].examine[1] = currentMap[n].examine[1] or 'You see ' .. currentMap[n].name
-                            AddLog(currentMap[n].examine[1]) 
-                        end 
-                        --figure out relative forward, l/r distance from player
-                        local dy = py - currentMap[n].y 
-                        local dx = px - currentMap[n].x
+        DrawWalls()
+        
+        -- for m=1,#viewableTiles do 
+        --     for n=1,#currentMap do 
+        --         if viewableTiles[m].x == currentMap[n].x then 
+        --             if viewableTiles[m].y == currentMap[n].y then 
+        --                 --print("I SEE SOMETHING!")
+        --                 FR_ONE = 1
+        --                 FR_TWO = 2
+        --                 FR_THREE = 3
+        --                 FR_FOUR = 4
+        --                 RIGHTTWO = -2
+        --                 RIGHTONE = -1
+        --                 STRAIGHT = 0
+        --                 LEFTONE = 1
+        --                 LEFTTWO = 2
+        --                 if px == currentMap[n].x and py == currentMap[n].y then 
+        --                     currentMap[n].examine = currentMap[n].examine or {}
+        --                     currentMap[n].name = currentMap[n].name or 'nothing special'
+        --                     currentMap[n].examine[1] = currentMap[n].examine[1] or 'You see ' .. currentMap[n].name
+        --                     AddLog(currentMap[n].examine[1]) 
+        --                 end 
+        --                 --figure out relative forward, l/r distance from player
+        --                 local dy = py - currentMap[n].y 
+        --                 local dx = px - currentMap[n].x
                        
-                        if fpDirection == 1 or fpDirection==3 then 
-                            --if fpDirection == 3 then dx = dx - 1 end 
-                            --print(dx, dy)
-                            if fpDirection == 1 then 
-                                if dy == -2 then long = RIGHTTWO end
-                                if dy == -1 then long = RIGHTONE end
-                                if dy == 0 then long = STRAIGHT end
-                                if dy == 2 then long = LEFTTWO end
-                                if dy == 1 then long = LEFTONE end
-                            else 
-                                if dy == -2 then long = LEFTTWO end
-                                if dy == -1 then long = LEFTONE end
-                                if dy == 0 then long = STRAIGHT end
-                                if dy == 2 then long = RIGHTTWO end
-                                if dy == 1 then long = RIGHTONE end
-                            end
-                            if math.abs(dx) == 4 then lat = FR_FOUR end 
-                            if math.abs(dx) == 3 then lat = FR_THREE end 
-                            if math.abs(dx) == 2 then lat = FR_TWO end 
-                            if math.abs(dx) == 1 then lat = FR_ONE end 
-                            if math.abs(dx) == 0 then lat = FZERO end 
-                        else
-                            if fpDirection == 0 then 
-                                if dx == -2 then long = RIGHTTWO end
-                                if dx == -1 then long = RIGHTONE end
-                                if dx == 0 then long = STRAIGHT end
-                                if dx == 2 then long = LEFTTWO end
-                                if dx == 1 then long = LEFTONE end
-                            else
-                                if dx == -2 then long = LEFTTWO end
-                                if dx == -1 then long = LEFTONE end
-                                if dx == 0 then long = STRAIGHT end
-                                if dx == 2 then long = RIGHTTWO end
-                                if dx == 1 then long = RIGHTONE end
-                            end
-                            if math.abs(dy) == 4 then lat = FR_FOUR end 
-                            if math.abs(dy) == 3 then lat = FR_THREE end 
-                            if math.abs(dy) == 2 then lat = FR_TWO end 
-                            if math.abs(dy) == 1 then lat = FR_ONE end 
-                            if math.abs(dy) == 0 then lat = FZERO end 
-                        end
-                        local ex, ey = 56, 60
-                        local mod = ''
-                        currentMap[n].encounter = currentMap[n].encounter or false 
-                        currentMap[n].object = currentMap[n].object or false 
-                        if currentMap[n].encounter == true then 
-                            mod = 'e'
-                        elseif currentMap[n].object == true then 
-                            mod = 'q'
-                        else
-                            mod = 'n'
-                        end
-                        --currentMap[n].examine = currentMap[n].examine or nil 
-                        --if currentMap[n].examine ~= nil then mod = 'q' end
-                        currentMap[n].fpg = currentMap[n].fpg or nil 
-                        if currentMap[n].fpg == nil then 
-                            currentMap[n].fpg = lg.newImage('assets/fp_indicator_'..mod..'.png');
-                        end 
-                        --local other = 
-                        if lat == FR_ONE and long == STRAIGHT then 
-                            lg.draw(currentMap[n].fpg, (ex-8)*scale, ey*scale, 0, scale*2)
-                        elseif lat == FR_TWO and long == STRAIGHT then 
-                            lg.draw(currentMap[n].fpg, (ex+10)*scale, (ey+16)*scale, 0, scale)
-                        elseif lat == FR_ONE and long == LEFTONE then 
-                            lg.draw(currentMap[n].fpg, (ex-82)*scale, ey*scale, 0, scale*2)
-                        elseif lat == FR_ONE and long == RIGHTONE then 
-                            lg.draw(currentMap[n].fpg, (ex+64)*scale, ey*scale, 0, scale*2)
-                        elseif lat == FR_TWO and long == LEFTONE then 
-                            lg.draw(currentMap[n].fpg, (ex-36)*scale, (ey+16)*scale, 0, scale)
-                        elseif lat == FR_TWO and long==RIGHTONE then 
-                            lg.draw(currentMap[n].fpg, (ex+56)*scale, (ey+16)*scale, 0, scale)
-                        elseif lat == FR_THREE and long == RIGHTONE then 
-                            lg.draw(INDICATOR_FAR, (ex+46)*scale, (ey+18)*scale, 0, scale)
-                        elseif lat == FR_THREE and long == RIGHTTWO then 
-                            lg.draw(INDICATOR_FAR, (ex+86)*scale, (ey+18)*scale, 0, scale)
-                        elseif lat == FR_THREE and long == LEFTONE then 
-                            lg.draw(INDICATOR_FAR, (ex-16)*scale, (ey+18)*scale, 0, scale)
-                        elseif lat == FR_THREE and long == LEFTTWO then 
-                            lg.draw(INDICATOR_FAR, (ex-58)*scale, (ey+18)*scale, 0, scale)
-                        elseif lat == FR_THREE and long == STRAIGHT then 
-                            lg.draw(INDICATOR_FAR, (ex+16)*scale, (ey+18)*scale, 0, scale)
+        --                 if fpDirection == 1 or fpDirection==3 then 
+        --                     --if fpDirection == 3 then dx = dx - 1 end 
+        --                     --print(dx, dy)
+        --                     if fpDirection == 1 then 
+        --                         if dy == -2 then long = RIGHTTWO end
+        --                         if dy == -1 then long = RIGHTONE end
+        --                         if dy == 0 then long = STRAIGHT end
+        --                         if dy == 2 then long = LEFTTWO end
+        --                         if dy == 1 then long = LEFTONE end
+        --                     else 
+        --                         if dy == -2 then long = LEFTTWO end
+        --                         if dy == -1 then long = LEFTONE end
+        --                         if dy == 0 then long = STRAIGHT end
+        --                         if dy == 2 then long = RIGHTTWO end
+        --                         if dy == 1 then long = RIGHTONE end
+        --                     end
+        --                     if math.abs(dx) == 4 then lat = FR_FOUR end 
+        --                     if math.abs(dx) == 3 then lat = FR_THREE end 
+        --                     if math.abs(dx) == 2 then lat = FR_TWO end 
+        --                     if math.abs(dx) == 1 then lat = FR_ONE end 
+        --                     if math.abs(dx) == 0 then lat = FZERO end 
+        --                 else
+        --                     if fpDirection == 0 then 
+        --                         if dx == -2 then long = RIGHTTWO end
+        --                         if dx == -1 then long = RIGHTONE end
+        --                         if dx == 0 then long = STRAIGHT end
+        --                         if dx == 2 then long = LEFTTWO end
+        --                         if dx == 1 then long = LEFTONE end
+        --                     else
+        --                         if dx == -2 then long = LEFTTWO end
+        --                         if dx == -1 then long = LEFTONE end
+        --                         if dx == 0 then long = STRAIGHT end
+        --                         if dx == 2 then long = RIGHTTWO end
+        --                         if dx == 1 then long = RIGHTONE end
+        --                     end
+        --                     if math.abs(dy) == 4 then lat = FR_FOUR end 
+        --                     if math.abs(dy) == 3 then lat = FR_THREE end 
+        --                     if math.abs(dy) == 2 then lat = FR_TWO end 
+        --                     if math.abs(dy) == 1 then lat = FR_ONE end 
+        --                     if math.abs(dy) == 0 then lat = FZERO end 
+        --                 end
+        --                 local ex, ey = 56, 60
+        --                 local mod = ''
+        --                 currentMap[n].encounter = currentMap[n].encounter or false 
+        --                 currentMap[n].object = currentMap[n].object or false 
+        --                 if currentMap[n].encounter == true then 
+        --                     mod = 'e'
+        --                 elseif currentMap[n].object == true then 
+        --                     mod = 'q'
+        --                 else
+        --                     mod = 'n'
+        --                 end
+        --                 --currentMap[n].examine = currentMap[n].examine or nil 
+        --                 --if currentMap[n].examine ~= nil then mod = 'q' end
+        --                 currentMap[n].fpg = currentMap[n].fpg or nil 
+        --                 if currentMap[n].fpg == nil then 
+        --                     currentMap[n].fpg = lg.newImage('assets/fp_indicator_'..mod..'.png');
+        --                 end 
+        --                 --local other = 
+        --                 if lat == FR_ONE and long == STRAIGHT then 
+        --                     lg.draw(currentMap[n].fpg, (ex-8)*scale, ey*scale, 0, scale*2)
+        --                 elseif lat == FR_TWO and long == STRAIGHT then 
+        --                     lg.draw(currentMap[n].fpg, (ex+10)*scale, (ey+16)*scale, 0, scale)
+        --                 elseif lat == FR_ONE and long == LEFTONE then 
+        --                     lg.draw(currentMap[n].fpg, (ex-82)*scale, ey*scale, 0, scale*2)
+        --                 elseif lat == FR_ONE and long == RIGHTONE then 
+        --                     lg.draw(currentMap[n].fpg, (ex+64)*scale, ey*scale, 0, scale*2)
+        --                 elseif lat == FR_TWO and long == LEFTONE then 
+        --                     lg.draw(currentMap[n].fpg, (ex-36)*scale, (ey+16)*scale, 0, scale)
+        --                 elseif lat == FR_TWO and long==RIGHTONE then 
+        --                     lg.draw(currentMap[n].fpg, (ex+56)*scale, (ey+16)*scale, 0, scale)
+        --                 elseif lat == FR_THREE and long == RIGHTONE then 
+        --                     lg.draw(INDICATOR_FAR, (ex+46)*scale, (ey+18)*scale, 0, scale)
+        --                 elseif lat == FR_THREE and long == RIGHTTWO then 
+        --                     lg.draw(INDICATOR_FAR, (ex+86)*scale, (ey+18)*scale, 0, scale)
+        --                 elseif lat == FR_THREE and long == LEFTONE then 
+        --                     lg.draw(INDICATOR_FAR, (ex-16)*scale, (ey+18)*scale, 0, scale)
+        --                 elseif lat == FR_THREE and long == LEFTTWO then 
+        --                     lg.draw(INDICATOR_FAR, (ex-58)*scale, (ey+18)*scale, 0, scale)
+        --                 elseif lat == FR_THREE and long == STRAIGHT then 
+        --                     lg.draw(INDICATOR_FAR, (ex+16)*scale, (ey+18)*scale, 0, scale)
                         
-                        end
-                    end
-                end
-            end
-        end
-    --local ft=bgmap[ ((py-1) * map_w) + (px+1)]
+        --                 end
+        --             end
+        --         end
+        --     end
+        -- end -- end indicator loop
+
         -- clean
         g.setColor(0, 0, 0, 1);
         g.rectangle("fill", 160*scale, 0, 90*scale, 190*scale)
@@ -1031,7 +1211,7 @@ function love.draw(dT)
         lg.translate(-4*scale, 0);
     end
     lg.translate(-8*scale, 0)
-    if inputMode == MOVE_MODE then 
+    if inputMode == MOVE_MODE or inputMode==FP_MOVE then 
         lg.print(" A)ttack   C)amp   E)xamine   I)nventory\n  M)agic/Skill   Z)tats", 0, (8*23)*scale, 0, scale);
         lg.print("↑→↓← Move", (8*15)*scale, (8*24)*scale, 0, scale);
     end

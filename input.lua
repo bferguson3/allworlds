@@ -70,9 +70,10 @@ function love.keypressed(key)
             elseif fpDirection == 2 and not CheckCollision(px, py-1)  then py = py - 1; sfx.step:play(); AddLog("North"); moved=true;
             elseif fpDirection == 3 and not CheckCollision(px+1, py) then px = px + 1; sfx.step:play(); AddLog("East"); moved=true; end
         elseif key == "right" then 
+            sfx.step:play(); AddLog("Turn right");
             fpDirection = fpDirection + 1
         elseif key == "left" then 
-            --px = px - 1
+            sfx.step:play(); AddLog("Turn left");
             fpDirection = fpDirection - 1
         elseif key == "up" then 
             if fpDirection == 0  and not CheckCollision(px, py-1) then py = py - 1; AddLog("North"); moved=true;
@@ -126,8 +127,41 @@ function love.keypressed(key)
                 end
             end
         end
-        print(inputMode, cameraMode, moved)
-    end
+        --print(inputMode, cameraMode, moved)
+        if key == "c" then 
+            AddLog("Camp")
+            if TryCamp() then 
+                inputMode = INP_TRANSITIONING
+                AddLog("Setting up camp...", 0)
+                local healed = TryConsumeRations()
+                
+                --AddQueue({"wait", 0.5})
+                AddQueue({"startTrans"})
+                AddQueue({"wait", 0.4})
+                AddQueue({"campZoom"})
+                AddQueue({"wait", 3})
+                
+                AddQueue({"startTrans"})
+                AddQueue({"wait", 0.4})
+                AddQueue({"exitCamp", healed})
+            end
+        elseif key == "a" then 
+            AddLog("unimplemented")
+        elseif key == "z" then 
+            inputMode = STATS_MAIN
+            return
+        
+        elseif key == "1" then 
+            activePC = 1
+        elseif key == "2" then 
+            activePC = 2
+        elseif key == "3" then 
+            activePC = 3
+        elseif key == "4" then 
+            activePC = 4
+        end
+    
+    end -- end FP_MOVE
     if inputMode == COMBAT_MOVE then
         if key == "up" and CheckCollision(currentTurn.x, currentTurn.y-1) == false then 
             for h=1,#selectTiles do 
@@ -260,7 +294,7 @@ function love.keypressed(key)
         elseif key == "down" then 
             for p=1,#selectTiles do 
                 if (selectTiles[p].x==selector.x) and (selectTiles[p].y==(selector.y+1)) then 
-                    selector.y = selector.y + 1
+                    selector.y = selector.y--selector.y = selector.y + 1
                     return
                 end
             end

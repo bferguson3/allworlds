@@ -77,7 +77,7 @@ PLAY_INTRO = 12;
 MAKE_CHR = 13;
 FP_MOVE = 14;
 inputMode = TITLE_SCREEN;
-INDICATOR_FAR = nil
+INDICATOR_FAR, INDICATOR_NME, INDICATOR_NPC, INDICATOR_OBJ = nil, nil, nil, nil
 -- str dex con int wis cha 
 init = {}
 init.fighter = { str=16, dex=12, con=14, int=10, wis=10, cha=10}
@@ -120,6 +120,7 @@ FP_WATER_FLOOR, FP_WATER_FLOOR2, FP_WATER_FLOOR3 = nil, nil, nil
 FP_BLACKTILE_FLOOR, FP_BLACKTILE_FLOOR2, FP_BLACKTILE_FLOOR3 = nil, nil, nil 
 FP_DIRT_FLOOR, FP_DIRT_FLOOR2, FP_DIRT_FLOOR3 = nil, nil, nil 
 FP_BLANK = nil
+FP_WALL_STONEDOOR, FP_WALL_STONEDOOR2 = nil, nil
 
 current_npc = nil;
 myinput = ''
@@ -158,6 +159,9 @@ m()
 
 m = love.filesystem.load("intro.lua")
 m()
+
+function inc(n) n = n + 1 end 
+function dec(n) n = n - 1 end 
 
 function getac(o)
     a = 10 - o.armor.ac - math.floor((o.dex-10)/2);
@@ -203,6 +207,7 @@ function SetZoom(z)
 end
 
 function love.load(arg)
+    --function love.init()
     --====================================
     --=ANDROID SHIT==-
     --love.window.setMode(0, 0, {fullscreen=false});
@@ -238,6 +243,9 @@ function love.load(arg)
     lg.setDefaultFilter('nearest', 'nearest', 0);
     lg.setBackgroundColor(0.2, 0.2, 0.2); 
     INDICATOR_FAR = lg.newImage('assets/fp_indicatorb.png')
+    INDICATOR_NPC = lg.newImage('assets/fp_indicator_n.png')
+    INDICATOR_OBJ = lg.newImage('assets/fp_indicator_q.png')
+    INDICATOR_NME = lg.newImage('assets/fp_indicator_e.png')
     a = love.image.newImageData('assets/fpstnwl.png');
     a:mapPixel(changeTransparent);
     FP_WALL_STONE = g.newImage(a);
@@ -257,7 +265,12 @@ function love.load(arg)
     FP_DIRT_FLOOR2 = g.newImage('assets/fpdirtb.png');
     FP_DIRT_FLOOR3 = g.newImage('assets/fpdirtc.png');
     FP_BLANK = g.newImage('assets/fptmp.png')
-        
+    a = love.image.newImageData('assets/fp_door_a.png');
+    a:mapPixel(changeTransparent);
+    FP_WALL_STONEDOOR = g.newImage(a);
+    a = love.image.newImageData('assets/fp_door_b.png');
+    a:mapPixel(changeTransparent);
+    FP_WALL_STONEDOOR2 = g.newImage(a);
     --defaultfont = lg.setNewFont('ModernDOS8x8.ttf', 16);
     --defaultfont = lg.setNewFont('assets/PxPlus_AmstradPC1512-2y.ttf', 8);
     --defaultfont = lg.setNewFont('assets/Px437_ATI_SmallW_6x8.ttf', 8);
@@ -433,14 +446,6 @@ function LoadGame()
         party[p].player = true;
         party[p].inventory = {}
         for ic=1,10 do 
-            --local im = party[f].inventory[u] or { name="none" }
-            --saveData = saveData .. im.name .. '\x00'
-            --local st = im.stack or 1
-            --saveData = saveData .. st .. '\x00'
-            --local e = im.equipped or false 
-            --if e == false then e = 0 else e = 1 end 
-            --saveData = saveData .. e .. '\x00'
-            --itemname,count,equipped
             if loadData[ct] ~= "none" then 
                 o = {}
                 o.name = loadData[ct]; ct = ct + 1
@@ -816,6 +821,7 @@ end
 
 function CheckTalk(x, y)
     for i = 1, #currentMap do 
+        currentMap[i].object = currentMap[i].object or false
         if x == currentMap[i].x and currentMap[i].y == y and currentMap[i].object==false then 
             if currentMap[i].name then 
                 AddLog("You greet "..currentMap[i].name..".");
@@ -842,10 +848,11 @@ end
 
 function AskNPC(inp)
     
-    current_npc.chat[inp] = current_npc.chat[inp] or {"I don't understand."}
+    current_npc.chat[inp] = current_npc.chat[inp] or {}
     inp = string.lower(inp)
     if inp == 'hi' or inp == 'hail' or inp == 'greetings' then inp = 'hello' end
     if inp == 'farewell' or inp == 'goodbye' then inp = 'bye' end
+    current_npc.chat[inp][1] = current_npc.chat[inp][1] or "I don't understand."
     AddLog("\""..current_npc.chat[inp][1].."\"", 0)
     if inp == "bye" then 
         AddLog("Ok.")
@@ -1061,3 +1068,4 @@ m()
 --dofile("combat.lua")
 m = love.filesystem.load("combat.lua")
 m()
+
