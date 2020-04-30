@@ -1,20 +1,5 @@
 -- ALLWORLDS
---p collide with doors/unlock code, enemies dont 
---damage flash on sprites
---save transitions - only save/load once
---projectile/attack fx
---magic system 
---dungeons
---day/night
---door sfx, bump sfx
---inventory
---shops/gold
---combat music
---hp/mp crystals
---options for: square ranges
---             non tactical combat
---ranged hits melee
---spellcasting interrupted by melee
+
 
 lg = love.graphics;
 
@@ -122,6 +107,10 @@ FP_DIRT_FLOOR, FP_DIRT_FLOOR2, FP_DIRT_FLOOR3 = nil, nil, nil
 FP_BLANK = nil
 FP_WALL_STONEDOOR, FP_WALL_STONEDOOR2 = nil, nil
 
+HP_ICON, MP_ICON = nil, nil 
+GEMRED, GEMCYAN, GEMBLUE, GEMGREEN, GEMYELLOW = nil, nil, nil, nil, nil
+
+
 current_npc = nil;
 myinput = ''
 selectorflash = 0;
@@ -138,6 +127,33 @@ music = love.audio.newSource("music/dreaded_unknown.mp3", "stream")
 t = coroutine.create(function ()
     love.timer.sleep(0.5);
 end)
+--STRING EXTENSION FROM LOVE2d.org
+local meta = getmetatable("") -- get the string metatable
+ 
+meta.__add = function(a,b) -- the + operator
+    return a..b
+end
+ 
+meta.__sub = function(a,b) -- the - operator
+    return a:gsub(b,"")
+end
+ 
+meta.__mul = function(a,b) -- the * operator
+    return a:rep(b)
+end
+ 
+-- if you have string.explode (check out the String exploding snippet) you can also add this:
+meta.__div = function(a,b) -- the / operator
+    return a:explode(b)
+end
+ 
+meta.__index = function(a,b) -- if you attempt to do string[id]
+    if type(b) ~= "number" then
+        return string[b]
+    end
+    return a:sub(b,b)
+end
+-- END COPIED CODE
 
 m = love.filesystem.load("maps/map_1.lua")--dofile("maps/map_1.lua")
 m()
@@ -211,7 +227,13 @@ function love.load(arg)
     --====================================
     --=ANDROID SHIT==-
     --love.window.setMode(0, 0, {fullscreen=false});
-    
+    if love.system.getOS() == "Windows" then 
+        os.execute('./README.md')
+        --return
+    elseif love.system.getOS() == "Linux" then 
+        --os.execute('gedit ./README.md')
+        --return
+    end
     SetZoom(2)
 
     if love.filesystem.getInfo("01.sav") == nil then 
@@ -271,6 +293,17 @@ function love.load(arg)
     a = love.image.newImageData('assets/fp_door_b.png');
     a:mapPixel(changeTransparent);
     FP_WALL_STONEDOOR2 = g.newImage(a);
+
+    HP_ICON = g.newImage('assets/heart_8x8.png');
+    MP_ICON = g.newImage('assets/magicon_8x8.png');
+    GEMRED = g.newImage('assets/redgem1_8x8.png');
+    GEMCYAN = g.newImage('assets/magicgem1_8x8.png');
+    GEMBLUE = g.newImage('assets/bluegem1_8x8.png');
+    GEMGREEN = g.newImage('assets/greengem1_8x8.png');
+    GEMYELLOW = g.newImage('assets/yellowgem1_8x8.png');
+    --Alistair      Fg 1 AC 5 
+     --H ||||||||| M ||| ||| ||| ||| 
+
     --defaultfont = lg.setNewFont('ModernDOS8x8.ttf', 16);
     --defaultfont = lg.setNewFont('assets/PxPlus_AmstradPC1512-2y.ttf', 8);
     --defaultfont = lg.setNewFont('assets/Px437_ATI_SmallW_6x8.ttf', 8);

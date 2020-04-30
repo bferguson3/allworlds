@@ -181,9 +181,24 @@ function TestDead(t)
     if t.hp <= 0 then 
         AddLog(t.name .. " dies!", 0)
         --xp
+        --get party's average level
+        --XP = (25*MLVL)*MLVL / PTYLVL
         if t.player == false then 
-            combatXP = combatXP + (t.level*25)
+            local alv = 0
+            local pcnt = 0
+            for pn=1,#combat_actors do 
+                if combat_actors[pn].player == true then 
+                    pcnt = pcnt + 1
+                    alv = alv + combat_actors[pn].level
+                end
+            end
+            alv = math.floor(alv/pcnt); -- total level divided by player count
+            combatXP = combatXP + math.floor((t.level*25)*t.level / alv);
         end
+        
+        --if t.player == false then 
+        --    combatXP = combatXP + (t.level*25)
+        --end
         
         local n = 1
         for n=1,#combat_actors do 

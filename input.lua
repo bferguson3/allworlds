@@ -285,6 +285,7 @@ function love.keypressed(key)
         
     elseif inputMode == COMBAT_MELEE then 
         if key == "up" then 
+            --print('up')
             for p=1,#selectTiles do 
                 if (selectTiles[p].x==selector.x) and (selectTiles[p].y==(selector.y-1)) then 
                     selector.y = selector.y - 1
@@ -292,9 +293,11 @@ function love.keypressed(key)
                 end
             end
         elseif key == "down" then 
+            --print 'down'
             for p=1,#selectTiles do 
+                --print(selectTiles[p].x)
                 if (selectTiles[p].x==selector.x) and (selectTiles[p].y==(selector.y+1)) then 
-                    selector.y = selector.y--selector.y = selector.y + 1
+                    selector.y = selector.y+1
                     return
                 end
             end
@@ -356,6 +359,7 @@ function love.keypressed(key)
                     --print(lx, ly)
                     if math.abs(lx)+math.abs(ly) >= currentTurn.weapon.minRange then
                         table.insert(selectTiles, {x=(currentTurn.x+lx), y=(currentTurn.y+ly)})
+                        --print('x' .. selectTiles[#selectTiles].x .. 'y' .. selectTiles[#selectTiles].y);
                     end
                 end
             end

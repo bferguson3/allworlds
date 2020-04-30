@@ -922,118 +922,7 @@ function love.draw(dT)
         end
         DrawWalls()
         
-        -- for m=1,#viewableTiles do 
-        --     for n=1,#currentMap do 
-        --         if viewableTiles[m].x == currentMap[n].x then 
-        --             if viewableTiles[m].y == currentMap[n].y then 
-        --                 --print("I SEE SOMETHING!")
-        --                 FR_ONE = 1
-        --                 FR_TWO = 2
-        --                 FR_THREE = 3
-        --                 FR_FOUR = 4
-        --                 RIGHTTWO = -2
-        --                 RIGHTONE = -1
-        --                 STRAIGHT = 0
-        --                 LEFTONE = 1
-        --                 LEFTTWO = 2
-        --                 if px == currentMap[n].x and py == currentMap[n].y then 
-        --                     currentMap[n].examine = currentMap[n].examine or {}
-        --                     currentMap[n].name = currentMap[n].name or 'nothing special'
-        --                     currentMap[n].examine[1] = currentMap[n].examine[1] or 'You see ' .. currentMap[n].name
-        --                     AddLog(currentMap[n].examine[1]) 
-        --                 end 
-        --                 --figure out relative forward, l/r distance from player
-        --                 local dy = py - currentMap[n].y 
-        --                 local dx = px - currentMap[n].x
-                       
-        --                 if fpDirection == 1 or fpDirection==3 then 
-        --                     --if fpDirection == 3 then dx = dx - 1 end 
-        --                     --print(dx, dy)
-        --                     if fpDirection == 1 then 
-        --                         if dy == -2 then long = RIGHTTWO end
-        --                         if dy == -1 then long = RIGHTONE end
-        --                         if dy == 0 then long = STRAIGHT end
-        --                         if dy == 2 then long = LEFTTWO end
-        --                         if dy == 1 then long = LEFTONE end
-        --                     else 
-        --                         if dy == -2 then long = LEFTTWO end
-        --                         if dy == -1 then long = LEFTONE end
-        --                         if dy == 0 then long = STRAIGHT end
-        --                         if dy == 2 then long = RIGHTTWO end
-        --                         if dy == 1 then long = RIGHTONE end
-        --                     end
-        --                     if math.abs(dx) == 4 then lat = FR_FOUR end 
-        --                     if math.abs(dx) == 3 then lat = FR_THREE end 
-        --                     if math.abs(dx) == 2 then lat = FR_TWO end 
-        --                     if math.abs(dx) == 1 then lat = FR_ONE end 
-        --                     if math.abs(dx) == 0 then lat = FZERO end 
-        --                 else
-        --                     if fpDirection == 0 then 
-        --                         if dx == -2 then long = RIGHTTWO end
-        --                         if dx == -1 then long = RIGHTONE end
-        --                         if dx == 0 then long = STRAIGHT end
-        --                         if dx == 2 then long = LEFTTWO end
-        --                         if dx == 1 then long = LEFTONE end
-        --                     else
-        --                         if dx == -2 then long = LEFTTWO end
-        --                         if dx == -1 then long = LEFTONE end
-        --                         if dx == 0 then long = STRAIGHT end
-        --                         if dx == 2 then long = RIGHTTWO end
-        --                         if dx == 1 then long = RIGHTONE end
-        --                     end
-        --                     if math.abs(dy) == 4 then lat = FR_FOUR end 
-        --                     if math.abs(dy) == 3 then lat = FR_THREE end 
-        --                     if math.abs(dy) == 2 then lat = FR_TWO end 
-        --                     if math.abs(dy) == 1 then lat = FR_ONE end 
-        --                     if math.abs(dy) == 0 then lat = FZERO end 
-        --                 end
-        --                 local ex, ey = 56, 60
-        --                 local mod = ''
-        --                 currentMap[n].encounter = currentMap[n].encounter or false 
-        --                 currentMap[n].object = currentMap[n].object or false 
-        --                 if currentMap[n].encounter == true then 
-        --                     mod = 'e'
-        --                 elseif currentMap[n].object == true then 
-        --                     mod = 'q'
-        --                 else
-        --                     mod = 'n'
-        --                 end
-        --                 --currentMap[n].examine = currentMap[n].examine or nil 
-        --                 --if currentMap[n].examine ~= nil then mod = 'q' end
-        --                 currentMap[n].fpg = currentMap[n].fpg or nil 
-        --                 if currentMap[n].fpg == nil then 
-        --                     currentMap[n].fpg = lg.newImage('assets/fp_indicator_'..mod..'.png');
-        --                 end 
-        --                 --local other = 
-        --                 if lat == FR_ONE and long == STRAIGHT then 
-        --                     lg.draw(currentMap[n].fpg, (ex-8)*scale, ey*scale, 0, scale*2)
-        --                 elseif lat == FR_TWO and long == STRAIGHT then 
-        --                     lg.draw(currentMap[n].fpg, (ex+10)*scale, (ey+16)*scale, 0, scale)
-        --                 elseif lat == FR_ONE and long == LEFTONE then 
-        --                     lg.draw(currentMap[n].fpg, (ex-82)*scale, ey*scale, 0, scale*2)
-        --                 elseif lat == FR_ONE and long == RIGHTONE then 
-        --                     lg.draw(currentMap[n].fpg, (ex+64)*scale, ey*scale, 0, scale*2)
-        --                 elseif lat == FR_TWO and long == LEFTONE then 
-        --                     lg.draw(currentMap[n].fpg, (ex-36)*scale, (ey+16)*scale, 0, scale)
-        --                 elseif lat == FR_TWO and long==RIGHTONE then 
-        --                     lg.draw(currentMap[n].fpg, (ex+56)*scale, (ey+16)*scale, 0, scale)
-        --                 elseif lat == FR_THREE and long == RIGHTONE then 
-        --                     lg.draw(INDICATOR_FAR, (ex+46)*scale, (ey+18)*scale, 0, scale)
-        --                 elseif lat == FR_THREE and long == RIGHTTWO then 
-        --                     lg.draw(INDICATOR_FAR, (ex+86)*scale, (ey+18)*scale, 0, scale)
-        --                 elseif lat == FR_THREE and long == LEFTONE then 
-        --                     lg.draw(INDICATOR_FAR, (ex-16)*scale, (ey+18)*scale, 0, scale)
-        --                 elseif lat == FR_THREE and long == LEFTTWO then 
-        --                     lg.draw(INDICATOR_FAR, (ex-58)*scale, (ey+18)*scale, 0, scale)
-        --                 elseif lat == FR_THREE and long == STRAIGHT then 
-        --                     lg.draw(INDICATOR_FAR, (ex+16)*scale, (ey+18)*scale, 0, scale)
-                        
-        --                 end
-        --             end
-        --         end
-        --     end
-        -- end -- end indicator loop
-
+        
         -- clean
         g.setColor(0, 0, 0, 1);
         g.rectangle("fill", 160*scale, 0, 90*scale, 190*scale)
@@ -1185,6 +1074,7 @@ function love.draw(dT)
             lg.print(known_kw[i], 24.5*8*scale, (8*i)*scale, 0, scale);
         end 
     else 
+        --display status 
         lg.translate(4*scale, 0);
         for b=1,#party do
             if inCombat==false then 
@@ -1202,9 +1092,23 @@ function love.draw(dT)
             end
 
             lg.print(party[b].name, 24*8*scale, ((8*(b*2))-8)*scale, 0, scale);
-            lg.print("  "..party[b].class.." "..party[b].level, 24*8*scale, (16*b)*scale, 0, scale);
-            lg.print("AC " .. getac(party[b]), 272*scale, (16*b)*scale, 0, scale);
-            lg.print("HP " .. party[b].hp, ((24*8)+(10*8))*scale, ((8*(b*2))-8)*scale, 0, scale);
+            lg.print(party[b].class[1] .. party[b].class[2] .. " " .. party[b].level, 32*8*scale, ((8*(b*2))-8)*scale, 0, scale);
+            lg.print(" / AC " .. getac(party[b]), 34*8*scale, ((8*(b*2))-8)*scale, 0, scale);
+            lg.setColor(1,1,1,1)
+            lg.draw(HP_ICON, 25*8*scale, 16*b*scale, 0, scale);
+            lg.draw(MP_ICON, 31*8*scale, 16*b*scale, 0, scale);
+            for hi=1,8 do 
+                lg.draw(GEMRED, (25+(hi/2)+1)*8*scale, 16*b*scale, 0, scale);
+            end
+            lg.draw(GEMBLUE, 32.5*8*scale, 16*b*scale, 0, scale);
+            lg.draw(GEMBLUE, 33*8*scale, 16*b*scale, 0, scale);
+            lg.draw(GEMCYAN, 33.5*8*scale, 16*b*scale, 0, scale);
+            lg.draw(GEMCYAN, 34*8*scale, 16*b*scale, 0, scale);
+            lg.draw(GEMGREEN, 34.5*8*scale, 16*b*scale, 0, scale);
+            lg.draw(GEMGREEN, 35*8*scale, 16*b*scale, 0, scale);
+            lg.draw(GEMYELLOW, 35.5*8*scale, 16*b*scale, 0, scale);
+            lg.draw(GEMYELLOW, 36*8*scale, 16*b*scale, 0, scale);
+            --lg.print("HP " .. party[b].hp, ((24*8)+(10*8))*scale, ((8*(b*2))-8)*scale, 0, scale);
         end
         lg.setColor(1, 1, 1, 1)
         lg.print("GOLD\nRELICS", 24*8*scale, (8*10)*scale, 0, scale);
