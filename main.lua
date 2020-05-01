@@ -46,7 +46,7 @@ ZOOM_FP = 2;
 STATUSWINDOW = 3
 cameraMode = ZOOM_SMALL;
 
-log = { ".", ".", ".", ".", ".", ".", ".", ".", ".", ".", ".", "> Loaded." }
+log = { ".", ".", ".", ".", ".", ".", ".", ".", ".", ".", "> Loaded." }
 --inputMOde
 MOVE_MODE = 0;
 TALK_MODE = 1;
@@ -109,7 +109,7 @@ FP_WALL_STONEDOOR, FP_WALL_STONEDOOR2 = nil, nil
 
 HP_ICON, MP_ICON = nil, nil 
 GEMRED, GEMCYAN, GEMBLUE, GEMGREEN, GEMYELLOW = nil, nil, nil, nil, nil
-
+GEMREDH, GEMCYANH, GEMBLUEH, GEMGREENH, GEMYELLOWH = nil, nil, nil, nil, nil
 
 current_npc = nil;
 myinput = ''
@@ -296,11 +296,18 @@ function love.load(arg)
 
     HP_ICON = g.newImage('assets/heart_8x8.png');
     MP_ICON = g.newImage('assets/magicon_8x8.png');
+    
     GEMRED = g.newImage('assets/redgem1_8x8.png');
     GEMCYAN = g.newImage('assets/magicgem1_8x8.png');
     GEMBLUE = g.newImage('assets/bluegem1_8x8.png');
     GEMGREEN = g.newImage('assets/greengem1_8x8.png');
     GEMYELLOW = g.newImage('assets/yellowgem1_8x8.png');
+    
+    GEMREDH = g.newImage('assets/redgemh_8x8.png');
+    GEMCYANH = g.newImage('assets/magicgemh_8x8.png');
+    GEMBLUEH = g.newImage('assets/bluegemh_8x8.png');
+    GEMGREENH = g.newImage('assets/greengemh_8x8.png');
+    GEMYELLOWH = g.newImage('assets/yellowgemh_8x8.png');
     --Alistair      Fg 1 AC 5 
      --H ||||||||| M ||| ||| ||| ||| 
 
@@ -411,6 +418,10 @@ function SaveGame()
         saveData = saveData .. party[f].name .. '\x00'
         saveData = saveData .. party[f].hp .. '\x00'
         saveData = saveData .. party[f].mhp .. '\x00'
+        saveData = saveData .. party[f].mp[1] .. '\x00'
+        saveData = saveData .. party[f].mp[2] .. '\x00'
+        saveData = saveData .. party[f].mp[3] .. '\x00'
+        saveData = saveData .. party[f].mp[4] .. '\x00'
         saveData = saveData .. party[f].str .. '\x00'
         saveData = saveData .. party[f].dex .. '\x00'
         saveData = saveData .. party[f].con .. '\x00'
@@ -463,6 +474,11 @@ function LoadGame()
         --print(party[p].name)
         party[p].hp = tonumber(loadData[ct]); ct = ct + 1;
         party[p].mhp = tonumber(loadData[ct]); ct = ct + 1;
+        party[p].mp = {}
+        party[p].mp[1] = tonumber(loadData[ct]); ct = ct + 1;
+        party[p].mp[2] = tonumber(loadData[ct]); ct = ct + 1;
+        party[p].mp[3] = tonumber(loadData[ct]); ct = ct + 1;
+        party[p].mp[4] = tonumber(loadData[ct]); ct = ct + 1;
         party[p].str = tonumber(loadData[ct]); ct = ct + 1;
         party[p].dex = tonumber(loadData[ct]); ct = ct + 1;
         party[p].con = tonumber(loadData[ct]); ct = ct + 1;

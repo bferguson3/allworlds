@@ -974,6 +974,7 @@ function love.draw(dT)
         lg.print("F)ighter,  R)ogue  or  M)age ?", 8*8*s, 21*8*s, 0, s)
         return
     end
+
     -- BIG
     lg.translate(16*scale, 8*scale)
     if cameraMode == ZOOM_BIG then 
@@ -1057,17 +1058,17 @@ function love.draw(dT)
         lg.draw(tileSet[1].sheet, tileSet[1].quads[7], 23*8*scale, i*8*scale, 0, scale)
     end
     for i=1,13 do 
-        lg.draw(tileSet[1].sheet, tileSet[1].quads[6], ((i+23)*8)*scale, 12*8*scale, 0, scale)
+        lg.draw(tileSet[1].sheet, tileSet[1].quads[6], ((i+23)*8)*scale, 13*8*scale, 0, scale)
     end
     lg.draw(tileSet[1].sheet, tileSet[1].quads[5], 0, 0, 0, scale)
     lg.draw(tileSet[1].sheet, tileSet[1].quads[5], 23*8*scale, 0, 0, scale)
     lg.draw(tileSet[1].sheet, tileSet[1].quads[5], 0, 22*8*scale, 0, scale)
     lg.draw(tileSet[1].sheet, tileSet[1].quads[5], 23*8*scale, 22*8*scale, 0, scale)
-    lg.draw(tileSet[1].sheet, tileSet[1].quads[5], 23*8*scale, 12*8*scale, 0, scale)
-    lg.draw(tileSet[1].sheet, tileSet[1].quads[5], 37*8*scale, 12*8*scale, 0, scale)
+    lg.draw(tileSet[1].sheet, tileSet[1].quads[5], 23*8*scale, 13*8*scale, 0, scale)
+    lg.draw(tileSet[1].sheet, tileSet[1].quads[5], 37*8*scale, 13*8*scale, 0, scale)
 
     for i = 1, #log do 
-        lg.print(log[i], 24.5*8*scale, (96+(8*i))*scale, 0, scale);
+        lg.print(log[i], 24.5*8*scale, ((96+8)+(8*i))*scale, 0, scale);
     end
     if inputMode == CHAT_INPUT then 
         for i=1, #known_kw do 
@@ -1090,28 +1091,48 @@ function love.draw(dT)
                     lg.setColor(1, 1, 1, 1)
                 end 
             end
-
-            lg.print(party[b].name, 24*8*scale, ((8*(b*2))-8)*scale, 0, scale);
-            lg.print(party[b].class[1] .. party[b].class[2] .. " " .. party[b].level, 32*8*scale, ((8*(b*2))-8)*scale, 0, scale);
-            lg.print(" / AC " .. getac(party[b]), 34*8*scale, ((8*(b*2))-8)*scale, 0, scale);
+            
+            lg.print(party[b].name, 24*8*scale, ((24*b)-16)*scale, 0, scale);
+            lg.print(party[b].class[1] .. party[b].class[2] .. " " .. party[b].level, 32*8*scale, ((24*b)-16)*scale, 0, scale);
+            lg.print(" / AC " .. getac(party[b]), 34*8*scale, ((24*b)-16)*scale, 0, scale);
             lg.setColor(1,1,1,1)
-            lg.draw(HP_ICON, 25*8*scale, 16*b*scale, 0, scale);
-            lg.draw(MP_ICON, 31*8*scale, 16*b*scale, 0, scale);
-            for hi=1,8 do 
-                lg.draw(GEMRED, (25+(hi/2)+1)*8*scale, 16*b*scale, 0, scale);
+            lg.draw(HP_ICON, 25*8*scale, ((24*b)-8)*scale, 0, scale);
+            --lg.draw(MP_ICON, 32*8*scale, 16*b*scale, 0, scale);
+            lg.draw(MP_ICON, 25*8*scale, 24*b*scale, 0, scale);
+            --draw high gems in clear, low gems in filled
+            --local mhpc = math.floor((party[b].hp / party[b].mhp)*20)
+            --local mhpc2 = math.ceil((party[b].hp / party[b].mhp)*20)
+            local mhpc = math.ceil(party[b].hp / 8)
+            local mhpc2 = math.ceil(party[b].mhp / 8)
+            for hi=1,mhpc2 do 
+                lg.draw(GEMREDH, (25+(hi/2)+1)*8*scale,((24*b)-8)*scale, 0, scale);
             end
-            lg.draw(GEMBLUE, 32.5*8*scale, 16*b*scale, 0, scale);
-            lg.draw(GEMBLUE, 33*8*scale, 16*b*scale, 0, scale);
-            lg.draw(GEMCYAN, 33.5*8*scale, 16*b*scale, 0, scale);
-            lg.draw(GEMCYAN, 34*8*scale, 16*b*scale, 0, scale);
-            lg.draw(GEMGREEN, 34.5*8*scale, 16*b*scale, 0, scale);
-            lg.draw(GEMGREEN, 35*8*scale, 16*b*scale, 0, scale);
-            lg.draw(GEMYELLOW, 35.5*8*scale, 16*b*scale, 0, scale);
-            lg.draw(GEMYELLOW, 36*8*scale, 16*b*scale, 0, scale);
-            --lg.print("HP " .. party[b].hp, ((24*8)+(10*8))*scale, ((8*(b*2))-8)*scale, 0, scale);
+            for hi=1,mhpc do 
+                lg.draw(GEMRED, (25+(hi/2)+1)*8*scale, ((24*b)-8)*scale, 0, scale);
+            end
+            --mp 1
+            local m = math.floor(party[b].mp[1])
+            for i=1,m do 
+                lg.draw(GEMBLUE, (26+(0.5*i))*8*scale, 24*b*scale, 0, scale);
+            end
+            --mp 2
+            m = math.floor(party[b].mp[2])
+            for i=1,m do 
+                lg.draw(GEMCYAN, (28+(0.5*i)+0.5)*8*scale, 24*b*scale, 0, scale);
+            end
+            --mp 3
+            m = math.floor(party[b].mp[3])
+            for i=1,m do 
+                lg.draw(GEMGREEN, (30+(0.5*i)+1)*8*scale, 24*b*scale, 0, scale);
+            end
+            --mp 4
+            m2 = math.floor(party[b].mp[4])
+            for i=1,m2 do 
+                lg.draw(GEMYELLOW, (32+(0.5*i)+1.5)*8*scale, 24*b*scale, 0, scale);
+            end
         end
         lg.setColor(1, 1, 1, 1)
-        lg.print("GOLD\nRELICS", 24*8*scale, (8*10)*scale, 0, scale);
+        --lg.print("GOLD\nRELICS", 24*8*scale, (8*13)*scale, 0, scale);
         lg.translate(-4*scale, 0);
     end
     lg.translate(-8*scale, 0)
@@ -1160,6 +1181,7 @@ function love.draw(dT)
         
         local r = "assets/"
         r = r..party[activePC].g.."_16x16.png";
+        party[activePC].imgb = party[activePC].imgb or lg.newImage(r)
         lg.draw(party[activePC].imgb, s*16, s*16, 0, s);
         lg.print(party[activePC].name, 8*s, 40*s, 0, s);
         lg.print("Strength\nDexterity\nConstitution\nIntelligence\nWisdom\nCharisma", 8*s, 56*s, 0, s);
