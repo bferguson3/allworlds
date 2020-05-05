@@ -535,7 +535,6 @@ function love.keypressed(key)
             cameraMode = 3
         end
         if (moved == true) then 
-            print('stepped')
             sfx.step:play()
 
             enemyStep = enemyStep - 1

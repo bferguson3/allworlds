@@ -1,5 +1,5 @@
 function MeleeTwo(tgt)
-    --print(tgt.name)
+    
     local dmg = 0;
     selector.x, selector.y = tgt.x, tgt.y
     local hit = false;
@@ -50,7 +50,7 @@ end
 
 
 function StartCombat(nmes)
-    --print(nmes)
+    
     lastActive = activePC;
     outOfCombatState.map = currentMap.fname
     outOfCombatState.x, outOfCombatState.y = px, py
@@ -58,7 +58,7 @@ function StartCombat(nmes)
     ppos = {{x=5, y=8},{x=4,y=9},{x=6,y=9},{x=5,y=9}}
     combat_actors = {}
     --party
-    --print(currentTurn.name)
+    
     for i=1,#party do 
         party[i].x, party[i].y = ppos[i].x, ppos[i].y 
         table.insert(combat_actors, party[i]);
@@ -93,26 +93,26 @@ function FinishTransCombat(m)
     AddLog("Combat!!", 0)
     inCombat = true;
     px, py = 5, 5;
-    print('debug1')
+    
     
     -- initiative.
     for i=1,#combat_actors do 
         combat_actors[i].init = math.ceil(love.math.random()*10) + math.floor((combat_actors[i].dex-10)/2);
-        --print(combat_actors[i].name.." "..combat_actors[i].init)
+    
     end
-    --print('debug2')
+    
     next = combat_actors[1];
-    --print('debug3')
+    
     for i=1,#combat_actors do 
         if combat_actors[i].init > next.init then 
             next = combat_actors[i]
         end
     end
-    --print('debug4')
+    
     AddQueue({"wait", 1})
     
     AddQueue({"nextTurn"})
-    --print('debug5')
+    
 end
 
 function GenerateCombatant(n)
@@ -317,13 +317,13 @@ end
 
 function NextTurn()
     next = combat_actors[1];
-    print('debug a')
+    
     for i=1,#combat_actors do 
         if combat_actors[i].init > next.init then 
             next = combat_actors[i]
         end
     end
-    print('debug b')
+    
     if next.init == -1 then 
         AddLog("New round!", 0)
         for i=1,#combat_actors do 

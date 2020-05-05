@@ -141,7 +141,7 @@ function DrawFloors()
     end
 
     for vt=1,#viewableTiles do 
-        --print(lat, viewableTiles[vt].y, vt)
+        
         local ct = bgmap[(viewableTiles[vt].y*map_w)+viewableTiles[vt].x+1]
         local lat = 0
         local long = 0
@@ -237,9 +237,9 @@ function DrawFloors()
                 g.draw(tn, TWO_LEFT1_FLOOR, 0*scale, 100*scale, 0, scale); --floor
                 
             elseif lat==STRAIGHT then 
-                --print(ct)
+                
                 if ct == '1' or (tonumber(ct) >= 7 and tonumber(ct) <=14) then
-                    --print('test')
+                    
                     g.draw(FP_WATER_FLOOR, TWO_FRONT_FLOOR, 45*scale, 100*scale, 0, scale);
                 elseif ct=='0' then 
                     g.draw(FP_GRASS_FLOOR, TWO_FRONT_FLOOR, 45*scale, 100*scale, 0, scale);
@@ -943,7 +943,7 @@ function love.draw(dT)
         for k=1,math.floor(introTicker)-1 do 
             if k == (math.floor(introTicker)-1) then 
                 local h = introTicker - math.floor(introTicker)
-                --print(h)
+                
                 if h < 0.25 then lg.setColor(0, 0, 0, 1);
                 elseif h < 0.5 then lg.setColor(0.33, 0.33, 0.33, 1) 
                 elseif h < 0.75 then lg.setColor(0.67, 0.67, 0.67, 1)
@@ -1102,8 +1102,12 @@ function love.draw(dT)
             --draw high gems in clear, low gems in filled
             --local mhpc = math.floor((party[b].hp / party[b].mhp)*20)
             --local mhpc2 = math.ceil((party[b].hp / party[b].mhp)*20)
-            local mhpc = math.ceil(party[b].hp / 8)
+            local mhpc = round(party[b].hp / 8)
             local mhpc2 = math.ceil(party[b].mhp / 8)
+            if (party[b].hp == party[b].mhp) then mhpc = mhpc2 end
+            if (party[b].hp ~= party[b].mhp) and (mhpc == mhpc2) then mhpc = mhpc - 1 end 
+            if (party[b].hp ~= 0) and (mhpc == 0) then mhpc = 1 end 
+            
             for hi=1,mhpc2 do 
                 lg.draw(GEMREDH, (25+(hi/2)+1)*8*scale,((24*b)-8)*scale, 0, scale);
             end

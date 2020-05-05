@@ -155,6 +155,14 @@ meta.__index = function(a,b) -- if you attempt to do string[id]
 end
 -- END COPIED CODE
 
+function round(n)
+    if n % 1 >= 0.5 then
+        return math.ceil(n)
+    else 
+        return math.floor(n)
+    end
+end
+
 m = love.filesystem.load("maps/map_1.lua")--dofile("maps/map_1.lua")
 m()
 
@@ -437,7 +445,7 @@ function SaveGame()
         for u=1,10 do 
             local im = party[f].inventory[u] or { name="none" }
             saveData = saveData .. im.name .. '\x00'
-            print(im.name)
+            
             local st = im.stack or 1
             saveData = saveData .. st .. '\x00'
             local e = im.equipped or false 
@@ -488,7 +496,7 @@ function LoadGame()
         party[p].xp = tonumber(loadData[ct]); ct = ct + 1;
         party[p].level = tonumber(loadData[ct]); ct = ct + 1;
         party[p].g = loadData[ct]; ct = ct + 1;
-        --print(party[p].g)
+        
         party[p].mov = tonumber(loadData[ct]); ct = ct + 1;
         party[p].thaco = tonumber(loadData[ct]); ct = ct + 1;
         party[p].class = loadData[ct]; ct = ct + 1;
@@ -502,7 +510,7 @@ function LoadGame()
                 if loadData[ct]=='1' then 
                     o.equipped = true 
                     q = itemdb[o.name]
-                    print(o.name, q.name)
+                    
                     if q.type == "melee" or q.type=="ranged" then 
                         party[p].weapon = q 
                     elseif q.type == "armor" then 
@@ -847,7 +855,7 @@ function AddLog(l, arrow)
     --local sl = 1
     while string.find(l, "\n") do 
         local po = string.find(l, "\n") -- get location of linebreak
-        --print("lb: "..po)
+        
         local ps = l:sub(1, po-1)
         table.insert(toadd, ps)
         l = l:sub(po+1)
