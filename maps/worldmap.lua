@@ -4,6 +4,7 @@ currentMap = {
     fname = "worldmap",
     campable = true,
     fights = true,
+    music = 'dreaded_unknown',
     encounters = {
         [1] = {
             enemies = { "goblin", "goblin" },

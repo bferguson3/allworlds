@@ -21,7 +21,7 @@ origPos = {};
 combatXP = 0;
 xpTable = { 1000, 3000, 6000, 10000, 15000, 21000, 28000, 36000, 45000 };
 inCombat = false;
-scale = 2;
+scale = 3;
 timeSinceMove = 0;
 map_w = 36;
 x_draw_offset = 0;
@@ -106,6 +106,7 @@ FP_BLACKTILE_FLOOR, FP_BLACKTILE_FLOOR2, FP_BLACKTILE_FLOOR3 = nil, nil, nil
 FP_DIRT_FLOOR, FP_DIRT_FLOOR2, FP_DIRT_FLOOR3 = nil, nil, nil 
 FP_BLANK = nil
 FP_WALL_STONEDOOR, FP_WALL_STONEDOOR2 = nil, nil
+FP_TILEFLOOR_A = nil 
 
 HP_ICON, MP_ICON = nil, nil 
 GEMRED, GEMCYAN, GEMBLUE, GEMGREEN, GEMYELLOW = nil, nil, nil, nil, nil
@@ -123,7 +124,9 @@ activePC = 1;
 queue = {}
 maxEnemySpawns = 3
 noEnemiesSpawned = 0
-music = love.audio.newSource("music/dreaded_unknown.mp3", "stream")
+currentMusic = ''
+--music = love.audio.newSource("music/dreaded_unknown.mp3", "stream")
+music = nil 
 t = coroutine.create(function ()
     love.timer.sleep(0.5);
 end)
@@ -172,16 +175,16 @@ classes = {
 }
 --print(classes["Fighter"])
 --dofile("enemies.lua")
-m = love.filesystem.load("enemies.lua")
+m = love.filesystem.load("src/enemies.lua")
 m()
 
-m = love.filesystem.load("itemdb.lua")
+m = love.filesystem.load("src/itemdb.lua")
 m()
 
-m = love.filesystem.load("party.lua")
+m = love.filesystem.load("src/party.lua")
 m()
 
-m = love.filesystem.load("intro.lua")
+m = love.filesystem.load("src/intro.lua")
 m()
 
 function inc(n) n = n + 1 end 
@@ -242,7 +245,7 @@ function love.load(arg)
         --os.execute('gedit ./README.md')
         --return
     end
-    SetZoom(2)
+    SetZoom(3);
 
     if love.filesystem.getInfo("01.sav") == nil then 
         currentSave = love.filesystem.newFile("01.sav")
@@ -250,17 +253,17 @@ function love.load(arg)
         --print("k")
     end
 
-    music:setLooping(true)
-    music:play()
     sfx = {}
     sfx.atk = love.audio.newSource("sfx/atk.wav", "static");
+    --sfx.atk:setVolume(0.5);
     sfx.dead = love.audio.newSource("sfx/dead.wav", "static");
     sfx.exit = love.audio.newSource("sfx/exit.wav", "static");
     sfx.hurt = love.audio.newSource("sfx/hurt.wav", "static");
     sfx.miss = love.audio.newSource("sfx/miss.wav", "static");
+    --sfx.miss:setVolume(0.5);
     sfx.spell1 = love.audio.newSource("sfx/spell1.wav", "static");
     sfx.step = love.audio.newSource("sfx/step.wav", "static");
-    
+    --sfx.step:setVolume(0.5);
     love.math.setRandomSeed(love.timer.getTime())
     --currentState = systemState.init;
     init_time = love.timer.getTime();
@@ -291,6 +294,8 @@ function love.load(arg)
     FP_BLACKTILE_FLOOR = g.newImage('assets/fpblacktilea.png');
     FP_BLACKTILE_FLOOR2 = g.newImage('assets/fpblacktileb.png');
     FP_BLACKTILE_FLOOR3 = g.newImage('assets/fpblacktilec.png');
+    FP_TILEFLOOR_C = g.newImage('assets/fp_tilefloor_c.png') --30
+    FP_TILEFLOOR_A = g.newImage('assets/fp_tilefloor_a.png')
     FP_DIRT_FLOOR = g.newImage('assets/fpdirta.png');
     FP_DIRT_FLOOR2 = g.newImage('assets/fpdirtb.png');
     FP_DIRT_FLOOR3 = g.newImage('assets/fpdirtc.png');
@@ -585,12 +590,12 @@ function love.update(dT)
     if love.keyboard.isDown("lalt") and love.keyboard.isDown("return") then 
         if eFullscr == false then 
             eFullscr = true;
-            SetZoom(2);
+            SetZoom(3);
             love.window.setFullscreen(true, "exclusive");
             return
         else 
             eFullscr = false;
-            SetZoom(2);
+            SetZoom(3);
             return
             --love.window.setMode(320*2, 200*2);
         end
@@ -779,7 +784,7 @@ function love.update(dT)
 end -- love.update
 
 --dofile("draw.lua")
-m = love.filesystem.load("draw.lua")
+m = love.filesystem.load("src/draw.lua")
 m()
 
 function CheckCollision(x, y)
@@ -955,7 +960,22 @@ function LoadMap(name, w)
     for n in bg:gmatch("(%d*).") do
         table.insert(bgmap, n);
     end
-    print(name .. " loaded.")
+    -- if next map has music 
+    -- and its different 
+    -- stop, change source, play
+    currentMap.music = currentMap.music or nil; 
+    if (currentMap.music ~= nil) then 
+        if (currentMap.music ~= currentMusic) then 
+            if music ~= nil then music:stop(); end 
+            currentMusic = currentMap.music;
+            music = love.audio.newSource("music/"..currentMusic..".mp3", "stream");
+            music:setLooping(true);
+            music:play();
+        end
+    else 
+        if music ~= nil then music:stop(); currentMusic = nil; music = nil; end
+    end
+    print(name .. " loaded.");
 end
 
 
@@ -1119,10 +1139,10 @@ function CheckSearch(x, y)
 end
 
 --dofile("input.lua")
-m = love.filesystem.load("input.lua")
+m = love.filesystem.load("src/input.lua")
 m()
 
 --dofile("combat.lua")
-m = love.filesystem.load("combat.lua")
+m = love.filesystem.load("src/combat.lua")
 m()
 

@@ -4,6 +4,7 @@ currentMap = {
     fname = "shrine1",
     fights = true,
     campable = true,
+    music = 'driftingtower',
     encounters = {
         [1] = {
             --enemies = { enemies.gslime, enemies.gslime,enemies.gslime,enemies.gslime },

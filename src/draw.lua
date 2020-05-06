@@ -95,6 +95,47 @@ function changeTransparent(x, y, r, g, b, a)
 fpDirection = 0
 viewableTiles = {}
 
+function GetFPImageFromTile(angle, ct)
+    if angle == 'TWO' then
+        if ct == '1' or (tonumber(ct) >= 7 and tonumber(ct) <=14) then
+            return FP_WATER_FLOOR3 
+        elseif ct == '0' then
+            return FP_GRASS_FLOOR3
+        elseif ct == '2' then
+            return FP_BLACKTILE_FLOOR3 
+        elseif ct == '15' then 
+            return FP_DIRT_FLOOR3 
+        elseif ct == '30' then 
+            return FP_TILEFLOOR_C
+        end
+    elseif angle == 'ONE' then 
+        if ct == '1' or (tonumber(ct) >= 7 and tonumber(ct) <=14) then
+            return FP_WATER_FLOOR2 
+        elseif ct == '0' then
+            return FP_GRASS_FLOOR2
+        elseif ct == '2' then
+            return FP_BLACKTILE_FLOOR2 
+        elseif ct == '15' then 
+            return FP_DIRT_FLOOR2 
+        elseif ct == '30' then 
+            return FP_TILEFLOOR_B
+        end 
+    elseif angle == 'ZERO' then 
+        if ct == '1' or (tonumber(ct) >= 7 and tonumber(ct) <=14) then
+            return FP_WATER_FLOOR
+        elseif ct == '0' then
+            return FP_GRASS_FLOOR
+        elseif ct == '2' then
+            return FP_BLACKTILE_FLOOR 
+        elseif ct == '15' then 
+            return FP_DIRT_FLOOR
+        elseif ct == '30' then 
+            return FP_TILEFLOOR_A
+        end
+    end
+    return nil
+end
+
 function DrawFloors()
     local LEFTTWO, LEFTONE, STRAIGHT, RIGHTONE, RIGHTTWO, FZERO, FR_ONE, FR_TWO, FR_THREE, FR_FOUR = 0, 0, 0, 0, 0, 0, 0, 0, 0,0
     if fpDirection == 0 then 
@@ -154,14 +195,9 @@ function DrawFloors()
         end
         if long == FR_THREE then --row 3
             if lat == LEFTTWO then 
-                if ct == '1' or (tonumber(ct) >= 7 and tonumber(ct) <=14) then --7 thru 14-then 
-                    g.draw(FP_WATER_FLOOR3, THREE_LEFT2_FLOOR, 0*scale, 90*scale, 0, scale); --floor
-                elseif ct == '0' then 
-                    g.draw(FP_GRASS_FLOOR3, THREE_LEFT2_FLOOR, 0*scale, 90*scale, 0, scale); --floor
-                elseif ct == '2' then 
-                    g.draw(FP_BLACKTILE_FLOOR3, THREE_LEFT2_FLOOR, 0*scale, 90*scale, 0, scale); --floor
-                elseif ct == '15' then 
-                    g.draw(FP_DIRT_FLOOR3, THREE_LEFT2_FLOOR, 0*scale, 90*scale, 0, scale); --floor
+                i = GetFPImageFromTile('TWO', ct) 
+                if i~=nil then 
+                    g.draw(i, THREE_LEFT2_FLOOR, 0*scale, 90*scale, 0, scale); 
                 end
             elseif lat == LEFTONE then 
                 if ct == '1' or (tonumber(ct) >= 7 and tonumber(ct) <=14) then
