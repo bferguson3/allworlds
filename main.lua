@@ -94,7 +94,7 @@ IMM_LEFT_FLOOR = g.newQuad(0, 140, 20, 20, 160, 160)
 ONE_FRONT_FLOOR = g.newQuad(20, 115, 120, 25, 160, 160);
 TWO_FRONT_FLOOR = g.newQuad(45, 100, 70, 15, 160, 160)
 ONE_LEFT_FLOOR = g.newQuad(0, 115, 45, 25, 160, 160);
-FRONT_WALL_REDGE = g.newQuad(85, 45, 20/(1.72), 70, 160, 160)
+FRONT_WALL_REDGE = g.newQuad(115-20, 45, 20/(1.72), 70, 160, 160)
 ROW2_SIDEWALL_R = g.newQuad(140, 50, 20, 60, 160, 160)
 THREE_LEFT2_FLOOR = g.newQuad(0, 90, 37, 10, 160, 160)
 THREE_LEFT1_FLOOR = g.newQuad(20, 90, 50, 10, 160, 160)
@@ -295,10 +295,13 @@ function love.load(arg)
     FP_BLACKTILE_FLOOR2 = g.newImage('assets/fpblacktileb.png');
     FP_BLACKTILE_FLOOR3 = g.newImage('assets/fpblacktilec.png');
     FP_TILEFLOOR_C = g.newImage('assets/fp_tilefloor_c.png') --30
-    FP_TILEFLOOR_A = g.newImage('assets/fp_tilefloor_a.png')
+    FP_TILEFLOOR_B = g.newImage('assets/fp_tilefloor_b.png')
+    FP_TILEFLOOR_A = g.newImage('assets/fp_tilefloorb_a.png')
     FP_DIRT_FLOOR = g.newImage('assets/fpdirta.png');
     FP_DIRT_FLOOR2 = g.newImage('assets/fpdirtb.png');
     FP_DIRT_FLOOR3 = g.newImage('assets/fpdirtc.png');
+    FP_TREE2 = g.newImage('assets/fptree2.png')
+    FP_TREE = g.newImage('assets/fptree.png')
     FP_BLANK = g.newImage('assets/fptmp.png')
     a = love.image.newImageData('assets/fp_door_a.png');
     a:mapPixel(changeTransparent);

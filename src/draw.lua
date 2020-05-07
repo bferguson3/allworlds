@@ -95,42 +95,78 @@ function changeTransparent(x, y, r, g, b, a)
 fpDirection = 0
 viewableTiles = {}
 
+function GetFPWallFromTile(angle, ct)
+    print(angle, ct)
+    if angle == 'TWO' then 
+        if ct == '3' then 
+            return FP_WALL_STONE3 
+        elseif ct == '31' then 
+            return FP_WALL_STONEDOOR3 
+        end
+    elseif angle == 'ONE' then 
+        if ct == '3' then 
+            return FP_WALL_STONE2
+        elseif ct == '31' then 
+            return FP_WALL_STONEDOOR2 
+        end
+    elseif angle == 'ZERO' then 
+        if ct == '3' then 
+            return FP_WALL_STONE
+        elseif ct == '31' then 
+            return FP_WALL_STONEDOOR
+        end
+    end
+    return nil
+end
+
 function GetFPImageFromTile(angle, ct)
     if angle == 'TWO' then
-        if ct == '1' or (tonumber(ct) >= 7 and tonumber(ct) <=14) then
+        if ct == '1' or (tonumber(ct) >= 7 and tonumber(ct) <=14) or (tonumber(ct) >= 17 and tonumber(ct) <= 19) or (tonumber(ct)>=23 and tonumber(ct)<=29) then
             return FP_WATER_FLOOR3 
         elseif ct == '0' then
             return FP_GRASS_FLOOR3
         elseif ct == '2' then
-            return FP_BLACKTILE_FLOOR3 
+            return FP_BLACKTILE_FLOOR3
+        --elseif ct == '3' then
+        --    return FP_WALL_STONE3 
         elseif ct == '15' then 
             return FP_DIRT_FLOOR3 
         elseif ct == '30' then 
             return FP_TILEFLOOR_C
+        --elseif ct == '31' then
+        --    return FP_WALL_STONEDOOR3
         end
     elseif angle == 'ONE' then 
-        if ct == '1' or (tonumber(ct) >= 7 and tonumber(ct) <=14) then
+        if ct == '1' or (tonumber(ct) >= 7 and tonumber(ct) <=14) or (tonumber(ct) >= 17 and tonumber(ct) <= 19) or (tonumber(ct)>=23 and tonumber(ct)<=29) then
             return FP_WATER_FLOOR2 
         elseif ct == '0' then
             return FP_GRASS_FLOOR2
         elseif ct == '2' then
-            return FP_BLACKTILE_FLOOR2 
+            return FP_BLACKTILE_FLOOR2
+        --elseif ct == '3' then
+        --    return FP_WALL_STONE2 
         elseif ct == '15' then 
             return FP_DIRT_FLOOR2 
         elseif ct == '30' then 
             return FP_TILEFLOOR_B
+        --elseif ct == '31' then
+        --    return FP_WALL_STONEDOOR2
         end 
     elseif angle == 'ZERO' then 
-        if ct == '1' or (tonumber(ct) >= 7 and tonumber(ct) <=14) then
+        if ct == '1' or (tonumber(ct) >= 7 and tonumber(ct) <=14) or (tonumber(ct) >= 17 and tonumber(ct) <= 19) or (tonumber(ct)>=23 and tonumber(ct)<=29) then
             return FP_WATER_FLOOR
         elseif ct == '0' then
             return FP_GRASS_FLOOR
         elseif ct == '2' then
             return FP_BLACKTILE_FLOOR 
+        --elseif ct == '3' then
+        --    return FP_WALL_STONE
         elseif ct == '15' then 
             return FP_DIRT_FLOOR
         elseif ct == '30' then 
             return FP_TILEFLOOR_A
+        --elseif ct == '31' then
+        --    return FP_WALL_STONEDOOR
         end
     end
     return nil
@@ -199,196 +235,59 @@ function DrawFloors()
                 if i~=nil then 
                     g.draw(i, THREE_LEFT2_FLOOR, 0*scale, 90*scale, 0, scale); 
                 end
-            elseif lat == LEFTONE then 
-                if ct == '1' or (tonumber(ct) >= 7 and tonumber(ct) <=14) then
-                    g.draw(FP_WATER_FLOOR2, THREE_LEFT1_FLOOR, 20*scale, 90*scale, 0, scale); --floor
-                elseif ct == '0' then 
-                    g.draw(FP_GRASS_FLOOR2, THREE_LEFT1_FLOOR, 20*scale, 90*scale, 0, scale); --floor
-                elseif ct == '2' then 
-                    g.draw(FP_BLACKTILE_FLOOR2, THREE_LEFT1_FLOOR, 20*scale, 90*scale, 0, scale); --floor
-                elseif ct == '15' then 
-                    g.draw(FP_DIRT_FLOOR2, THREE_LEFT1_FLOOR, 20*scale, 90*scale, 0, scale); --floor
+            elseif lat == LEFTONE then
+                i = GetFPImageFromTile('ONE', ct)
+                if i~=nil then 
+                    g.draw(i, THREE_LEFT1_FLOOR, 20*scale, 90*scale, 0, scale); 
                 end
             elseif lat == STRAIGHT then 
-                if ct == '1' or (tonumber(ct) >= 7 and tonumber(ct) <=14) then
-                    g.draw(FP_WATER_FLOOR, THREE_FRONT_FLOOR, 60*scale, 90*scale, 0, scale); --floor          
-                elseif ct == '0' then 
-                    g.draw(FP_GRASS_FLOOR, THREE_FRONT_FLOOR, 60*scale, 90*scale, 0, scale); --floor          
-                elseif ct=='2' then 
-                    g.draw(FP_BLACKTILE_FLOOR, THREE_FRONT_FLOOR, 60*scale, 90*scale, 0, scale); --floor          
-                elseif ct=='15' then 
-                    g.draw(FP_DIRT_FLOOR, THREE_FRONT_FLOOR, 60*scale, 90*scale, 0, scale); --floor          
-                end
+                i = GetFPImageFromTile('ZERO', ct);
+                if i~=nil then g.draw(i, THREE_FRONT_FLOOR, 60*scale, 90*scale, 0, scale); end
             elseif lat == RIGHTONE then
-                local tn = FP_BLANK
-                if ct == '1' or (tonumber(ct) >= 7 and tonumber(ct) <=14) then
-                    tn = FP_WATER_FLOOR2
-                elseif ct == '0' then 
-                    tn = FP_GRASS_FLOOR2 
-                elseif ct == '2' then 
-                    tn = FP_BLACKTILE_FLOOR2
-                elseif ct == '15' then 
-                    tn = FP_DIRT_FLOOR2
-                end
-                g.draw(tn, THREE_LEFT1_FLOOR, 140*scale, 90*scale, 0, -scale, scale); --floor
+                i = GetFPImageFromTile('ONE', ct);
+                if i~=nil then g.draw(i, THREE_LEFT1_FLOOR, 140*scale, 90*scale, 0, -scale, scale); end
             elseif lat == RIGHTTWO then 
-                local tn = FP_BLANK
-                if ct == '1' or (tonumber(ct) >= 7 and tonumber(ct) <=14) then
-                    tn = FP_WATER_FLOOR3
-                elseif ct == '0' then 
-                    tn = FP_GRASS_FLOOR3
-                elseif ct == '2' then 
-                    tn = FP_BLACKTILE_FLOOR3
-                elseif ct == '15' then 
-                    tn = FP_DIRT_FLOOR3
-                end
-                
-                g.draw(tn, THREE_LEFT2_FLOOR, 160*scale, 90*scale, 0, -scale, scale); --floor
+                i = GetFPImageFromTile('TWO', ct);
+                if i~=nil then g.draw(i, THREE_LEFT2_FLOOR, 160*scale, 90*scale, 0, -scale, scale); end
             end
         elseif long == FR_TWO then 
             if lat==LEFTTWO then 
-                local tn = FP_BLANK
-                if ct == '1' or (tonumber(ct) >= 7 and tonumber(ct) <=14) then
-                    tn = FP_WATER_FLOOR3
-                elseif ct == '0' then 
-                    tn = FP_GRASS_FLOOR3 
-                elseif ct == '2' then 
-                    tn = FP_BLACKTILE_FLOOR3
-                elseif ct == '15' then 
-                    tn = FP_DIRT_FLOOR3
-                end
-                g.draw(tn, TWO_LEFT2_FLOOR, 0*scale, 100*scale, 0, scale); --floor
-                
+                i = GetFPImageFromTile('TWO', ct);
+                if i~=nil then g.draw(i, TWO_LEFT2_FLOOR, 0, 100*scale, 0, scale); end
             elseif lat==LEFTONE then 
-                local tn = FP_BLANK
-                if ct == '1' or (tonumber(ct) >= 7 and tonumber(ct) <=14) then
-                    tn = FP_WATER_FLOOR2
-                elseif ct == '0' then 
-                    tn = FP_GRASS_FLOOR2 
-                elseif ct == '2' then 
-                    tn = FP_BLACKTILE_FLOOR2 
-                elseif ct == '15' then 
-                    tn = FP_DIRT_FLOOR2
-                end
-                g.draw(tn, TWO_LEFT1_FLOOR, 0*scale, 100*scale, 0, scale); --floor
-                
+                i = GetFPImageFromTile('ONE', ct);
+                if i~=nil then g.draw(i, TWO_LEFT1_FLOOR, 0, 100*scale, 0, scale); end
             elseif lat==STRAIGHT then 
-                
-                if ct == '1' or (tonumber(ct) >= 7 and tonumber(ct) <=14) then
-                    
-                    g.draw(FP_WATER_FLOOR, TWO_FRONT_FLOOR, 45*scale, 100*scale, 0, scale);
-                elseif ct=='0' then 
-                    g.draw(FP_GRASS_FLOOR, TWO_FRONT_FLOOR, 45*scale, 100*scale, 0, scale);
-                elseif ct=='2' then 
-                    g.draw(FP_BLACKTILE_FLOOR, TWO_FRONT_FLOOR, 45*scale, 100*scale, 0, scale);
-                elseif ct=='15' then 
-                    g.draw(FP_DIRT_FLOOR, TWO_FRONT_FLOOR, 45*scale, 100*scale, 0, scale);
-                end
+                i = GetFPImageFromTile('ZERO', ct);
+                if i~=nil then g.draw(i, TWO_FRONT_FLOOR, 45*scale, 100*scale, 0, scale); end
             elseif lat==RIGHTONE then 
-                local tn = FP_BLANK
-                if ct == '1' or (tonumber(ct) >= 7 and tonumber(ct) <=14) then
-                    tn = FP_WATER_FLOOR2
-                elseif ct == '0' then 
-                    tn = FP_GRASS_FLOOR2 
-                elseif ct == '2' then 
-                    tn = FP_BLACKTILE_FLOOR2 
-                elseif ct == '15' then 
-                    tn = FP_DIRT_FLOOR2 
-                end
-                g.draw(tn, TWO_LEFT1_FLOOR, 160*scale, 100*scale, 0, -scale, scale); --floor
-                
+                i = GetFPImageFromTile('ONE', ct);
+                if i~=nil then g.draw(i, TWO_LEFT1_FLOOR, 160*scale, 100*scale, 0, -scale, scale); end
             elseif lat==RIGHTTWO then 
-                local tn = FP_BLANK
-                if ct == '1' or (tonumber(ct) >= 7 and tonumber(ct) <=14) then
-                    tn = FP_WATER_FLOOR3
-                elseif ct == '0' then 
-                    tn = FP_GRASS_FLOOR3 
-                elseif ct == '2' then 
-                    tn = FP_BLACKTILE_FLOOR3
-                elseif ct == '15' then 
-                    tn = FP_DIRT_FLOOR3
-                end
-                g.draw(tn, TWO_LEFT2_FLOOR, 160*scale, 100*scale, 0, -scale, scale); --floor              
-                
+                i = GetFPImageFromTile('TWO', ct);
+                if i~=nil then g.draw(i, TWO_LEFT2_FLOOR, 160*scale, 100*scale, 0, -scale, scale); end
             end
         elseif long==FR_ONE then 
             if lat==LEFTONE then 
-                local tn = FP_BLANK
-                if ct == '1' or (tonumber(ct) >= 7 and tonumber(ct) <=14) then
-                    tn = FP_WATER_FLOOR2
-                elseif ct == '0' then 
-                    tn = FP_GRASS_FLOOR2 
-                elseif ct == '2' then 
-                    tn = FP_BLACKTILE_FLOOR2 
-                elseif ct == '15' then 
-                    tn = FP_DIRT_FLOOR2 
-                end
-                g.draw(tn, ONE_LEFT_FLOOR, 0*scale, 115*scale, 0, scale); --floor
-                
+                i = GetFPImageFromTile('ONE', ct);
+                if i~=nil then g.draw(i, ONE_LEFT_FLOOR, 0, 115*scale, 0, scale); end
             elseif lat==STRAIGHT then 
-                local tn = FP_BLANK
-                if ct == '1' or (tonumber(ct) >= 7 and tonumber(ct) <=14) then
-                    tn = FP_WATER_FLOOR
-                elseif ct == '0' then 
-                    tn = FP_GRASS_FLOOR
-                elseif ct == '2' then 
-                    tn = FP_BLACKTILE_FLOOR
-                elseif ct == '15' then 
-                    tn = FP_DIRT_FLOOR
-                end
-                g.draw(tn, ONE_FRONT_FLOOR, 20*scale, 115*scale, 0, scale);--floor
-                
+                i = GetFPImageFromTile('ZERO', ct);
+                if i~=nil then g.draw(i, ONE_FRONT_FLOOR, 20*scale, 115*scale, 0, scale); end
             elseif lat==RIGHTONE then 
-                local tn = FP_BLANK
-                if ct == '1' or (tonumber(ct) >= 7 and tonumber(ct) <=14) then
-                    tn = FP_WATER_FLOOR2
-                elseif ct == '0' then 
-                    tn = FP_GRASS_FLOOR2
-                elseif ct == '2' then 
-                    tn = FP_BLACKTILE_FLOOR2
-                elseif ct == '15' then 
-                    tn = FP_DIRT_FLOOR2
-                end
-                g.draw(tn, ONE_LEFT_FLOOR, 160*scale, 115*scale, 0, -scale, scale); --floor
-                
+                i = GetFPImageFromTile('ONE', ct);
+                if i~=nil then g.draw(i, ONE_LEFT_FLOOR, 160*scale, 115*scale, 0, -scale, scale); end
             end
         elseif long==FZERO then 
             if lat==LEFTONE then 
-                local tn = FP_BLANK
-                if ct == '1' or (tonumber(ct) >= 7 and tonumber(ct) <=14) then
-                    tn = FP_WATER_FLOOR2
-                elseif ct == '0' then 
-                    tn = FP_GRASS_FLOOR2
-                elseif ct == '2' then 
-                    tn = FP_BLACKTILE_FLOOR2
-                elseif ct == '15' then 
-                    tn = FP_DIRT_FLOOR2 
-                end
-                g.draw(tn, IMM_LEFT_FLOOR, 0, 140*scale, 0, scale);--floor
-                
+                i = GetFPImageFromTile('ONE', ct);
+                if i~=nil then g.draw(i, IMM_LEFT_FLOOR, 0, 140*scale, 0, scale); end
             elseif lat==STRAIGHT then 
-                if ct=='0' then
-                    g.draw(FP_GRASS_FLOOR, IMM_FRONT_FLOOR, 0, 140*scale, 0, scale);
-                elseif (ct == '1') or (tonumber(ct) >= 7 and tonumber(ct) <=14) then
-                    g.draw(FP_WATER_FLOOR, IMM_FRONT_FLOOR, 0, 140*scale, 0, scale);
-                elseif ct=='2' then 
-                    g.draw(FP_BLACKTILE_FLOOR, IMM_FRONT_FLOOR, 0, 140*scale, 0, scale);
-                elseif ct=='15' then 
-                    g.draw(FP_DIRT_FLOOR, IMM_FRONT_FLOOR, 0, 140*scale, 0, scale);
-                end
+                i = GetFPImageFromTile('ZERO', ct);
+                if i~=nil then g.draw(i, IMM_FRONT_FLOOR, 0, 140*scale, 0, scale); end
             elseif lat==RIGHTONE then 
-                local tn = FP_BLANK
-                if (ct == '1') or (tonumber(ct) >= 7 and tonumber(ct) <=14) then
-                    tn = FP_WATER_FLOOR2
-                elseif ct == '0' then 
-                    tn = FP_GRASS_FLOOR2
-                elseif ct == '2' then 
-                    tn = FP_BLACKTILE_FLOOR2
-                elseif ct == '15' then 
-                    tn = FP_DIRT_FLOOR2
-                end
-                g.draw(tn, IMM_LEFT_FLOOR, 160*scale, 140*scale, 0, -scale, scale);--floor          
-                
+                i = GetFPImageFromTile('ONE', ct);
+                if i~=nil then g.draw(i, IMM_LEFT_FLOOR, 160*scale, 140*scale, 0, -scale, scale); end
             end
         end
     end
@@ -486,12 +385,15 @@ function DrawWalls()
          local ct = bgmap[(viewableTiles[vt].y*map_w)+viewableTiles[vt].x+1]
          if long == FR_FOUR then --back row 
              if lat == LEFTTWO then 
-    --             --back row, tile 1
+                --print(ct)
+                   --back row, tile 1
                 if ct == '3' then 
     --                 --stone wall?
                     g.draw(FP_WALL_STONE, FAR_BACK_WALL, 0*scale, 70*scale, 0, scale*1.5, scale); 
                 elseif ct == '31' then 
                     g.draw(FP_WALL_STONEDOOR, FAR_BACK_WALL, 0*scale, 70*scale, 0, scale*1.5, scale); 
+                elseif ct == '16' then 
+                    g.draw(FP_TREE, FAR_BACK_WALL, 0*scale, 70*scale, 0, scale*1.5, scale); 
                 end
                 --new function
                 
@@ -500,24 +402,32 @@ function DrawWalls()
                      g.draw(FP_WALL_STONE, FAR_BACK_WALL, 34*scale, 70*scale, 0, scale*1.35, scale); 
                  elseif ct == '31' then 
                     g.draw(FP_WALL_STONEDOOR, FAR_BACK_WALL, 34*scale, 70*scale, 0, scale*1.35, scale); 
+                elseif ct == '16' then 
+                    g.draw(FP_TREE, FAR_BACK_WALL, 34*scale, 70*scale, 0, scale*1.35, scale); 
                  end
              elseif lat == STRAIGHT then 
                  if ct == '3' then 
                      g.draw(FP_WALL_STONE, FAR_BACK_WALL, 64*scale, 70*scale, 0, scale*1.25, scale);
                  elseif ct=='31' then 
                     g.draw(FP_WALL_STONEDOOR, FAR_BACK_WALL, 64*scale, 70*scale, 0, scale*1.25, scale);
+                 elseif ct=='16' then 
+                    g.draw(FP_TREE, FAR_BACK_WALL, 64*scale, 70*scale, 0, scale*1.25, scale);
                  end
              elseif lat == RIGHTONE then 
                  if ct == '3' then 
                      g.draw(FP_WALL_STONE, FAR_BACK_WALL, 92*scale, 70*scale, 0, scale*1.5, scale);
                  elseif ct == '31' then 
                     g.draw(FP_WALL_STONEDOOR, FAR_BACK_WALL, 92*scale, 70*scale, 0, scale*1.5, scale);
+                 elseif ct == '16' then 
+                    g.draw(FP_TREE, FAR_BACK_WALL, 92*scale, 70*scale, 0, scale*1.5, scale);
                  end
              elseif lat == RIGHTTWO then 
                  if ct == '3' then 
                      g.draw(FP_WALL_STONE, FAR_BACK_WALL, 126*scale, 70*scale, 0, scale*1.5, scale);
                  elseif ct=='31' then 
                     g.draw(FP_WALL_STONEDOOR, FAR_BACK_WALL, 126*scale, 70*scale, 0, scale*1.5, scale);
+                elseif ct=='16' then 
+                    g.draw(FP_TREE, FAR_BACK_WALL, 126*scale, 70*scale, 0, scale*1.5, scale);
                  end
              end
           end
@@ -526,12 +436,15 @@ function DrawWalls()
     if fpDirection == 0 or fpDirection==2 then 
         
         local v = bgmap[(FR_THREE*map_w)+LEFTTWO+1]
+        
         if v=='3' then 
             g.draw(FP_WALL_STONE2, WALL_THREE, -18*scale, 60*scale, 0, scale); --facing wall
             g.draw(FP_WALL_STONE, THREE_SIDE, 40*scale, 60*scale, 0, -scale, scale); --side wall
         elseif v=='31' then 
             g.draw(FP_WALL_STONEDOOR2, WALL_THREE, -18*scale, 60*scale, 0, scale); --facing wall
             g.draw(FP_WALL_STONEDOOR, THREE_SIDE, 40*scale, 60*scale, 0, -scale, scale); --side wall
+        elseif v=='16' then 
+            g.draw(FP_TREE2, WALL_THREE, -18*scale, 60*scale, 0, scale); --facing wall
         end
         local icon = GetFarFPObj(LEFTTWO, FR_THREE)
         if icon ~= false then lg.draw(INDICATOR_FAR, (ex-58)*scale, (ey+18)*scale, 0, scale) end
@@ -543,6 +456,8 @@ function DrawWalls()
         elseif v=='31' then 
             g.draw(FP_WALL_STONEDOOR2, WALL_THREE, 178*scale, 60*scale, 0, -scale, scale); --facing wall
             g.draw(FP_WALL_STONEDOOR, THREE_SIDE, 120*scale, 60*scale, 0, scale); --side wall      
+        elseif v=='16' then 
+            g.draw(FP_TREE2, WALL_THREE, 178*scale, 60*scale, 0, -scale, scale);--facing wall
         end
         icon = GetFarFPObj(RIGHTTWO, FR_THREE)
         if icon ~= false then lg.draw(INDICATOR_FAR, (ex+86)*scale, (ey+18)*scale, 0, scale) end
@@ -554,6 +469,8 @@ function DrawWalls()
         elseif v=='31' then 
             g.draw(FP_WALL_STONEDOOR2, WALL_THREE, 140*scale, 60*scale, 0, -scale, scale); --facing wall
             g.draw(FP_WALL_STONEDOOR, THREE_LEFT_WALL, 100*scale, 60*scale, 0, -scale, scale)
+        elseif v=='16' then 
+            g.draw(FP_TREE2, WALL_THREE, 140*scale, 60*scale, 0, -scale, scale); --facing wall
         end
         icon = GetFarFPObj(RIGHTONE, FR_THREE)
         if icon ~= false then lg.draw(INDICATOR_FAR, (ex+46)*scale, (ey+18)*scale, 0, scale) end
@@ -565,6 +482,8 @@ function DrawWalls()
         elseif v=='31' then 
             g.draw(FP_WALL_STONEDOOR2, WALL_THREE, 20*scale, 60*scale, 0, scale); --facing wall
             g.draw(FP_WALL_STONEDOOR, THREE_LEFT_WALL, 60*scale, 60*scale, 0, scale)
+        elseif v=='16' then 
+            g.draw(FP_TREE2, WALL_THREE, 20*scale, 60*scale, 0, scale); --facing wall
         end
         icon = GetFarFPObj(LEFTONE, FR_THREE)
         if icon ~= false then lg.draw(INDICATOR_FAR, (ex-16)*scale, (ey+18)*scale, 0, scale) end
@@ -574,6 +493,8 @@ function DrawWalls()
             g.draw(FP_WALL_STONE2, WALL_THREE, 60*scale, 60*scale, 0, scale)
         elseif v=='31' then 
             g.draw(FP_WALL_STONEDOOR2, WALL_THREE, 60*scale, 60*scale, 0, scale)
+        elseif v=='16' then 
+            g.draw(FP_TREE2, WALL_THREE, 60*scale, 60*scale, 0, scale) --facing wall
         end
         icon = GetFarFPObj(STRAIGHT, FR_THREE)
         if icon ~= false then lg.draw(INDICATOR_FAR, (ex+16)*scale, (ey+18)*scale, 0, scale) end
@@ -583,6 +504,7 @@ function DrawWalls()
             g.draw(FP_WALL_STONE, ROW2_SIDEWALL_R, 20*scale, 50*scale, 0, -scale, scale);
         elseif v=='31' then 
             g.draw(FP_WALL_STONEDOOR, ROW2_SIDEWALL_R, 20*scale, 50*scale, 0, -scale, scale);
+        
         end
         
         local v = bgmap[(FR_TWO*map_w)+RIGHTTWO+1]
@@ -599,6 +521,8 @@ function DrawWalls()
         elseif v=='31' then 
             g.draw(FP_WALL_STONEDOOR2, FRONT_WALL, -25*scale, 45*scale, 0, scale)--front wall
             g.draw(FP_WALL_STONEDOOR, TWO_LEFT_WALL, 45*scale, 45*scale, 0, scale)--side wall
+        elseif v=='16' then 
+            g.draw(FP_TREE2, FRONT_WALL, -25*scale, 45*scale, 0, scale)--front wall
         end
         icon = GetFPObj(LEFTONE, FR_TWO)
         if icon ~= false then lg.draw(icon, (ex-36)*scale, (ey+16)*scale, 0, scale) end
@@ -610,6 +534,8 @@ function DrawWalls()
         elseif v=='31' then 
             g.draw(FP_WALL_STONEDOOR2, FRONT_WALL, 185*scale, 45*scale, 0, -scale, scale)--front wall
             g.draw(FP_WALL_STONEDOOR, TWO_LEFT_WALL, 115*scale, 45*scale, 0, -scale, scale)--side wall
+        elseif v=='16' then 
+            g.draw(FP_TREE2, FRONT_WALL, 185*scale, 45*scale, 0, -scale, scale)--front wall
         end
         icon = GetFPObj(RIGHTONE, FR_TWO)
         if icon ~= false then lg.draw(icon, (ex+52)*scale, (ey+16)*scale, 0, scale) end
@@ -619,6 +545,8 @@ function DrawWalls()
             g.draw(FP_WALL_STONE2, FRONT_WALL, 45*scale, 45*scale, 0, scale)--back wall
         elseif v=='31' then 
             g.draw(FP_WALL_STONEDOOR2, FRONT_WALL, 45*scale, 45*scale, 0, scale)--back wall
+        elseif v=='16' then 
+            g.draw(FP_TREE2, FRONT_WALL, 45*scale, 45*scale, 0, scale)--back wall
         end
         icon = GetFPObj(STRAIGHT, FR_TWO)
         if icon ~= false then lg.draw(icon, (ex+10)*scale, (ey+16)*scale, 0, scale) end
@@ -630,6 +558,8 @@ function DrawWalls()
         elseif v=='31' then 
             g.draw(FP_WALL_STONEDOOR2, FRONT_WALL_REDGE, 160*scale, 20*scale, 0, -scale*1.72, scale*1.72)--front wall
             g.draw(FP_WALL_STONEDOOR, ONE_LEFT_WALL, 140*scale, 20*scale, 0, -scale, scale)--side wall
+        elseif v=='16' then 
+            g.draw(FP_TREE2, FRONT_WALL_REDGE, 160*scale, 20*scale, 0, -scale*1.72, scale*1.72)--front wall
         end
         icon = GetFPObj(RIGHTONE, FR_ONE)
         if icon ~= false then lg.draw(icon, (ex+64)*scale, ey*scale, 0, scale*2) end
@@ -641,6 +571,8 @@ function DrawWalls()
         elseif v=='31' then 
             g.draw(FP_WALL_STONEDOOR2, FRONT_WALL_REDGE, 0, 20*scale, 0, scale*1.72)--front wall
             g.draw(FP_WALL_STONEDOOR, ONE_LEFT_WALL, 20*scale, 20*scale, 0, scale)--side wall
+        elseif v=='16' then 
+            g.draw(FP_TREE2, FRONT_WALL_REDGE, 0, 20*scale, 0, scale*1.72)--front wall
         end
         icon = GetFPObj(LEFTONE, FR_ONE)
         if icon ~= false then lg.draw(icon, (ex-82)*scale, ey*scale, 0, scale*2) end
@@ -650,6 +582,8 @@ function DrawWalls()
             g.draw(FP_WALL_STONE2, FRONT_WALL, 20*scale, 20*scale, 0, scale*1.72)--front wall
         elseif v=='31' then 
             g.draw(FP_WALL_STONEDOOR2, FRONT_WALL, 20*scale, 20*scale, 0, scale*1.72)--front wall
+        elseif v=='16' then 
+            g.draw(FP_TREE2, FRONT_WALL, 20*scale, 20*scale, 0, scale*1.72)
         end
         icon = GetFPObj(STRAIGHT, FR_ONE)
         if icon ~= false then lg.draw(icon, (ex-8)*scale, ey*scale, 0, scale*2) end
@@ -674,6 +608,8 @@ function DrawWalls()
         elseif v=='31' then 
             g.draw(FP_WALL_STONEDOOR2, WALL_THREE, -18*scale, 60*scale, 0, scale); --facing wall
             g.draw(FP_WALL_STONEDOOR, THREE_SIDE, 40*scale, 60*scale, 0, -scale, scale); --side wall
+        elseif v=='16' then 
+            g.draw(FP_TREE2, WALL_THREE, -18*scale, 60*scale, 0, scale); --facing wall
         end
         local icon = GetFarFPObj(FR_THREE, LEFTTWO)
         if icon ~= false then lg.draw(INDICATOR_FAR, (ex-58)*scale, (ey+18)*scale, 0, scale) end
@@ -685,6 +621,8 @@ function DrawWalls()
         elseif v=='31' then 
             g.draw(FP_WALL_STONEDOOR2, WALL_THREE, 178*scale, 60*scale, 0, -scale, scale); --facing wall
             g.draw(FP_WALL_STONEDOOR, THREE_SIDE, 120*scale, 60*scale, 0, scale); --side wall      
+        elseif v=='16' then 
+            g.draw(FP_TREE2, WALL_THREE, 178*scale, 60*scale, 0, -scale, scale); --facing wall
         end
         icon = GetFarFPObj(FR_THREE, RIGHTTWO)
         if icon ~= false then lg.draw(INDICATOR_FAR, (ex+86)*scale, (ey+18)*scale, 0, scale) end
@@ -696,6 +634,8 @@ function DrawWalls()
         elseif v=='31' then 
             g.draw(FP_WALL_STONEDOOR2, WALL_THREE, 140*scale, 60*scale, 0, -scale, scale); --facing wall
             g.draw(FP_WALL_STONEDOOR, THREE_LEFT_WALL, 100*scale, 60*scale, 0, -scale, scale)
+        elseif v=='16' then 
+            g.draw(FP_TREE2, WALL_THREE, 140*scale, 60*scale, 0, -scale, scale); --facing wall
         end
         icon = GetFarFPObj(FR_THREE, RIGHTONE)
         if icon ~= false then lg.draw(INDICATOR_FAR, (ex+46)*scale, (ey+18)*scale, 0, scale) end
@@ -707,6 +647,8 @@ function DrawWalls()
         elseif v=='31' then 
             g.draw(FP_WALL_STONEDOOR2, WALL_THREE, 20*scale, 60*scale, 0, scale); --facing wall
             g.draw(FP_WALL_STONEDOOR, THREE_LEFT_WALL, 60*scale, 60*scale, 0, scale)
+        elseif v=='16' then 
+            g.draw(FP_TREE2, WALL_THREE, 20*scale, 60*scale, 0, scale); --facing wall
         end
         icon = GetFarFPObj(FR_THREE, LEFTONE)
         if icon ~= false then lg.draw(INDICATOR_FAR, (ex-16)*scale, (ey+18)*scale, 0, scale) end
@@ -716,6 +658,8 @@ function DrawWalls()
             g.draw(FP_WALL_STONE2, WALL_THREE, 60*scale, 60*scale, 0, scale)
         elseif v=='31' then 
             g.draw(FP_WALL_STONEDOOR2, WALL_THREE, 60*scale, 60*scale, 0, scale)
+        elseif v=='16' then 
+            g.draw(FP_TREE2, WALL_THREE, 60*scale, 60*scale, 0, scale)
         end
         icon = GetFarFPObj(FR_THREE, STRAIGHT)
         if icon ~= false then lg.draw(INDICATOR_FAR, (ex+16)*scale, (ey+18)*scale, 0, scale) end
@@ -725,6 +669,8 @@ function DrawWalls()
             g.draw(FP_WALL_STONE, ROW2_SIDEWALL_R, 20*scale, 50*scale, 0, -scale, scale);
         elseif v=='31' then 
             g.draw(FP_WALL_STONEDOOR, ROW2_SIDEWALL_R, 20*scale, 50*scale, 0, -scale, scale);
+        --elseif v=='16' then 
+        --    g.draw(FP_TREE, ROW2_SIDEWALL_R, 20*scale, 50*scale, 0, -scale, scale);
         end
 
         local v = bgmap[(RIGHTTWO*map_w)+FR_TWO+1]
@@ -732,6 +678,8 @@ function DrawWalls()
             g.draw(FP_WALL_STONE, ROW2_SIDEWALL_R, 140*scale, 50*scale, 0, scale);
         elseif v=='31' then 
             g.draw(FP_WALL_STONEDOOR, ROW2_SIDEWALL_R, 140*scale, 50*scale, 0, scale);
+        --elseif v=='16' then 
+        --    g.draw(FP_TREE, ROW2_SIDEWALL_R, 140*scale, 50*scale, 0, scale);
         end
 
         v = bgmap[(LEFTONE*map_w)+FR_TWO+1]
@@ -741,6 +689,8 @@ function DrawWalls()
         elseif v=='31' then 
             g.draw(FP_WALL_STONEDOOR2, FRONT_WALL, -25*scale, 45*scale, 0, scale)--front wall
             g.draw(FP_WALL_STONEDOOR, TWO_LEFT_WALL, 45*scale, 45*scale, 0, scale)--side wall
+        elseif v=='16' then 
+            g.draw(FP_TREE2, FRONT_WALL, -25*scale, 45*scale, 0, scale)--front wall
         end
         icon = GetFPObj(FR_TWO, LEFTONE)
         if icon ~= false then lg.draw(icon, (ex-36)*scale, (ey+16)*scale, 0, scale) end
@@ -752,6 +702,8 @@ function DrawWalls()
         elseif v=='31' then 
             g.draw(FP_WALL_STONEDOOR2, FRONT_WALL, 185*scale, 45*scale, 0, -scale, scale)--front wall
             g.draw(FP_WALL_STONEDOOR, TWO_LEFT_WALL, 115*scale, 45*scale, 0, -scale, scale)--side wall
+        elseif v=='16' then 
+            g.draw(FP_TREE2, FRONT_WALL, 185*scale, 45*scale, 0, -scale, scale)--front wall
         end
         icon = GetFPObj(FR_TWO, RIGHTONE)
         if icon ~= false then lg.draw(icon, (ex+52)*scale, (ey+16)*scale, 0, scale) end
@@ -761,6 +713,8 @@ function DrawWalls()
             g.draw(FP_WALL_STONE2, FRONT_WALL, 45*scale, 45*scale, 0, scale)--back wall
         elseif v=='31' then 
             g.draw(FP_WALL_STONEDOOR2, FRONT_WALL, 45*scale, 45*scale, 0, scale)--back wall
+        elseif v=='16' then 
+            g.draw(FP_TREE2, FRONT_WALL, 45*scale, 45*scale, 0, scale)--back wall
         end
         icon = GetFPObj(FR_TWO, STRAIGHT)
         if icon ~= false then lg.draw(icon, (ex+10)*scale, (ey+16)*scale, 0, scale) end
@@ -772,6 +726,8 @@ function DrawWalls()
         elseif v=='31' then 
             g.draw(FP_WALL_STONEDOOR2, FRONT_WALL_REDGE, 160*scale, 20*scale, 0, -scale*1.72, scale*1.72)--front wall
             g.draw(FP_WALL_STONEDOOR, ONE_LEFT_WALL, 140*scale, 20*scale, 0, -scale, scale)--side wall
+        elseif v=='16' then 
+            g.draw(FP_TREE2, FRONT_WALL_REDGE, 160*scale, 20*scale, 0, -scale*1.72, scale*1.72)--front wall
         end
         icon = GetFPObj(FR_ONE, RIGHTONE)
         if icon ~= false then lg.draw(icon, (ex+64)*scale, ey*scale, 0, scale*2) end
@@ -783,6 +739,9 @@ function DrawWalls()
         elseif v=='31' then 
             g.draw(FP_WALL_STONEDOOR2, FRONT_WALL_REDGE, 0, 20*scale, 0, scale*1.72)--front wall
             g.draw(FP_WALL_STONEDOOR, ONE_LEFT_WALL, 20*scale, 20*scale, 0, scale)--side wall
+        elseif v=='16' then 
+            g.draw(FP_TREE2, FRONT_WALL_REDGE, 0, 20*scale, 0, scale*1.72)--front wall
+            
         end
         icon = GetFPObj(FR_ONE, LEFTONE)
         if icon ~= false then lg.draw(icon, (ex-82)*scale, ey*scale, 0, scale*2) end
@@ -792,6 +751,8 @@ function DrawWalls()
             g.draw(FP_WALL_STONE2, FRONT_WALL, 20*scale, 20*scale, 0, scale*1.72)--front wall
         elseif v=='31' then 
             g.draw(FP_WALL_STONEDOOR2, FRONT_WALL, 20*scale, 20*scale, 0, scale*1.72)--front wall
+        elseif v=='16' then 
+            g.draw(FP_TREE2, FRONT_WALL, 20*scale, 20*scale, 0, scale*1.72)
         end
         icon = GetFPObj(FR_ONE, STRAIGHT)
         if icon ~= false then lg.draw(icon, (ex-8)*scale, ey*scale, 0, scale*2) end
@@ -801,6 +762,8 @@ function DrawWalls()
             g.draw(FP_WALL_STONE, IMM_LEFT_WALL, 0, 0, 0, scale)--lefthand wall
         elseif v=='31' then 
             g.draw(FP_WALL_STONEDOOR, IMM_LEFT_WALL, 0, 0, 0, scale)--lefthand wall
+        --elseif v=='16' then 
+        --    g.draw(FP_TREE, IMM_LEFT_WALL, 0, 0, 0, scale)--lefthand wall
         end
         v = bgmap[(RIGHTONE*map_w)+FZERO+1]
         if v=='3' then 
@@ -832,7 +795,8 @@ function love.draw(dT)
         g.push()
         cr = scale*8
         g.translate(cr+(16*scale), cr+(4*scale));
-        g.setColor(0, (170/255), (170/255), 1.0);
+        --g.setColor(0, (170/255), (170/255), 1.0);
+        g.setColor(0, 0, 0, 1);
         love.graphics.rectangle("fill", 0, 0, 160*scale, 160*scale)
         
         --render order
