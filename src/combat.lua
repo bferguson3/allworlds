@@ -50,7 +50,7 @@ end
 
 
 function StartCombat(nmes)
-    
+    queue = {};
     lastActive = activePC;
     outOfCombatState.map = currentMap.fname
     outOfCombatState.x, outOfCombatState.y = px, py

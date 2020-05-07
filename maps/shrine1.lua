@@ -48,11 +48,27 @@ currentMap = {
     },
     {
         g = "gslime",
-        x = 20,
+        x = 18,
         y = 30,
         examine = {": \"A group of green slimes.\""},
         encounter = true,
         enemies = { "gslime","gslime","gslime","gslime" }
+    },
+    {
+        g = "gslime",
+        x = 19,
+        y = 31,
+        examine = {": \"A group of green slimes.\""},
+        encounter = true,
+        enemies = { "gslime","gslime","gslime" }
+    },
+    {
+        g = "gslime",
+        x = 29,
+        y = 21,
+        examine = {": \"A group of green slimes.\""},
+        encounter = true,
+        enemies = { "gslime","gslime","gslime" }
     },
     {
         g = "gslime",

@@ -65,10 +65,10 @@ function love.keypressed(key)
     if inputMode == FP_MOVE then 
         moved = false;
         if key == "down" then 
-            if fpDirection == 0 and not CheckCollision(px, py+1) then py = py + 1; sfx.step:play(); AddLog("South"); moved=true;
-            elseif fpDirection == 1 and not CheckCollision(px-1, py)  then px = px - 1; sfx.step:play(); AddLog("West"); moved=true;
-            elseif fpDirection == 2 and not CheckCollision(px, py-1)  then py = py - 1; sfx.step:play(); AddLog("North"); moved=true;
-            elseif fpDirection == 3 and not CheckCollision(px+1, py) then px = px + 1; sfx.step:play(); AddLog("East"); moved=true; end
+            if fpDirection == 0 and not CheckCollision(px, py+1, 'TRUE') then py = py + 1; sfx.step:play(); AddLog("Back"); moved=true;
+            elseif fpDirection == 1 and not CheckCollision(px-1, py, 'TRUE')  then px = px - 1; sfx.step:play(); AddLog("Back"); moved=true;
+            elseif fpDirection == 2 and not CheckCollision(px, py-1, 'TRUE')  then py = py - 1; sfx.step:play(); AddLog("Back"); moved=true;
+            elseif fpDirection == 3 and not CheckCollision(px+1, py, 'TRUE') then px = px + 1; sfx.step:play(); AddLog("Back"); moved=true; end
         elseif key == "right" then 
             sfx.step:play(); AddLog("Turn right");
             fpDirection = fpDirection + 1
@@ -76,10 +76,10 @@ function love.keypressed(key)
             sfx.step:play(); AddLog("Turn left");
             fpDirection = fpDirection - 1
         elseif key == "up" then 
-            if fpDirection == 0  and not CheckCollision(px, py-1) then py = py - 1; AddLog("North"); moved=true;
-            elseif fpDirection == 1 and not CheckCollision(px+1, py) then px = px + 1; AddLog("East"); moved=true;
-            elseif fpDirection == 2 and not CheckCollision(px, py+1) then py = py + 1; AddLog("South"); moved=true;
-            elseif fpDirection == 3 and not CheckCollision(px-1, py) then px = px - 1; AddLog("West"); moved=true; end
+            if fpDirection == 0  and not CheckCollision(px, py-1) then py = py - 1; AddLog("Forward"); moved=true;
+            elseif fpDirection == 1 and not CheckCollision(px+1, py) then px = px + 1; AddLog("Forward"); moved=true;
+            elseif fpDirection == 2 and not CheckCollision(px, py+1) then py = py + 1; AddLog("Forward"); moved=true;
+            elseif fpDirection == 3 and not CheckCollision(px-1, py) then px = px - 1; AddLog("Forward"); moved=true; end
         elseif key == 't' then 
             AddLog("Talk"); 
             if fpDirection==0 and CheckTalk(px, py-1) then AddQueue({"wait", 0.25}); AddQueue({"setIMchat"}); return; 

@@ -565,6 +565,14 @@ function MoveRandomly(e)
     if td ~= '0' and td ~= '2' and td ~= '30' then ds[2] = false end
     --randomly pick open dir
     local rr = love.math.random(4)-1
+    --error check
+    local err = false
+    for d=0,#ds do 
+        if ds[d] == true then 
+            err = true 
+        end 
+    end
+    if err==false then return end 
     while ds[rr] ~= true do 
         rr = love.math.random(4)-1
     end
@@ -691,7 +699,8 @@ function love.update(dT)
             elseif queue[1][1] == "wait" then 
                 local t = queue[1][2]
                 table.remove(queue, 1)
-                animationTimer = t
+                if t ~= nil then 
+                    animationTimer = t else animationTimer = 0 end 
             elseif queue[1][1] == "campZoom" then 
                 table.remove(queue, 1);
                 CampZoom()
@@ -709,6 +718,18 @@ function love.update(dT)
                 local t = queue[1][2] 
                 table.remove(queue, 1)
                 MoveRandomly(t)
+            elseif queue[1][1] == "goForward" then 
+                table.remove(queue, 1)
+                --if inputMode ~= FP_MOVE then return end 
+                if fpDirection == 0 then py = py - 1 
+                elseif fpDirection == 1 then px = px + 1 
+                elseif fpDirection == 2 then py = py + 1 
+                elseif fpDirection == 3 then px = px - 1 end
+                --inputMode = FP_MOVE;
+            elseif queue[1][1] == "inputMode" then 
+                local t = queue[1][2];
+                table.remove(queue, 1);
+                inputMode = t;
             elseif queue[1][1] == "MoveTowardsP" then 
                 local t = queue[1][2] 
                 table.remove(queue, 1)
@@ -790,7 +811,8 @@ end -- love.update
 m = love.filesystem.load("src/draw.lua")
 m()
 
-function CheckCollision(x, y)
+function CheckCollision(x, y, backwards)
+    backwards = backwards or 'FALSE';
     if inCombat == true then 
         for i=1,#combat_actors do 
             if combat_actors[i].x == x and combat_actors[i].y == y then 
@@ -843,6 +865,7 @@ function CheckCollision(x, y)
     end
     if bgmap[ofs] == '31' then
         --door 
+        if backwards=='TRUE' then AddLog("Blocked!"); return true; end
         --check if there's an object in currentMap that has coords of x, y
         for d=1,#currentMap do 
             if currentMap[d].x == x and currentMap[d].y == y then 
@@ -851,7 +874,10 @@ function CheckCollision(x, y)
         end
         AddLog("Open!", 0);
         --if not, we're good - play 'Open!' and sfx
-        --if yes, play 'Locked!' and return true
+        inputMode = nil
+        AddQueue({"wait", 0.2});
+        AddQueue({"goForward"});
+        AddQueue({"inputMode", FP_MOVE})
     end
     return false;
 end
@@ -1005,10 +1031,12 @@ function TryMoveLR(o, c)
     if o.x - c.x > 0 then 
         -- move left: -x
         if CheckCollision(o.x-1, o.y) == false then 
+            sfx.step:play();
             o.x = o.x - 1;
         end
     else 
         if CheckCollision(o.x+1, o.y) == false then 
+            sfx.step:play();
             o.x = o.x + 1;
         end 
     end 
