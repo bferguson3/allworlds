@@ -231,8 +231,9 @@ function SetZoom(z)
     love.window.setMode(320*z, 200*z)
     scr_w, scr_h = lg.getDimensions();
     --scale = math.floor(scr_h / 200);
-    scale = scr_h / 200;
+    scale = scr_w / 320;
     x_draw_offset = (scr_w - (scale * 320))/2;
+    y_draw_offset = (scr_h - (scale * 200))/2;
 end
 
 function love.load(arg)
@@ -248,7 +249,22 @@ function love.load(arg)
         --return
     end
     SetZoom(3);
-
+    for a=1,#arg do
+        if arg[a] == '--fs' then 
+            eFullscr = true;
+            love.window.setMode(0, 0, {fullscreen=true});
+            scr_w, scr_h = lg.getDimensions();
+            scale = scr_w / 320;
+            x_draw_offset = (scr_w - (scale * 320))/2;
+        elseif arg[a] == '--fr' then 
+            eFullscr = true;
+            love.window.setMode(0, 0, {fullscreen=true});
+            scr_w, scr_h = lg.getDimensions();
+            scale = math.floor(scr_w / 320);
+            x_draw_offset = (scr_w - (scale * 320))/2;
+            y_draw_offset = (scr_h - (scale * 200))/2;
+        end
+    end
     if love.filesystem.getInfo("01.sav") == nil then 
         currentSave = love.filesystem.newFile("01.sav")
         love.filesystem.write("01.sav", 'ok')
@@ -600,20 +616,21 @@ distanceTest = 0
 
 function love.update(dT)
     print(zoomTab)
-    --if dT > (1/60) then return end
-    -- if love.keyboard.isDown("lalt") and love.keyboard.isDown("return") then 
-    --     if eFullscr == false then 
-    --         eFullscr = true;
-    --         SetZoom(3);
-    --         love.window.setFullscreen(true, "exclusive");
-    --         return
-    --     else 
-    --         eFullscr = false;
-    --         SetZoom(3);
-    --         return
-    --         --love.window.setMode(320*2, 200*2);
-    --     end
-    -- end
+     if love.keyboard.isDown("lalt") and love.keyboard.isDown("return") then 
+         if eFullscr == false then 
+            eFullscr = true;
+            love.window.setMode(0, 0, {fullscreen=true});
+            scr_w, scr_h = lg.getDimensions();
+            scale = scr_w / 320;
+            x_draw_offset = (scr_w - (scale * 320))/2;
+             return
+        else 
+            eFullscr = false;
+            SetZoom(3);
+            return
+            --love.window.setMode(320*2, 200*2);
+        end
+    end
     distanceTest = distanceTest + dT
     if distanceTest > 4 then distanceTest = 0 end
     if love.keyboard.isDown("lctrl") and love.keyboard.isDown("s") then 
@@ -635,6 +652,7 @@ function love.update(dT)
         sinCounter = sinCounter + (dT*4);
         animationTimer = animationTimer - dT;
         flashtimer = flashtimer - dT;
+        timeSinceMove = timeSinceMove + dT;
         transitionTick = transitionTick + dT;
         --print(transitionTick)
     end

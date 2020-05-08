@@ -1,22 +1,27 @@
 # allworlds
 ALLWORLDS I<br>
 <br>
+Command line args:<br>
+--fs: Launches in borderless fullscreen<br>
+--fr: Launches in borderless fullscreen with correct pixel<br>
+aspect ratio (must restart to enter this mode again)<br>
+<br>
 Controls:<br>
 <br>
-Alt-enter: Exclusive fullscreen toggle (pixel zoom 2, 640x400)<br>
-Tab: Toggle between pixel zoom 1-3 and borderless fs<br>
+Alt-enter: Toggle borderless fullscreen<br>
+Tab: Toggle between pixel zoom 1-4<br>
 <br>
 1-4 - Select party member<br>
-0 - Toggle first person view (WIP)<br>
 <br>
 A - Attack<br>
 C - Camp<br>
 D - Defend (and end turn)<br>
-E - Examine<br>
+E - Examine (top-down only)*<br>
 I - Inventory<br>
-M - Magic/skill<br>
+M - Magic<br>
 T - Talk<br>
 Z - Open party status screen<br>
+*Bump into things in first person to examine them.<br>
 <br>
 Ctrl+S: Save<br>
 Ctrl+L: Load<br>

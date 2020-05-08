@@ -779,7 +779,7 @@ end
 function love.draw(dT)
     
     --love.graphics.scale(scale, scale)
-    love.graphics.translate(x_draw_offset, 0)
+    love.graphics.translate(x_draw_offset, y_draw_offset)
     local ofs = ((py-10) * map_w) + (px-10);
     lg.setColor(0, 0, 0, 1);
     lg.rectangle("fill", 0, 0, 320*scale, 200*scale)

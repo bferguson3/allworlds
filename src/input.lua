@@ -38,9 +38,9 @@ function SetIMchat()
 end
 
 function love.keypressed(key)
-    --if timeSinceMove < 0.1 then 
-    --    return
-    --end
+    if timeSinceMove < 0.1 then 
+        return
+    end
     if camping then return end 
     if inputMode == CHAT_INPUT then 
         if key == 'backspace' and #myinput > 0 then 
@@ -97,13 +97,15 @@ function love.keypressed(key)
         --    return
         --end
         if (moved == true) then 
---            print('stepped')
+            timeSinceMove = 0
             sfx.step:play()
+            AddQueue({"wait", 0.1})
+            --AddQueue({"inputMode", ip})
+                    
             enemyStep = enemyStep - 1
             if enemyStep == 0 then 
                 enemyStep = 2
                 if currentMap.name=='world map' then--currentMap.name == "world map" then 
-                    AddQueue({"wait", 0.1})
                     if noEnemiesSpawned < maxEnemySpawns then 
                         if love.math.random(100) <= 10 then 
                             CreateWMEnemy()
@@ -117,10 +119,10 @@ function love.keypressed(key)
                     end
                 end -- endif worldmap
                 if currentMap.name~='world map' then 
-                    if currentMap.fights == true then AddQueue({"wait", 0.1}); end 
+                    if currentMap.fights == true then 
+                        
+                    end 
                     for p=1,#currentMap do 
-                        --currentMap[p].encounter = currentMap[p].encounter or false;
-                        --if currentMap[p].encounter == true then
                         currentMap[p].wander = currentMap[p].wander or 0;
                         if currentMap[p].wander == 1 then AddQueue({"MoveRandomly", currentMap[p]}) end
                         --end
@@ -536,14 +538,20 @@ function love.keypressed(key)
         --    cameraMode = 3
         --end
         if (moved == true) then 
+            timeSinceMove = 0;
             sfx.step:play()
+            local ip = inputMode;
+            --inputMode = nil;
+            AddQueue({"wait", 0.1})
+            --AddQueue({"inputMode", ip})
+                    
             movedThisMap = true;
             enemyStep = enemyStep - 1
             if enemyStep == 0 then 
                 enemyStep = 2
                 if currentMap.name=='world map' then--currentMap.name == "world map" then 
                     -- random spawn 
-                    AddQueue({"wait", 0.1})
+                    --AddQueue({"wait", 0.1})
                     if noEnemiesSpawned < maxEnemySpawns then 
                         if love.math.random(100) <= 10 then 
                             CreateWMEnemy()
@@ -561,7 +569,7 @@ function love.keypressed(key)
             
                 if currentMap.fights == true and currentMap.name~='world map' then 
                 -- make enemies move randomly otherwise 
-                    AddQueue({"wait", 0.1});
+                    --AddQueue({"wait", 0.1});
                     for p=1,#currentMap do 
                         currentMap[p].encounter = currentMap[p].encounter or false;
                         if currentMap[p].encounter == true then 
