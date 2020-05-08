@@ -50,6 +50,7 @@ currentMap = {
         g = "gslime",
         x = 18,
         y = 30,
+        wander = 1,
         examine = {": \"A group of green slimes.\""},
         encounter = true,
         enemies = { "gslime","gslime","gslime","gslime" }
@@ -60,12 +61,14 @@ currentMap = {
         y = 31,
         examine = {": \"A group of green slimes.\""},
         encounter = true,
+        wander = 1,
         enemies = { "gslime","gslime","gslime" }
     },
     {
         g = "gslime",
         x = 29,
         y = 21,
+        wander = 1,
         examine = {": \"A group of green slimes.\""},
         encounter = true,
         enemies = { "gslime","gslime","gslime" }
@@ -74,6 +77,7 @@ currentMap = {
         g = "gslime",
         x = 30,
         y = 30,
+        wander = 1,
         examine = {": \"A group of green slimes.\""},
         encounter = true,
         enemies = { "gslime","gslime","gslime","gslime", "gslime" }
@@ -83,7 +87,8 @@ currentMap = {
             x1 = 1,
             y1 = 1,
             x2 = 200,
-            y2 = 200
+            y2 = 200,
+            fp = 0
         }
     },
     warps = {
@@ -102,5 +107,10 @@ currentMap = {
             y = 39,
             target = { map="worldmap", x=20, y=10 }
         },
+        [4] = {
+            x = 24,
+            y = 25,
+            target = { map="tower_innocence_1f", x=24, y=24 }
+        }
     }
 }

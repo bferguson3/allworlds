@@ -387,7 +387,7 @@ function DrawWalls()
              if lat == LEFTTWO then 
                 --print(ct)
                    --back row, tile 1
-                if ct == '3' then 
+                if ct == '3' or ct == '34' or ct == '35' then 
     --                 --stone wall?
                     g.draw(FP_WALL_STONE, FAR_BACK_WALL, 0*scale, 70*scale, 0, scale*1.5, scale); 
                 elseif ct == '31' then 
@@ -398,7 +398,7 @@ function DrawWalls()
                 --new function
                 
              elseif lat == LEFTONE then 
-                 if ct == '3' then 
+                if ct == '3' or ct == '34' or ct == '35' then 
                      g.draw(FP_WALL_STONE, FAR_BACK_WALL, 34*scale, 70*scale, 0, scale*1.35, scale); 
                  elseif ct == '31' then 
                     g.draw(FP_WALL_STONEDOOR, FAR_BACK_WALL, 34*scale, 70*scale, 0, scale*1.35, scale); 
@@ -406,7 +406,7 @@ function DrawWalls()
                     g.draw(FP_TREE, FAR_BACK_WALL, 34*scale, 70*scale, 0, scale*1.35, scale); 
                  end
              elseif lat == STRAIGHT then 
-                 if ct == '3' then 
+                if ct == '3' or ct == '34' or ct == '35' then 
                      g.draw(FP_WALL_STONE, FAR_BACK_WALL, 64*scale, 70*scale, 0, scale*1.25, scale);
                  elseif ct=='31' then 
                     g.draw(FP_WALL_STONEDOOR, FAR_BACK_WALL, 64*scale, 70*scale, 0, scale*1.25, scale);
@@ -414,7 +414,7 @@ function DrawWalls()
                     g.draw(FP_TREE, FAR_BACK_WALL, 64*scale, 70*scale, 0, scale*1.25, scale);
                  end
              elseif lat == RIGHTONE then 
-                 if ct == '3' then 
+                if ct == '3' or ct == '34' or ct == '35' then 
                      g.draw(FP_WALL_STONE, FAR_BACK_WALL, 92*scale, 70*scale, 0, scale*1.5, scale);
                  elseif ct == '31' then 
                     g.draw(FP_WALL_STONEDOOR, FAR_BACK_WALL, 92*scale, 70*scale, 0, scale*1.5, scale);
@@ -422,7 +422,7 @@ function DrawWalls()
                     g.draw(FP_TREE, FAR_BACK_WALL, 92*scale, 70*scale, 0, scale*1.5, scale);
                  end
              elseif lat == RIGHTTWO then 
-                 if ct == '3' then 
+                if ct == '3' or ct == '34' or ct == '35' then 
                      g.draw(FP_WALL_STONE, FAR_BACK_WALL, 126*scale, 70*scale, 0, scale*1.5, scale);
                  elseif ct=='31' then 
                     g.draw(FP_WALL_STONEDOOR, FAR_BACK_WALL, 126*scale, 70*scale, 0, scale*1.5, scale);
@@ -437,7 +437,7 @@ function DrawWalls()
         
         local v = bgmap[(FR_THREE*map_w)+LEFTTWO+1]
         
-        if v=='3' then 
+        if v == '3' or v == '34' or v == '35' then 
             g.draw(FP_WALL_STONE2, WALL_THREE, -18*scale, 60*scale, 0, scale); --facing wall
             g.draw(FP_WALL_STONE, THREE_SIDE, 40*scale, 60*scale, 0, -scale, scale); --side wall
         elseif v=='31' then 
@@ -450,7 +450,7 @@ function DrawWalls()
         if icon ~= false then lg.draw(INDICATOR_FAR, (ex-58)*scale, (ey+18)*scale, 0, scale) end
         
         local v = bgmap[(FR_THREE*map_w)+RIGHTTWO+1]
-        if v=='3' then 
+        if v == '3' or v == '34' or v == '35' then
             g.draw(FP_WALL_STONE2, WALL_THREE, 178*scale, 60*scale, 0, -scale, scale); --facing wall
             g.draw(FP_WALL_STONE, THREE_SIDE, 120*scale, 60*scale, 0, scale); --side wall      
         elseif v=='31' then 
@@ -463,7 +463,7 @@ function DrawWalls()
         if icon ~= false then lg.draw(INDICATOR_FAR, (ex+86)*scale, (ey+18)*scale, 0, scale) end
 
         local v = bgmap[(FR_THREE*map_w)+RIGHTONE+1]
-        if v=='3' then 
+        if v == '3' or v == '34' or v == '35' then
             g.draw(FP_WALL_STONE2, WALL_THREE, 140*scale, 60*scale, 0, -scale, scale); --facing wall
             g.draw(FP_WALL_STONE, THREE_LEFT_WALL, 100*scale, 60*scale, 0, -scale, scale)
         elseif v=='31' then 
@@ -476,7 +476,7 @@ function DrawWalls()
         if icon ~= false then lg.draw(INDICATOR_FAR, (ex+46)*scale, (ey+18)*scale, 0, scale) end
 
         v = bgmap[(FR_THREE*map_w)+LEFTONE+1]
-        if v=='3' then 
+        if v == '3' or v == '34' or v == '35' then
             g.draw(FP_WALL_STONE2, WALL_THREE, 20*scale, 60*scale, 0, scale); --facing wall
             g.draw(FP_WALL_STONE, THREE_LEFT_WALL, 60*scale, 60*scale, 0, scale)
         elseif v=='31' then 
@@ -489,7 +489,7 @@ function DrawWalls()
         if icon ~= false then lg.draw(INDICATOR_FAR, (ex-16)*scale, (ey+18)*scale, 0, scale) end
 
         local v = bgmap[(FR_THREE*map_w)+STRAIGHT+1]
-        if v=='3' then 
+        if v == '3' or v == '34' or v == '35' then
             g.draw(FP_WALL_STONE2, WALL_THREE, 60*scale, 60*scale, 0, scale)
         elseif v=='31' then 
             g.draw(FP_WALL_STONEDOOR2, WALL_THREE, 60*scale, 60*scale, 0, scale)
@@ -500,7 +500,7 @@ function DrawWalls()
         if icon ~= false then lg.draw(INDICATOR_FAR, (ex+16)*scale, (ey+18)*scale, 0, scale) end
 
         local v = bgmap[(FR_TWO*map_w)+LEFTTWO+1]
-        if v=='3' then 
+        if v == '3' or v == '34' or v == '35' then
             g.draw(FP_WALL_STONE, ROW2_SIDEWALL_R, 20*scale, 50*scale, 0, -scale, scale);
         elseif v=='31' then 
             g.draw(FP_WALL_STONEDOOR, ROW2_SIDEWALL_R, 20*scale, 50*scale, 0, -scale, scale);
@@ -508,14 +508,14 @@ function DrawWalls()
         end
         
         local v = bgmap[(FR_TWO*map_w)+RIGHTTWO+1]
-        if v=='3' then 
+        if v == '3' or v == '34' or v == '35' then
             g.draw(FP_WALL_STONE, ROW2_SIDEWALL_R, 140*scale, 50*scale, 0, scale);
         elseif v=='31' then 
             g.draw(FP_WALL_STONEDOOR, ROW2_SIDEWALL_R, 140*scale, 50*scale, 0, scale);
         end
         
         v = bgmap[(FR_TWO*map_w)+LEFTONE+1]
-        if v=='3' then 
+        if v == '3' or v == '34' or v == '35' then
             g.draw(FP_WALL_STONE2, FRONT_WALL, -25*scale, 45*scale, 0, scale)--front wall
             g.draw(FP_WALL_STONE, TWO_LEFT_WALL, 45*scale, 45*scale, 0, scale)--side wall
         elseif v=='31' then 
@@ -528,7 +528,7 @@ function DrawWalls()
         if icon ~= false then lg.draw(icon, (ex-36)*scale, (ey+16)*scale, 0, scale) end
 
         v = bgmap[(FR_TWO*map_w)+RIGHTONE+1]
-        if v=='3' then 
+        if v == '3' or v == '34' or v == '35' then
             g.draw(FP_WALL_STONE2, FRONT_WALL, 185*scale, 45*scale, 0, -scale, scale)--front wall
             g.draw(FP_WALL_STONE, TWO_LEFT_WALL, 115*scale, 45*scale, 0, -scale, scale)--side wall
         elseif v=='31' then 
@@ -541,7 +541,7 @@ function DrawWalls()
         if icon ~= false then lg.draw(icon, (ex+52)*scale, (ey+16)*scale, 0, scale) end
 
         v = bgmap[(FR_TWO*map_w)+STRAIGHT+1]
-        if v=='3' then 
+        if v == '3' or v == '34' or v == '35' then
             g.draw(FP_WALL_STONE2, FRONT_WALL, 45*scale, 45*scale, 0, scale)--back wall
         elseif v=='31' then 
             g.draw(FP_WALL_STONEDOOR2, FRONT_WALL, 45*scale, 45*scale, 0, scale)--back wall
@@ -552,7 +552,7 @@ function DrawWalls()
         if icon ~= false then lg.draw(icon, (ex+10)*scale, (ey+16)*scale, 0, scale) end
         
         v = bgmap[(FR_ONE*map_w)+RIGHTONE+1]
-        if v=='3' then 
+        if v == '3' or v == '34' or v == '35' then
             g.draw(FP_WALL_STONE2, FRONT_WALL_REDGE, 160*scale, 20*scale, 0, -scale*1.72, scale*1.72)--front wall
             g.draw(FP_WALL_STONE, ONE_LEFT_WALL, 140*scale, 20*scale, 0, -scale, scale)--side wall
         elseif v=='31' then 
@@ -565,7 +565,7 @@ function DrawWalls()
         if icon ~= false then lg.draw(icon, (ex+64)*scale, ey*scale, 0, scale*2) end
         
         v = bgmap[(FR_ONE*map_w)+LEFTONE+1]
-        if v=='3' then 
+        if v == '3' or v == '34' or v == '35' then
             g.draw(FP_WALL_STONE2, FRONT_WALL_REDGE, 0, 20*scale, 0, scale*1.72)--front wall
             g.draw(FP_WALL_STONE, ONE_LEFT_WALL, 20*scale, 20*scale, 0, scale)--side wall
         elseif v=='31' then 
@@ -578,7 +578,7 @@ function DrawWalls()
         if icon ~= false then lg.draw(icon, (ex-82)*scale, ey*scale, 0, scale*2) end
         
         v = bgmap[(FR_ONE*map_w)+STRAIGHT+1]
-        if v=='3' then 
+        if v == '3' or v == '34' or v == '35' then
             g.draw(FP_WALL_STONE2, FRONT_WALL, 20*scale, 20*scale, 0, scale*1.72)--front wall
         elseif v=='31' then 
             g.draw(FP_WALL_STONEDOOR2, FRONT_WALL, 20*scale, 20*scale, 0, scale*1.72)--front wall
@@ -589,20 +589,20 @@ function DrawWalls()
         if icon ~= false then lg.draw(icon, (ex-8)*scale, ey*scale, 0, scale*2) end
         
         v = bgmap[(FZERO*map_w)+LEFTONE+1]
-        if v=='3' then 
+        if v == '3' or v == '34' or v == '35' then
             g.draw(FP_WALL_STONE, IMM_LEFT_WALL, 0, 0, 0, scale)--lefthand wall
         elseif v=='31' then 
             g.draw(FP_WALL_STONEDOOR, IMM_LEFT_WALL, 0, 0, 0, scale)--lefthand wall
         end
         v = bgmap[(FZERO*map_w)+RIGHTONE+1]
-        if v=='3' then 
+        if v == '3' or v == '34' or v == '35' then
             g.draw(FP_WALL_STONE, IMM_LEFT_WALL, 160*scale, 0, 0, -scale, scale)--lefthand wall
         elseif v=='31' then 
             g.draw(FP_WALL_STONEDOOR, IMM_LEFT_WALL, 160*scale, 0, 0, -scale, scale)--lefthand wall
         end
     elseif fpDirection == 1 or fpDirection==3 then 
         local v = bgmap[(LEFTTWO*map_w)+FR_THREE+1]
-        if v=='3' then 
+        if v == '3' or v == '34' or v == '35' then
             g.draw(FP_WALL_STONE2, WALL_THREE, -18*scale, 60*scale, 0, scale); --facing wall
             g.draw(FP_WALL_STONE, THREE_SIDE, 40*scale, 60*scale, 0, -scale, scale); --side wall
         elseif v=='31' then 
@@ -615,7 +615,7 @@ function DrawWalls()
         if icon ~= false then lg.draw(INDICATOR_FAR, (ex-58)*scale, (ey+18)*scale, 0, scale) end
         
         local v = bgmap[(RIGHTTWO*map_w)+FR_THREE+1]
-        if v=='3' then 
+        if v == '3' or v == '34' or v == '35' then
             g.draw(FP_WALL_STONE2, WALL_THREE, 178*scale, 60*scale, 0, -scale, scale); --facing wall
             g.draw(FP_WALL_STONE, THREE_SIDE, 120*scale, 60*scale, 0, scale); --side wall      
         elseif v=='31' then 
@@ -628,7 +628,7 @@ function DrawWalls()
         if icon ~= false then lg.draw(INDICATOR_FAR, (ex+86)*scale, (ey+18)*scale, 0, scale) end
 
         local v = bgmap[(RIGHTONE*map_w)+FR_THREE+1]
-        if v=='3' then 
+        if v == '3' or v == '34' or v == '35' then
             g.draw(FP_WALL_STONE2, WALL_THREE, 140*scale, 60*scale, 0, -scale, scale); --facing wall
             g.draw(FP_WALL_STONE, THREE_LEFT_WALL, 100*scale, 60*scale, 0, -scale, scale)
         elseif v=='31' then 
@@ -641,7 +641,7 @@ function DrawWalls()
         if icon ~= false then lg.draw(INDICATOR_FAR, (ex+46)*scale, (ey+18)*scale, 0, scale) end
 
         v = bgmap[(LEFTONE*map_w)+FR_THREE+1]
-        if v=='3' then 
+        if v == '3' or v == '34' or v == '35' then
             g.draw(FP_WALL_STONE2, WALL_THREE, 20*scale, 60*scale, 0, scale); --facing wall
             g.draw(FP_WALL_STONE, THREE_LEFT_WALL, 60*scale, 60*scale, 0, scale)
         elseif v=='31' then 
@@ -654,7 +654,7 @@ function DrawWalls()
         if icon ~= false then lg.draw(INDICATOR_FAR, (ex-16)*scale, (ey+18)*scale, 0, scale) end
 
         local v = bgmap[(STRAIGHT*map_w)+FR_THREE+1]
-        if v=='3' then 
+        if v == '3' or v == '34' or v == '35' then
             g.draw(FP_WALL_STONE2, WALL_THREE, 60*scale, 60*scale, 0, scale)
         elseif v=='31' then 
             g.draw(FP_WALL_STONEDOOR2, WALL_THREE, 60*scale, 60*scale, 0, scale)
@@ -665,7 +665,7 @@ function DrawWalls()
         if icon ~= false then lg.draw(INDICATOR_FAR, (ex+16)*scale, (ey+18)*scale, 0, scale) end
 
         local v = bgmap[(LEFTTWO*map_w)+FR_TWO+1]
-        if v=='3' then 
+        if v == '3' or v == '34' or v == '35' then
             g.draw(FP_WALL_STONE, ROW2_SIDEWALL_R, 20*scale, 50*scale, 0, -scale, scale);
         elseif v=='31' then 
             g.draw(FP_WALL_STONEDOOR, ROW2_SIDEWALL_R, 20*scale, 50*scale, 0, -scale, scale);
@@ -674,7 +674,7 @@ function DrawWalls()
         end
 
         local v = bgmap[(RIGHTTWO*map_w)+FR_TWO+1]
-        if v=='3' then 
+        if v == '3' or v == '34' or v == '35' then
             g.draw(FP_WALL_STONE, ROW2_SIDEWALL_R, 140*scale, 50*scale, 0, scale);
         elseif v=='31' then 
             g.draw(FP_WALL_STONEDOOR, ROW2_SIDEWALL_R, 140*scale, 50*scale, 0, scale);
@@ -683,7 +683,7 @@ function DrawWalls()
         end
 
         v = bgmap[(LEFTONE*map_w)+FR_TWO+1]
-        if v=='3' then 
+        if v == '3' or v == '34' or v == '35' then
             g.draw(FP_WALL_STONE2, FRONT_WALL, -25*scale, 45*scale, 0, scale)--front wall
             g.draw(FP_WALL_STONE, TWO_LEFT_WALL, 45*scale, 45*scale, 0, scale)--side wall
         elseif v=='31' then 
@@ -696,7 +696,7 @@ function DrawWalls()
         if icon ~= false then lg.draw(icon, (ex-36)*scale, (ey+16)*scale, 0, scale) end
 
         v = bgmap[(RIGHTONE*map_w)+FR_TWO+1]
-        if v=='3' then 
+        if v == '3' or v == '34' or v == '35' then
             g.draw(FP_WALL_STONE2, FRONT_WALL, 185*scale, 45*scale, 0, -scale, scale)--front wall
             g.draw(FP_WALL_STONE, TWO_LEFT_WALL, 115*scale, 45*scale, 0, -scale, scale)--side wall
         elseif v=='31' then 
@@ -709,7 +709,7 @@ function DrawWalls()
         if icon ~= false then lg.draw(icon, (ex+52)*scale, (ey+16)*scale, 0, scale) end
 
         v = bgmap[(STRAIGHT*map_w)+FR_TWO+1]
-        if v=='3' then 
+        if v == '3' or v == '34' or v == '35' then
             g.draw(FP_WALL_STONE2, FRONT_WALL, 45*scale, 45*scale, 0, scale)--back wall
         elseif v=='31' then 
             g.draw(FP_WALL_STONEDOOR2, FRONT_WALL, 45*scale, 45*scale, 0, scale)--back wall
@@ -720,7 +720,7 @@ function DrawWalls()
         if icon ~= false then lg.draw(icon, (ex+10)*scale, (ey+16)*scale, 0, scale) end
 
         v = bgmap[(RIGHTONE*map_w)+FR_ONE+1]
-        if v=='3' then 
+        if v == '3' or v == '34' or v == '35' then
             g.draw(FP_WALL_STONE2, FRONT_WALL_REDGE, 160*scale, 20*scale, 0, -scale*1.72, scale*1.72)--front wall
             g.draw(FP_WALL_STONE, ONE_LEFT_WALL, 140*scale, 20*scale, 0, -scale, scale)--side wall
         elseif v=='31' then 
@@ -733,7 +733,7 @@ function DrawWalls()
         if icon ~= false then lg.draw(icon, (ex+64)*scale, ey*scale, 0, scale*2) end
 
         v = bgmap[(LEFTONE*map_w)+FR_ONE+1]
-        if v=='3' then 
+        if v == '3' or v == '34' or v == '35' then
             g.draw(FP_WALL_STONE2, FRONT_WALL_REDGE, 0, 20*scale, 0, scale*1.72)--front wall
             g.draw(FP_WALL_STONE, ONE_LEFT_WALL, 20*scale, 20*scale, 0, scale)--side wall
         elseif v=='31' then 
@@ -747,7 +747,7 @@ function DrawWalls()
         if icon ~= false then lg.draw(icon, (ex-82)*scale, ey*scale, 0, scale*2) end
 
         v = bgmap[(STRAIGHT*map_w)+FR_ONE+1]
-        if v=='3' then 
+        if v == '3' or v == '34' or v == '35' then
             g.draw(FP_WALL_STONE2, FRONT_WALL, 20*scale, 20*scale, 0, scale*1.72)--front wall
         elseif v=='31' then 
             g.draw(FP_WALL_STONEDOOR2, FRONT_WALL, 20*scale, 20*scale, 0, scale*1.72)--front wall
@@ -758,7 +758,7 @@ function DrawWalls()
         if icon ~= false then lg.draw(icon, (ex-8)*scale, ey*scale, 0, scale*2) end
 
         v = bgmap[(LEFTONE*map_w)+FZERO+1]
-        if v=='3' then 
+        if v == '3' or v == '34' or v == '35' then
             g.draw(FP_WALL_STONE, IMM_LEFT_WALL, 0, 0, 0, scale)--lefthand wall
         elseif v=='31' then 
             g.draw(FP_WALL_STONEDOOR, IMM_LEFT_WALL, 0, 0, 0, scale)--lefthand wall
@@ -766,7 +766,7 @@ function DrawWalls()
         --    g.draw(FP_TREE, IMM_LEFT_WALL, 0, 0, 0, scale)--lefthand wall
         end
         v = bgmap[(RIGHTONE*map_w)+FZERO+1]
-        if v=='3' then 
+        if v == '3' or v == '34' or v == '35' then
             g.draw(FP_WALL_STONE, IMM_LEFT_WALL, 160*scale, 0, 0, -scale, scale)--lefthand wall
         elseif v=='31' then 
             g.draw(FP_WALL_STONEDOOR, IMM_LEFT_WALL, 160*scale, 0, 0, -scale, scale)--lefthand wall
@@ -1141,7 +1141,7 @@ function love.draw(dT)
     end
     lg.translate(-8*scale, 0)
     if inputMode == MOVE_MODE or inputMode==FP_MOVE then 
-        lg.print(" A)ttack   C)amp   E)xamine   I)nventory\n  M)agic/Skill   Z)tats", 0, (8*23)*scale, 0, scale);
+        lg.print(" A)ttack   C)amp   E)xamine   I)nventory\n   M)agic   T)alk    Z)tats", 0, (8*23)*scale, 0, scale);
         lg.print("↑→↓← Move", (8*15)*scale, (8*24)*scale, 0, scale);
     end
     if (inputMode == COMBAT_MOVE) or (inputMode == COMBAT_COMMAND) or (inputMode == nil) then 
@@ -1155,7 +1155,7 @@ function love.draw(dT)
         lg.draw(tileSet[2].sheet, tileSet[2].quads[21], selector.x*scale*16, selector.y*scale*16, 0, scale);
         lg.translate(-16*scale, -8*scale)
         lg.setColor(1, 1, 1, 1);
-        lg.print(" A)ttack  D)efend  E)quip  I)tem\n  L)ook  M)agic/Skill  Z)tats", 0, (8*23)*scale, 0, scale);
+        lg.print(" A)ttack  D)efend  E)quip  I)tem\n  L)ook   M)agic   Z)tats", 0, (8*23)*scale, 0, scale);
         if remainingMov > 0 then 
             lg.print("↑→↓← Move", (8*16)*scale, (8*24)*scale, 0, scale);
         end
@@ -1233,7 +1233,10 @@ function togglezoom(cm)
         elseif cm == "small" then 
             cameraMode = ZOOM_SMALL;
             return;
-        end 
+        elseif cm == "fp" then 
+            cameraMode = ZOOM_FP; 
+            return;
+        end
     end 
     cameraMode = cameraMode + 1;
     if cameraMode == 3 then cameraMode = 0 end

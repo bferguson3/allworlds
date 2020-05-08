@@ -33,6 +33,7 @@ bgmap = {};
 currentMap = nil;
 px = 10;
 py = 10;
+movedThisMap = false;
 LONG_REPEAT = 0.75;
 SHORT_REPEAT = 0.1;
 initialRepeat = LONG_REPEAT;
@@ -224,8 +225,9 @@ function ChangeRichPresence(newrp)
 end
 
 currentSave = nil;
-zoomTab = 2
+zoomTab = 3
 function SetZoom(z)
+    
     love.window.setMode(320*z, 200*z)
     scr_w, scr_h = lg.getDimensions();
     --scale = math.floor(scr_h / 200);
@@ -597,20 +599,21 @@ end
 distanceTest = 0
 
 function love.update(dT)
+    print(zoomTab)
     --if dT > (1/60) then return end
-    if love.keyboard.isDown("lalt") and love.keyboard.isDown("return") then 
-        if eFullscr == false then 
-            eFullscr = true;
-            SetZoom(3);
-            love.window.setFullscreen(true, "exclusive");
-            return
-        else 
-            eFullscr = false;
-            SetZoom(3);
-            return
-            --love.window.setMode(320*2, 200*2);
-        end
-    end
+    -- if love.keyboard.isDown("lalt") and love.keyboard.isDown("return") then 
+    --     if eFullscr == false then 
+    --         eFullscr = true;
+    --         SetZoom(3);
+    --         love.window.setFullscreen(true, "exclusive");
+    --         return
+    --     else 
+    --         eFullscr = false;
+    --         SetZoom(3);
+    --         return
+    --         --love.window.setMode(320*2, 200*2);
+    --     end
+    -- end
     distanceTest = distanceTest + dT
     if distanceTest > 4 then distanceTest = 0 end
     if love.keyboard.isDown("lctrl") and love.keyboard.isDown("s") then 
@@ -624,6 +627,7 @@ function love.update(dT)
         if inputMode == MOVE_MODE then 
             print('loading')
             LoadGame()
+            return
         end
     end
     if inputMode == COMBAT_MOVE and remainingMov == 0 then inputMode = COMBAT_COMMAND end
@@ -663,7 +667,7 @@ function love.update(dT)
     if inputMode == PLAY_INTRO then 
         introTicker = introTicker + ((dT/2) * introSpeed)
     end
-
+    if inCombat == false then selector.x = 999*scale end
     if animationTimer > 0 then 
         love.draw()
         return 
@@ -746,7 +750,9 @@ function love.update(dT)
             if (px >= r.x1) and (px <= r.x2) then 
                 if (py >= r.y1) and (py <= r.y2) then 
                     b = true 
-                    --togglezoom("big")
+                    if inCombat==false then 
+                        if r.fp == 1 then cameraMode = ZOOM_FP; return; end
+                    end
                 end
             end 
         end
@@ -762,7 +768,7 @@ function love.update(dT)
     end
     --print(cameraMode, inputMode)
     -- am I on a teleporter?
-    if inputMode == MOVE_MODE or inputMode==FP_MOVE then 
+    if ((inputMode == MOVE_MODE) or (inputMode==FP_MOVE)) and (movedThisMap==true) then 
         for i=1,#currentMap.warps do 
             w = currentMap.warps[i] 
             if (px==w.x) and (py==w.y) then 
@@ -874,11 +880,27 @@ function CheckCollision(x, y, backwards)
         end
         AddLog("Open!", 0);
         --if not, we're good - play 'Open!' and sfx
-        inputMode = nil
-        AddQueue({"wait", 0.2});
-        AddQueue({"goForward"});
-        AddQueue({"inputMode", FP_MOVE})
+        if inputMode == FP_MOVE then 
+            inputMode = nil
+            AddQueue({"wait", 0.1});
+            AddQueue({"goForward"});
+            AddQueue({"inputMode", FP_MOVE})
+        end
     end
+    if bgmap[ofs] == '35' then --passwall
+        AddLog("Passwall!!");
+        if inputMode == FP_MOVE then 
+            inputMode = nil;
+            AddQueue({"wait", 0.1});
+            AddQueue({"goForward"});
+            AddQueue({"inputMode", FP_MOVE})
+        end 
+    end
+    if bgmap[ofs] == '34' then 
+        AddLog("Secret door!\n Locked!!");
+        return true;
+    end
+
     return false;
 end
 
@@ -983,6 +1005,7 @@ function LoadMap(name, w)
     map_w = w;
     bgmap = {};
     local r = "maps/"..name..".csv";
+    print(r)
     --print(r)
     local bg = love.filesystem.read(r);
     --print(bg)
@@ -1004,7 +1027,8 @@ function LoadMap(name, w)
     else 
         if music ~= nil then music:stop(); currentMusic = nil; music = nil; end
     end
-    print(name .. " loaded.");
+    movedThisMap = false;
+    --print(name .. " loaded.");
 end
 
 

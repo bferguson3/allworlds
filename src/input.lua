@@ -91,11 +91,11 @@ function love.keypressed(key)
         end
         if fpDirection > 3 then fpDirection = 0 end 
         if fpDirection < 0 then fpDirection = 3 end
-        if key == '0' then 
-            inputMode = MOVE_MODE
-            cameraMode = 0
-            return
-        end
+        --if key == '0' then 
+        --    inputMode = MOVE_MODE
+        --    cameraMode = 0
+        --    return
+        --end
         if (moved == true) then 
 --            print('stepped')
             sfx.step:play()
@@ -115,14 +115,15 @@ function love.keypressed(key)
                             AddQueue({"MoveTowardsP", currentMap[p]})
                         end
                     end
-                end
-                if currentMap.fights == true and currentMap.name~='world map' then 
-                    AddQueue({"wait", 0.1});
+                end -- endif worldmap
+                if currentMap.name~='world map' then 
+                    if currentMap.fights == true then AddQueue({"wait", 0.1}); end 
                     for p=1,#currentMap do 
-                        currentMap[p].encounter = currentMap[p].encounter or false;
-                        if currentMap[p].encounter == true then 
-                            AddQueue({"MoveRandomly", currentMap[p]})
-                        end
+                        --currentMap[p].encounter = currentMap[p].encounter or false;
+                        --if currentMap[p].encounter == true then
+                        currentMap[p].wander = currentMap[p].wander or 0;
+                        if currentMap[p].wander == 1 then AddQueue({"MoveRandomly", currentMap[p]}) end
+                        --end
                     end
                 end
             end
@@ -494,7 +495,7 @@ function love.keypressed(key)
             AddLog("Direction?", 0)
             inputMode = TALK_MODE;
         elseif key == "e" then 
-            --print(px, py)
+            print('P loc: ', px, py)
             AddLog("Examine")
             AddLog("Direction?", 0)
             inputMode = EXAMINE_MODE
@@ -530,13 +531,13 @@ function love.keypressed(key)
         elseif key == "4" then 
             activePC = 4
         end
-        if key == '0' then 
-            inputMode = FP_MOVE
-            cameraMode = 3
-        end
+        --if key == '0' then 
+        --    inputMode = FP_MOVE
+        --    cameraMode = 3
+        --end
         if (moved == true) then 
             sfx.step:play()
-
+            movedThisMap = true;
             enemyStep = enemyStep - 1
             if enemyStep == 0 then 
                 enemyStep = 2
@@ -561,16 +562,12 @@ function love.keypressed(key)
                 if currentMap.fights == true and currentMap.name~='world map' then 
                 -- make enemies move randomly otherwise 
                     AddQueue({"wait", 0.1});
-                    --enemyStep = enemyStep - 1
-                    --if enemyStep == 0 then 
-                    --    enemyStep = 2;
-                        for p=1,#currentMap do 
-                            currentMap[p].encounter = currentMap[p].encounter or false;
-                            if currentMap[p].encounter == true then 
-                                AddQueue({"MoveRandomly", currentMap[p]})
-                            end
+                    for p=1,#currentMap do 
+                        currentMap[p].encounter = currentMap[p].encounter or false;
+                        if currentMap[p].encounter == true then 
+                            AddQueue({"MoveRandomly", currentMap[p]})
                         end
-                    --end
+                    end
                 end
             end
         end
@@ -578,7 +575,7 @@ function love.keypressed(key)
     lastkey = key;
     if key == "tab" then 
         zoomTab = zoomTab + 1
-        if zoomTab > 3 then zoomTab = 0 end 
+        if zoomTab > 4 then zoomTab = 1 end 
         SetZoom(zoomTab)
     end
 
