@@ -19,7 +19,7 @@ currentMap = {
     },
     {
         g = "01",
-        name = "Guard",
+        name = "Guard Capt",
         chat = {
             hello = {"Greetings, highness. Your\n father was looking for you.", "father"},--{{1, 1, 1}, "Greetings, h
             father = {"King Amadeus, of course.\n He's inside, highness."},
@@ -44,7 +44,7 @@ currentMap = {
         object = true,
         x = 20,
         y = 15,
-        examine = {": \"Old scrolls written in\n cryptic tongue.\""}
+        examine = {": \"Old scrolls written in\n cryptic tongue are scattered\nall about.\""}
     },
     {
         g = "02",
@@ -68,7 +68,8 @@ currentMap = {
             x1 = 19,
             y1 = 13,
             x2 = 23,
-            y2 = 17
+            y2 = 17, 
+            fp = 0
         }
     },
     warps = {

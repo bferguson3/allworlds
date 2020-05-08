@@ -93,7 +93,11 @@ function FinishTransCombat(m)
     AddLog("Combat!!", 0)
     inCombat = true;
     px, py = 5, 5;
-    
+    currentMusic = ''
+    music:stop()
+    music = love.audio.newSource("/music/stressfulstratagem.mp3", "stream")
+    music:setLooping(true);
+    music:play()
     
     -- initiative.
     for i=1,#combat_actors do 

@@ -634,14 +634,13 @@ function love.update(dT)
     distanceTest = distanceTest + dT
     if distanceTest > 4 then distanceTest = 0 end
     if love.keyboard.isDown("lctrl") and love.keyboard.isDown("s") then 
-        if inputMode == MOVE_MODE then 
+        if (inputMode == MOVE_MODE) or (inputMode == FP_MOVE) then 
             print("saving")
             SaveGame()
-            
             return
         end
     elseif love.keyboard.isDown("lctrl") and love.keyboard.isDown("l") then 
-        if inputMode == MOVE_MODE then 
+        if (inputMode == MOVE_MODE) or (inputMode == FP_MOVE) then
             print('loading')
             LoadGame()
             return
@@ -769,7 +768,7 @@ function love.update(dT)
                 if (py >= r.y1) and (py <= r.y2) then 
                     b = true 
                     if inCombat==false then 
-                        if r.fp == 1 then cameraMode = ZOOM_FP; return; end
+                        if r.fp == 1 then cameraMode = ZOOM_FP; inputMode = FP_MOVE; return; end
                     end
                 end
             end 
@@ -861,15 +860,15 @@ function CheckCollision(x, y, backwards)
                         if inputMode == FP_MOVE then 
                             currentMap[i].examine = currentMap[i].examine or {}
                             currentMap[i].name = currentMap[i].name or currentMap[i].g
-                            local df = "You see " .. currentMap[i].name 
-                            currentMap[i].examine[1] = currentMap[i].examine[1] or df
-                            if currentMap[i].examine[1] ~= df then 
-                                print(currentMap[i].examine[1])
-                                df = "> Examine " .. currentMap[i].name .. "\n"..currentMap[i].examine[1]
-                            end
+                            local df = "You see: " .. currentMap[i].name 
+                            --currentMap[i].examine[1] = currentMap[i].examine[1] or df
+                            --if currentMap[i].examine[1] ~= df then 
+                            --    print(currentMap[i].examine[1])
+                            --    df = "> Examine " .. currentMap[i].name .. "\n"..currentMap[i].examine[1]
+                            --end
                             AddLog(df, 0)
                             return true 
-                        end
+                        end -- FIRST PERSON CHECK END
                         AddLog("Blocked!")
                         return true;
                     end
@@ -906,7 +905,7 @@ function CheckCollision(x, y, backwards)
         end
     end
     if bgmap[ofs] == '35' then --passwall
-        AddLog("Passwall!!");
+        AddLog("Passwall!!", 0);
         if inputMode == FP_MOVE then 
             inputMode = nil;
             AddQueue({"wait", 0.1});
@@ -927,6 +926,7 @@ function AddLog(l, arrow)
     local toadd = {}
     --string.find(string, substring, startloc)
     --local sl = 1
+    
     while string.find(l, "\n") do 
         local po = string.find(l, "\n") -- get location of linebreak
         
@@ -1199,16 +1199,22 @@ function CheckSearch(x, y)
     for i=1,#currentMap do 
         if currentMap[i].x == x then 
             if currentMap[i].y == y then 
-                currentMap[i].name = currentMap[i].name or "nothing special"
+                currentMap[i].name = currentMap[i].name or currentMap[i].g
+                
                 currentMap[i].examine = currentMap[i].examine or { "You see " .. currentMap[i].name .. "." }
                 local ex = currentMap[i].examine[1]--("You see " .. currentMap[i].name) or "Nothing special."
+                if ex == nil then ex = "You see: " .. currentMap[i].name;  end 
                 AddLog(ex, 0)
                 return true
             end 
         end 
     end
-    AddLog("Nothing there!", 0)
-    return true
+    if inputMode == EXAMINE_MODE then 
+        AddLog("Nothing there!", 0)
+        return true
+    else
+        return false 
+    end
 end
 
 --dofile("input.lua")

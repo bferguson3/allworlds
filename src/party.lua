@@ -1,7 +1,7 @@
 party = {
     {
         name = "Alistair",
-        g = "00",
+        g = "00F",
         hp = 30,
         mhp = 30,
         mp = { 0, 0, 0, 0 },

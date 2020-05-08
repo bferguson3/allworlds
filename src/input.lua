@@ -88,6 +88,14 @@ function love.keypressed(key)
             elseif fpDirection==3 and CheckTalk(px-1, py) then AddQueue({"wait", 0.25}); AddQueue({"setIMchat"}); return; 
             else AddLog("Nobody there!",0); end
             return
+        elseif key == 'e' then 
+            AddLog("Examine");
+            if CheckSearch(px, py) then return end
+            if fpDirection == 0 then if CheckSearch(px, py-1) then return; end end --and not CheckCollision(px, py-1) then py = py - 1; AddLog("Forward"); moved=true;
+            if fpDirection == 1 then if CheckSearch(px+1, py) then return; end end--elseif fpDirection == 1 and not CheckCollision(px+1, py) then px = px + 1; AddLog("Forward"); moved=true;
+            if fpDirection == 2 then if CheckSearch(px, py+1) then return; end end--elseif fpDirection == 2 and not CheckCollision(px, py+1) then py = py + 1; AddLog("Forward"); moved=true;
+            if fpDirection == 3 then if CheckSearch(px-1, py) then return; end end--elseif fpDirection == 3 and not CheckCollision(px-1, py) then px = px - 1; AddLog("Forward"); moved=true; end
+            AddLog("Nothing here.", 0);
         end
         if fpDirection > 3 then fpDirection = 0 end 
         if fpDirection < 0 then fpDirection = 3 end
