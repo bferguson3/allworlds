@@ -62,6 +62,7 @@ TITLE_SCREEN = 11;
 PLAY_INTRO = 12;
 MAKE_CHR = 13;
 FP_MOVE = 14;
+GAIN_SPELL = 15;
 inputMode = TITLE_SCREEN;
 INDICATOR_FAR, INDICATOR_NME, INDICATOR_NPC, INDICATOR_OBJ = nil, nil, nil, nil
 -- str dex con int wis cha 
@@ -615,7 +616,7 @@ end
 distanceTest = 0
 
 function love.update(dT)
-    print(zoomTab)
+    --print(zoomTab)
      if love.keyboard.isDown("lalt") and love.keyboard.isDown("return") then 
          if eFullscr == false then 
             eFullscr = true;
@@ -977,6 +978,26 @@ function love.textinput(t)
     end
 end
 
+function ProcessGender(s, gender)
+    gender = gender or 'M'
+    while string.find(s, '&') ~= nil do 
+        local w = string.find(s, '&');
+        if w == nil then return s end 
+        local w2 = string.find(s, '&', w+1);
+        if w2 == nil then return s end 
+        local g = ''
+        if s ~= nil then 
+            g = s:sub(w+1, w2-1);
+        end
+        if gender == 'F' then 
+            if g == 'son' then g = 'daughter' end 
+        end
+        s = s:sub(0, w-1) .. g .. s:sub(w2+1);
+        --return s:sub(0, w-1) .. g .. s:sub(w2+1);
+    end
+    return s;
+end
+
 function AskNPC(inp)
     
     current_npc.chat[inp] = current_npc.chat[inp] or {}
@@ -984,7 +1005,8 @@ function AskNPC(inp)
     if inp == 'hi' or inp == 'hail' or inp == 'greetings' then inp = 'hello' end
     if inp == 'farewell' or inp == 'goodbye' then inp = 'bye' end
     current_npc.chat[inp][1] = current_npc.chat[inp][1] or "I don't understand."
-    AddLog("\""..current_npc.chat[inp][1].."\"", 0)
+    local ss = ProcessGender(current_npc.chat[inp][1])
+    AddLog("\""..ss.."\"", 0)
     if inp == "bye" then 
         AddLog("Ok.")
         if cameraMode == ZOOM_FP then inputMode = FP_MOVE else inputMode = MOVE_MODE end

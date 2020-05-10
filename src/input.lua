@@ -265,7 +265,7 @@ function love.keypressed(key)
             party[1].mhp = 30 + math.floor((init.fighter.con-10)/2)
             party[1].hp = party[1].mhp
             party[1].class = "Fighter"
-            party[1].mov = 1
+            party[1].mov = 2
             inputMode = MOVE_MODE
             --AddQueue({"startTrans"})
         elseif key == "r" then 
@@ -290,8 +290,9 @@ function love.keypressed(key)
             party[1].mhp = 26 + math.floor((init.mage.con-10)/2)
             party[1].hp = party[1].mhp
             party[1].class = "Mage"
-            party[1].mov = 1
-            inputMode = MOVE_MODE
+            party[1].mov = 2
+            --inputMode = MOVE_MODE
+            inputMode = GAIN_SPELL
         end
         
     elseif inputMode == COMBAT_MELEE then 

@@ -7,4 +7,4 @@ cd ../dist/
 mkdir allworlds
 cp * ./allworlds/
 zip allworlds.zip ./allworlds/* -x '*love.exe*' -x '*allworlds.love*'
-zip -u allworlds.zip ../allworlds/readme.txt
+zip -u allworlds.zip ../allworlds/readme.md

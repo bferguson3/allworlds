@@ -72,6 +72,10 @@ function DrawGUIWindow(x, y, w, h)
     for i = x, w do 
         lg.draw(tileSet[1].sheet, tileSet[1].quads[6], (i)*8*s, y*8*s, 0, scale)
         lg.draw(tileSet[1].sheet, tileSet[1].quads[6], (i)*8*s, h*8*scale, 0, scale)
+        --lg.draw(tileSet[1].sheet, tileSet[1].quads[7], x*8*s, i*8*s, 0, s)
+        --lg.draw(tileSet[1].sheet, tileSet[1].quads[7], w*8*s, i*8*s, 0, scale)
+    end
+    for i = y, h do 
         lg.draw(tileSet[1].sheet, tileSet[1].quads[7], x*8*s, i*8*s, 0, s)
         lg.draw(tileSet[1].sheet, tileSet[1].quads[7], w*8*s, i*8*s, 0, scale)
     end
@@ -954,6 +958,13 @@ function love.draw(dT)
         end
         
         return
+    elseif inputMode == GAIN_SPELL then 
+            g = lg;
+            s = scale;
+            g.push();
+            DrawGUIWindow(1, 1, 38, 23);
+            g.pop();
+            return;
     elseif inputMode == MAKE_CHR then 
         DrawGUIWindow(1, 1, 38, 24)
         local s = scale
