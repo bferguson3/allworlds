@@ -5,6 +5,7 @@ party = {
         hp = 30,
         mhp = 30,
         mp = { 0, 0, 0, 0 },
+        mmp = { 0, 0, 0, 0 },
         str = 14,
         dex = 16,
         con = 9,
@@ -62,6 +63,7 @@ party = {
         xp = 0,
         class = "Fighter",
         player = true,
+        spellbook = '0000000000000000'
         --getac = function()
         --    a = 10 - armor.ac - math.floor( (dex-10)/2); return a;
         --end
@@ -72,6 +74,7 @@ party = {
         hp = 31,
         mhp = 31,
         mp = { 0, 0, 0, 0 },
+        mmp = { 0, 0, 0, 0 },
         mov = 2,
         str = 14,
         dex = 12,
@@ -113,6 +116,7 @@ party = {
         xp = 0,
         class = "Fighter",
         player = true,
+        spellbook = '0000000000000000'
     },
     {
         name = "Retainer B",
@@ -120,6 +124,7 @@ party = {
         hp = 29,
         mhp = 29,
         mp = { 0, 0, 0, 0 },
+        mmp = { 0, 0, 0, 0 },
         mov = 2,
         str = 16,
         dex = 12,
@@ -161,6 +166,7 @@ party = {
         xp = 0,
         class = "Fighter",
         player = true,
+        spellbook = '0000000000000000'
     },
     {
         name = "Retainer C",
@@ -168,6 +174,7 @@ party = {
         hp = 32,
         mhp = 32,
         mp = { 0, 0, 0, 0 },
+        mmp = { 0, 0, 0, 0 },
         mov = 2,
         str = 12,
         dex = 12,
@@ -211,6 +218,7 @@ party = {
         xp = 0,
         class = "Fighter",
         player = true,
+        spellbook = '0000000000000000'
     }
     
 }

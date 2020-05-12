@@ -247,7 +247,6 @@ function EndCombat()
     combat_actors = {}
     currentTurn = nil
     queue = {}
-    inputMode = MOVE_MODE
     inCombat = false 
     px, py = outOfCombatState.x, outOfCombatState.y
     --dofile("maps/"..outOfCombatState.map..".lua")
@@ -256,6 +255,11 @@ function EndCombat()
     LoadMap(outOfCombatState.map, currentMap.width)
     activePC = lastActive;
     currentMap = mapstate;
+    if cameraMode == ZOOM_FP then 
+        inputMode = FP_MOVE
+    else
+        inputMode = MOVE_MODE
+    end
 end
 
 function EnemyTurn(o)

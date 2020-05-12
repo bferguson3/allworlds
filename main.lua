@@ -63,7 +63,9 @@ PLAY_INTRO = 12;
 MAKE_CHR = 13;
 FP_MOVE = 14;
 GAIN_SPELL = 15;
-inputMode = TITLE_SCREEN;
+TITLE_SPLASH = 16;
+--inputMode = TITLE_SCREEN;
+inputMode = TITLE_SPLASH;
 INDICATOR_FAR, INDICATOR_NME, INDICATOR_NPC, INDICATOR_OBJ = nil, nil, nil, nil
 -- str dex con int wis cha 
 init = {}
@@ -113,6 +115,12 @@ FP_TILEFLOOR_A = nil
 HP_ICON, MP_ICON = nil, nil 
 GEMRED, GEMCYAN, GEMBLUE, GEMGREEN, GEMYELLOW = nil, nil, nil, nil, nil
 GEMREDH, GEMCYANH, GEMBLUEH, GEMGREENH, GEMYELLOWH = nil, nil, nil, nil, nil
+
+gainMagicState = {
+    char = nil, 
+    --spells known from char 
+    circle = nil -- just determines text color
+}
 
 current_npc = nil;
 myinput = ''
@@ -175,8 +183,7 @@ known_kw = { "name", "job", "bye" }
 classes = {
     Fighter = {}
 }
---print(classes["Fighter"])
---dofile("enemies.lua")
+
 m = love.filesystem.load("src/enemies.lua")
 m()
 
@@ -198,6 +205,50 @@ function getac(o)
 end
 
 combat_actors = {}
+
+function HTMLColor(htmls) 
+    if htmls[1] == '#' then htmls = htmls:sub(2); end 
+    local r = tonumber(htmls:sub(1, 2), 16)/255;
+    local g = tonumber(htmls:sub(3, 4), 16)/255;
+    local b = tonumber(htmls:sub(5, 6), 16)/255;
+    return {r, g, b, 1};
+end
+egaColors = {
+    '#000000',
+    '#0000aa',
+    '#00aa00',
+    '#00aaaa',
+    '#aa0000',
+    '#aa00aa',
+    '#aa5500',
+    '#aaaaaa',
+    '#555555',
+    '#5555ff',
+    '#55ff55',
+    '#55ffff',
+    '#ff5555',
+    '#ff55ff',
+    '#ffff55',
+    '#ffffff'
+}
+EGA_BLACK = HTMLColor(egaColors[1])
+EGA_BLUE  = HTMLColor(egaColors[2])
+EGA_GREEN  = HTMLColor(egaColors[3])
+EGA_CYAN  = HTMLColor(egaColors[4])
+EGA_RED  = HTMLColor(egaColors[5])
+EGA_MAGENTA  = HTMLColor(egaColors[6])
+EGA_BROWN  = HTMLColor(egaColors[7])
+EGA_LIGHTGREY = HTMLColor(egaColors[8])
+EGA_DARKGREY = HTMLColor(egaColors[9])
+EGA_BRIGHTBLUE = HTMLColor(egaColors[10])
+EGA_BRIGHTGREEN = HTMLColor(egaColors[11])
+EGA_BRIGHTCYAN = HTMLColor(egaColors[12])
+EGA_BRIGHTRED = HTMLColor(egaColors[13])
+EGA_BRIGHTMAGENTA = HTMLColor(egaColors[14])
+EGA_YELLOW = HTMLColor(egaColors[15])
+EGA_WHITE = HTMLColor(egaColors[16])
+
+profilePics = {};
 
 function TestHardware()
     local gfx_support = lg.getSupported();
@@ -238,17 +289,6 @@ function SetZoom(z)
 end
 
 function love.load(arg)
-    --function love.init()
-    --====================================
-    --=ANDROID SHIT==-
-    --love.window.setMode(0, 0, {fullscreen=false});
-    if love.system.getOS() == "Windows" then 
-        os.execute('./README.md')
-        --return
-    elseif love.system.getOS() == "Linux" then 
-        --os.execute('gedit ./README.md')
-        --return
-    end
     SetZoom(3);
     for a=1,#arg do
         if arg[a] == '--fs' then 
@@ -269,7 +309,6 @@ function love.load(arg)
     if love.filesystem.getInfo("01.sav") == nil then 
         currentSave = love.filesystem.newFile("01.sav")
         love.filesystem.write("01.sav", 'ok')
-        --print("k")
     end
 
     sfx = {}
@@ -343,8 +382,8 @@ function love.load(arg)
     GEMBLUEH = g.newImage('assets/bluegemh_8x8.png');
     GEMGREENH = g.newImage('assets/greengemh_8x8.png');
     GEMYELLOWH = g.newImage('assets/yellowgemh_8x8.png');
-    --Alistair      Fg 1 AC 5 
-     --H ||||||||| M ||| ||| ||| ||| 
+
+    SPLASHIMG = g.newImage('assets/allworlds.png');
 
     --defaultfont = lg.setNewFont('ModernDOS8x8.ttf', 16);
     --defaultfont = lg.setNewFont('assets/PxPlus_AmstradPC1512-2y.ttf', 8);
@@ -355,6 +394,8 @@ function love.load(arg)
     lg.setFont(defaultfont);
     -- init canvases
     --UICanvas = lg.newCanvas(256, 192);
+
+    profilePics = SliceTileSheet(lg.newImage('assets/allworldsportraits.png'), 32, 32);
 
     --set rng+seed
     rng = love.math.newRandomGenerator();
@@ -449,14 +490,17 @@ function SaveGame()
     saveData = saveData .. py .. '\x00'
     --saveData = saveData .. partyGold .. '\x00'
     saveData = saveData .. currentMap.fname .. '\x00'
+    saveData = saveData .. party[1].gender .. '\x00'
     for f=1,#party do 
         saveData = saveData .. party[f].name .. '\x00'
         saveData = saveData .. party[f].hp .. '\x00'
         saveData = saveData .. party[f].mhp .. '\x00'
-        saveData = saveData .. party[f].mp[1] .. '\x00'
-        saveData = saveData .. party[f].mp[2] .. '\x00'
-        saveData = saveData .. party[f].mp[3] .. '\x00'
-        saveData = saveData .. party[f].mp[4] .. '\x00'
+        saveData = saveData .. party[f].mmp[1] .. '\x00'
+        saveData = saveData .. party[f].mmp[2] .. '\x00'
+        saveData = saveData .. party[f].mmp[3] .. '\x00'
+        saveData = saveData .. party[f].mmp[4] .. '\x00'
+        saveData = saveData .. binary2decimal(party[f].spellbook:sub(1, 8)) .. '\x00'
+        saveData = saveData .. binary2decimal(party[f].spellbook:sub(9, 16)) .. '\x00'
         saveData = saveData .. party[f].str .. '\x00'
         saveData = saveData .. party[f].dex .. '\x00'
         saveData = saveData .. party[f].con .. '\x00'
@@ -472,7 +516,6 @@ function SaveGame()
         for u=1,10 do 
             local im = party[f].inventory[u] or { name="none" }
             saveData = saveData .. im.name .. '\x00'
-            
             local st = im.stack or 1
             saveData = saveData .. st .. '\x00'
             local e = im.equipped or false 
@@ -480,10 +523,38 @@ function SaveGame()
             saveData = saveData .. e .. '\x00'
             --name\stack\equipped
         end
-        --saveData = saveData .. '\x01'
     end
     love.filesystem.write('01.sav', saveData)
     AddLog("Saved!")
+end
+
+function decimal2binary(n)
+    local out = '' 
+    while n > 0 do 
+        if n % 2 == 1 then 
+            out = '1' .. out 
+        else 
+            out = '0' .. out
+        end
+        n = math.floor(n / 2) 
+    end
+    while #out < 8 do 
+        out = '0' .. out 
+    end
+    return out
+end
+
+function binary2decimal(s)
+    if #s > 8 then return 255 end 
+    local v = 0
+    local m = 1
+    for i = 8, 1, -1 do 
+        if s:sub(i,i) == '1' then 
+            v = v + m 
+        end
+        m = m * 2
+    end
+    return v 
 end
 
 function LoadGame()
@@ -504,16 +575,26 @@ function LoadGame()
     m()
     LoadMap(cm, currentMap.width)
     party = {{},{},{},{}}
+    party[1].gender = loadData[ct]; ct = ct + 1;
+    if party[1].gender == 'M' then party[1].profile = 5 else party[1].profile = 6 end 
     for p=1,4 do 
         party[p].name = loadData[ct]; ct = ct + 1;
         --print(party[p].name)
         party[p].hp = tonumber(loadData[ct]); ct = ct + 1;
         party[p].mhp = tonumber(loadData[ct]); ct = ct + 1;
-        party[p].mp = {}
-        party[p].mp[1] = tonumber(loadData[ct]); ct = ct + 1;
-        party[p].mp[2] = tonumber(loadData[ct]); ct = ct + 1;
-        party[p].mp[3] = tonumber(loadData[ct]); ct = ct + 1;
-        party[p].mp[4] = tonumber(loadData[ct]); ct = ct + 1;
+        party[p].mp = { 0, 0, 0, 0 }; 
+        party[p].mmp = { 0, 0, 0, 0 };
+        party[p].mp[1] = tonumber(loadData[ct]);
+        party[p].mmp[1] = tonumber(loadData[ct]); ct = ct + 1;
+        party[p].mp[2] = tonumber(loadData[ct]);
+        party[p].mmp[2] = tonumber(loadData[ct]); ct = ct + 1;
+        party[p].mp[3] = tonumber(loadData[ct]);
+        party[p].mmp[3] = tonumber(loadData[ct]); ct = ct + 1;
+        party[p].mp[4] = tonumber(loadData[ct]);
+        party[p].mmp[4] = tonumber(loadData[ct]); ct = ct + 1;
+        -- spellbook a and b
+        party[p].spellbook = decimal2binary(tonumber(loadData[ct])); ct = ct + 1;
+        party[p].spellbook = party[p].spellbook + decimal2binary(tonumber(loadData[ct])); ct = ct + 1;
         party[p].str = tonumber(loadData[ct]); ct = ct + 1;
         party[p].dex = tonumber(loadData[ct]); ct = ct + 1;
         party[p].con = tonumber(loadData[ct]); ct = ct + 1;
@@ -557,6 +638,7 @@ function LoadGame()
         party[p].acc = party[p].acc or { name = "(none)"}
     end
     inputMode = MOVE_MODE
+    AddLog("Loaded.", 0)
 end
 
 function MoveRandomly(e)
@@ -614,8 +696,10 @@ function MoveRandomly(e)
 end
 
 distanceTest = 0
+titleTimer = 0;
 
 function love.update(dT)
+    if inputMode == TITLE_SPLASH then titleTimer = titleTimer + (dT/3) end 
     --print(zoomTab)
      if love.keyboard.isDown("lalt") and love.keyboard.isDown("return") then 
          if eFullscr == false then 
@@ -846,6 +930,9 @@ function CheckCollision(x, y, backwards)
                 return true;
             end
         end
+        if (x > 10) or (x < 0) or (y > 10) or (y < 0) then 
+            return true;
+        end
     else
         for i = 1, #currentMap do 
             if x == currentMap[i].x and currentMap[i].y == y then 
@@ -902,6 +989,7 @@ function CheckCollision(x, y, backwards)
             inputMode = nil
             AddQueue({"wait", 0.1});
             AddQueue({"goForward"});
+            AddQueue({"wait", 0.1});
             AddQueue({"inputMode", FP_MOVE})
         end
     end
@@ -911,6 +999,7 @@ function CheckCollision(x, y, backwards)
             inputMode = nil;
             AddQueue({"wait", 0.1});
             AddQueue({"goForward"});
+            AddQueue({"wait", 0.1});
             AddQueue({"inputMode", FP_MOVE})
         end 
     end
@@ -979,7 +1068,7 @@ function love.textinput(t)
 end
 
 function ProcessGender(s, gender)
-    gender = gender or 'M'
+    gender = party[1].gender or 'M'
     while string.find(s, '&') ~= nil do 
         local w = string.find(s, '&');
         if w == nil then return s end 

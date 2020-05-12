@@ -49,7 +49,9 @@ function DrawMoveBox(o)
     lg.setColor((85/255), 1, (85/255), 1);
 --    o.mov = o.mov or 1;
     for s=1,#selectTiles do 
-        lg.rectangle("fill", selectTiles[s].x*scale*16, selectTiles[s].y*scale*16, 16*scale, 16*scale)
+        if (selectTiles[s].x <= 10) and (selectTiles[s].y <= 10) and (selectTiles[s].x >= 0) and (selectTiles[s].y >= 0) then
+            lg.rectangle("fill", selectTiles[s].x*scale*16, selectTiles[s].y*scale*16, 16*scale, 16*scale)
+        end
     end
     --lg.rectangle("fill", o.x*16*scale-(16*scale), o.y*16*scale-(16*scale), scale*16*3, scale*16*3);
     lg.setColor(1, 1, 1, 1);
@@ -72,8 +74,6 @@ function DrawGUIWindow(x, y, w, h)
     for i = x, w do 
         lg.draw(tileSet[1].sheet, tileSet[1].quads[6], (i)*8*s, y*8*s, 0, scale)
         lg.draw(tileSet[1].sheet, tileSet[1].quads[6], (i)*8*s, h*8*scale, 0, scale)
-        --lg.draw(tileSet[1].sheet, tileSet[1].quads[7], x*8*s, i*8*s, 0, s)
-        --lg.draw(tileSet[1].sheet, tileSet[1].quads[7], w*8*s, i*8*s, 0, scale)
     end
     for i = y, h do 
         lg.draw(tileSet[1].sheet, tileSet[1].quads[7], x*8*s, i*8*s, 0, s)
@@ -780,16 +780,75 @@ function DrawWalls()
     
 end
 
+spellDesc = {
+    {
+        'Invisibility\n\nIn combat / out of combat\n\nTurns the caster invisible for 20 steps\nor until their next attack.',
+        'Teleport    \n\nIn combat / out of combat\n\nAllows the party to return to a prev-\niously visited location or forcibly\nescapes combat.',
+        'Telekinesis \n\nOut of combat\n\n\'Examine\' an object from afar.',
+        'Float       \n\nOut of combat            \n\nCross water, traps and unpassable tiles\nfor 20 steps.'
+    },
+    {
+        'Burst       \n\nIn combat                \n\nCauses an enemy\'s head to explode\nif they fail a saving throw.',
+        'Sleep       \n\nIn combat                \n\nPuts a group of enemies to sleep.',
+        'Fear Aura   \n\nIn combat / out of combat\n\nKeeps enemies from entering melee range\naround one party member or\nprevents combat for 20 steps.',
+        'Entangle    \n\nIn combat                \n\nPrevents enemies from moving for\nseveral turns.'
+    },
+    {
+        'Heal        \n\nIn combat / out of combat\n\nHeals the wounds of one ally.',
+        'Pure        \n\nIn combat / out of combat\n\nRemoves ailments from one ally.',
+        'Revive      \n\nIn combat / out of combat\n\nBrings one ally back from\ndeath.',
+        'Bless       \n\nIn combat / out of combat\n\nSlightly enhances physical abilities\nof all allies for 20 rounds.'
+    },
+    {
+        'Firewall    \n\nIn combat                \n\nCreates a pillar of flame that injures\nany who touch it.',
+        'Sheepify    \n\nIn combat                \n\nTransmutes one enemy into a sheep\nif they fail a saving throw.',
+        'Dispell     \n\nIn combat / out of combat\n\nRemoves a target magical effect.',
+        'Boulder     \n\nIn combat                \n\nSummons a menhir to block the path\nof any combatants.'
+    }
+}
+
+function ShowMagicDesc(cir, spl)
+    lg.setColor(EGA_BLACK);
+    lg.rectangle("fill", 2*8*s, 7*8*s, 24*8*s, 11*8*s)
+    lg.setColor(EGA_WHITE);
+    DrawGUIWindow(4, 7, 25, 17);
+    lg.print(spellDesc[cir][spl], 5*8*s, 8*8*s, 0, s);
+    lg.print('Enter) Scribe        Esc) Back', 6*8*s, 16*8*s, 0, s);
+end
+
 function love.draw(dT)
-    
-    --love.graphics.scale(scale, scale)
     love.graphics.translate(x_draw_offset, y_draw_offset)
     local ofs = ((py-10) * map_w) + (px-10);
     lg.setColor(0, 0, 0, 1);
     lg.rectangle("fill", 0, 0, 320*scale, 200*scale)
     lg.setColor(1, 1, 1, 1);
-    --inputMode = FP_MOVE;
-    --cameraMode = nil;
+    if inputMode == TITLE_SPLASH then 
+        if titleTimer < 1 then
+            if titleTimer < 0.25 then 
+                lg.setColor(EGA_BLACK);
+            elseif titleTimer < 0.35 then 
+                lg.setColor(EGA_DARKGREY);
+            elseif titleTimer < 0.45 then 
+                lg.setColor(EGA_LIGHTGREY);
+            else
+                lg.setColor(EGA_WHITE);
+            end 
+            lg.print('barely conscious\n\n    presents', 16*8*scale, 10*8*scale, 0, scale);
+        elseif titleTimer < 3 then 
+            lg.draw(SPLASHIMG, 0, 0, 0, scale);
+            lg.setColor(EGA_BLACK)
+            lg.rectangle("fill", 0, (titleTimer-1)*200*scale, 400*scale, 400*scale);
+            lg.setColor(EGA_WHITE)
+        else
+            lg.draw(SPLASHIMG, 0, 0, 0, scale);
+            lg.setColor(EGA_BLACK)
+            lg.rectangle("fill", 15*8*scale, 192*scale, 8*8*scale, 8*scale);
+            lg.setColor(EGA_WHITE)
+            lg.print('Press any key...', 16*8*scale, 192*scale, 0, scale);
+        end
+        return;
+    end
+
     if cameraMode == ZOOM_FP then 
         g = lg;
         e = (160/8)*scale
@@ -962,7 +1021,33 @@ function love.draw(dT)
             g = lg;
             s = scale;
             g.push();
+
             DrawGUIWindow(1, 1, 38, 23);
+
+            g.print('Select a new spell to scribe.', 12*8*s, 4*8*s, 0, s);
+            if gainMagicState.circle == nil then 
+                g.setColor(EGA_BRIGHTGREEN)
+                g.print(' 1)         \t\t\t\t\t2)          \n\n\n\n\n\n\n\n 3)    \t\t\t\t\t\t 4)', 4*8*s, 7*8*s, 0, s);
+            end
+            g.print('Metastatics\t\t\t\t\tMentaleptics\n\n\n\n\n\n\n\nLitany\t\t\t\t\t\t Transmogrification', 6*8*s, 7*8*s, 0, s);
+            g.setColor(1, 1, 1, 1);
+            if gainMagicState.circle == 1 then g.setColor(EGA_BRIGHTGREEN); g.print('1)\n2)\n3)\n4)', 5.5*8*s, 9*8*s, 0, s);
+                else g.setColor(EGA_WHITE) end
+            g.print('Invisibility\nTeleport\nTelekinesis\nFloat', 7*8*s, 9*8*s, 0, s);
+            if gainMagicState.circle == 2 then g.setColor(EGA_BRIGHTGREEN); g.print('1)\n2)\n3)\n4)', 21.5*8*s, 9*8*s, 0, s);
+                else g.setColor(EGA_WHITE) end
+            g.print('Burst\nSleep\nFear Aura\nEntangle', 23*8*s, 9*8*s, 0, s);
+            if gainMagicState.circle == 3 then g.setColor(EGA_BRIGHTGREEN); g.print('1)\n2)\n3)\n4)', 5.5*8*s, 17*8*s, 0, s);
+                else g.setColor(EGA_WHITE) end
+            g.print('Heal\nPure\nRevive\nBless', 7*8*s, 17*8*s, 0, s);
+            if gainMagicState.circle == 4 then g.setColor(EGA_BRIGHTGREEN); g.print('1)\n2)\n3)\n4)', 21.5*8*s, 17*8*s, 0, s);
+                else g.setColor(EGA_WHITE) end
+            g.print('Firewall\nSheepify\nDispell\nBoulder', 23*8*s, 17*8*s, 0, s);
+
+            if gainMagicState.spell ~= nil then 
+                ShowMagicDesc(gainMagicState.circle, gainMagicState.spell)
+            end
+
             g.pop();
             return;
     elseif inputMode == MAKE_CHR then 
@@ -1108,11 +1193,8 @@ function love.draw(dT)
             lg.print(" / AC " .. getac(party[b]), 34*8*scale, ((24*b)-16)*scale, 0, scale);
             lg.setColor(1,1,1,1)
             lg.draw(HP_ICON, 25*8*scale, ((24*b)-8)*scale, 0, scale);
-            --lg.draw(MP_ICON, 32*8*scale, 16*b*scale, 0, scale);
             lg.draw(MP_ICON, 25*8*scale, 24*b*scale, 0, scale);
             --draw high gems in clear, low gems in filled
-            --local mhpc = math.floor((party[b].hp / party[b].mhp)*20)
-            --local mhpc2 = math.ceil((party[b].hp / party[b].mhp)*20)
             local mhpc = round(party[b].hp / 8)
             local mhpc2 = math.ceil(party[b].mhp / 8)
             if (party[b].hp == party[b].mhp) then mhpc = mhpc2 end
@@ -1125,25 +1207,57 @@ function love.draw(dT)
             for hi=1,mhpc do 
                 lg.draw(GEMRED, (25+(hi/2)+1)*8*scale, ((24*b)-8)*scale, 0, scale);
             end
+            local mppos = 26
+            local mmppos = 26
             --mp 1
-            local m = math.floor(party[b].mp[1])
+            local m = party[b].mmp[1]
             for i=1,m do 
-                lg.draw(GEMBLUE, (26+(0.5*i))*8*scale, 24*b*scale, 0, scale);
+                lg.draw(GEMBLUEH, (mmppos+(0.5*i))*8*scale, 24*b*scale, 0, scale);
+                mmppos = mmppos + 0.5
             end
+            m = party[b].mp[1]
+            for i=1,m do 
+                lg.draw(GEMBLUE, (mppos+(0.5*i))*8*scale, 24*b*scale, 0, scale);
+                mppos = mppos + 0.5
+            end
+            if m > 0 then mmppos = mmppos + 0.5 end 
+            mppos = mmppos
             --mp 2
-            m = math.floor(party[b].mp[2])
+            m = party[b].mmp[2]
             for i=1,m do 
-                lg.draw(GEMCYAN, (28+(0.5*i)+0.5)*8*scale, 24*b*scale, 0, scale);
+                lg.draw(GEMCYANH, (mmppos+(0.5*i))*8*scale, 24*b*scale, 0, scale);
+                mmppos = mmppos + 0.5
             end
+            m = party[b].mp[2]
+            for i=1,m do 
+                lg.draw(GEMCYAN, (mppos+(0.5*i))*8*scale, 24*b*scale, 0, scale);
+                mppos = mppos + 0.5
+            end
+            if m > 0 then mmppos = mmppos + 0.5 end 
+            mppos = mmppos
             --mp 3
-            m = math.floor(party[b].mp[3])
+            m = party[b].mmp[3]
             for i=1,m do 
-                lg.draw(GEMGREEN, (30+(0.5*i)+1)*8*scale, 24*b*scale, 0, scale);
+                lg.draw(GEMGREENH, (mmppos+(0.5*i))*8*scale, 24*b*scale, 0, scale);
+                mmppos = mmppos + 0.5
             end
+            m = party[b].mp[3]
+            for i=1,m do 
+                lg.draw(GEMGREEN, (mppos+(0.5*i))*8*scale, 24*b*scale, 0, scale);
+                mppos = mppos + 0.5
+            end
+            if m > 0 then mmppos = mmppos + 0.5 end 
+            mppos = mmppos
             --mp 4
+            m2 = party[b].mmp[4]
+            for i=1,m2 do 
+                lg.draw(GEMYELLOWH, (mmppos+(0.5*i))*8*scale, 24*b*scale, 0, scale);
+                mmppos = mmppos + 0.5
+            end
             m2 = math.floor(party[b].mp[4])
             for i=1,m2 do 
-                lg.draw(GEMYELLOW, (32+(0.5*i)+1.5)*8*scale, 24*b*scale, 0, scale);
+                lg.draw(GEMYELLOW, (mppos+(0.5*i))*8*scale, 24*b*scale, 0, scale);
+                mppos = mppos + 0.5
             end
         end
         lg.setColor(1, 1, 1, 1)
@@ -1193,11 +1307,18 @@ function love.draw(dT)
         lg.draw(tileSet[1].sheet, tileSet[1].quads[5], 152*s, 144*s, 0, scale)
         lg.draw(tileSet[1].sheet, tileSet[1].quads[5], 0, 144*s, 0, scale)
         --lg.print("Character sheet: " .. party[1].name, 32*s, 0, 0, s)
-        
-        local r = "assets/"
+
+        local r = 'assets/';
         r = r..party[activePC].g.."_16x16.png";
-        party[activePC].imgb = party[activePC].imgb or lg.newImage(r)
-        lg.draw(party[activePC].imgb, s*16, s*16, 0, s);
+        party[activePC].imgb = party[activePC].imgb or lg.newImage(r);
+        party[activePC].profile = party[activePC].profile or nil;
+        local o = 1
+        if party[activePC].profile == nil then 
+            lg.draw(party[activePC].imgb, 8*s*2, 8*s*2, 0, s);
+        else 
+            lg.draw(profilePics.sheet, profilePics.quads[party[activePC].profile], 8*s*o, 8*s*o, 0, s);
+        end
+
         lg.print(party[activePC].name, 8*s, 40*s, 0, s);
         lg.print("Strength\nDexterity\nConstitution\nIntelligence\nWisdom\nCharisma", 8*s, 56*s, 0, s);
         lg.print(party[activePC].str..'\n'..party[activePC].dex..'\n'..party[activePC].con..'\n'..party[activePC].int..'\n'..party[activePC].wis..'\n'..party[activePC].cha, 72*s, 56*s, 0, s);
@@ -1206,7 +1327,9 @@ function love.draw(dT)
         lg.print("HP:      /", (8*12)*s, 32*s, 0, s);
         lg.print(party[activePC].hp, (8*15)*s, 32*s, 0, s);
         lg.print(party[activePC].mhp, (8*18)*s, 32*s, 0, s);
-        lg.print("Magic:\n 0 / 0 / 0 / 0", (8*12)*s, 40*s, 0, s);
+        --lg.print("Magic:\n 0 / 0 / 0 / 0", (8*12)*s, 40*s, 0, s);
+        local mps = party[activePC].mmp[1] .. ' / ' .. party[activePC].mmp[2] .. ' / ' .. party[activePC].mmp[3] .. ' / ' .. party[activePC].mmp[4]
+        lg.print("Magic:\n " .. mps, (8*12)*s, 40*s, 0, s);
         lg.print("Inventory:\n      " .. #party[activePC].inventory .. " / 10", (8*12)*s, 64*s, 0, s);
         lg.print("Equipment:", (8*12)*s, 80*s, 0, s);
         lg.print(party[activePC].weapon.name, (8*12.5)*s, 88*s, 0, s)

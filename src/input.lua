@@ -266,6 +266,10 @@ function love.keypressed(key)
             party[1].hp = party[1].mhp
             party[1].class = "Fighter"
             party[1].mov = 2
+            party[1].gender = 'F'
+            party[1].profile = 6
+            party[1].mmp = { 0, 0, 0, 0 }
+            party[1].mp = { 0, 0, 0, 0 };
             inputMode = MOVE_MODE
             --AddQueue({"startTrans"})
         elseif key == "r" then 
@@ -279,6 +283,10 @@ function love.keypressed(key)
             party[1].hp = party[1].mhp
             party[1].class = "Rogue"
             party[1].mov = 2
+            party[1].gender = 'F'
+            party[1].profile = 6
+            party[1].mp = { 0, 0, 0, 0 }; 
+            party[1].mmp = { 0, 0, 0, 0 }
             inputMode = MOVE_MODE
         elseif key == "m" then 
             party[1].str = init.mage.str
@@ -287,14 +295,55 @@ function love.keypressed(key)
             party[1].int = init.mage.int
             party[1].wis = init.mage.wis
             party[1].cha = init.mage.cha
-            party[1].mhp = 26 + math.floor((init.mage.con-10)/2)
+            party[1].mhp = 24 + math.floor((init.mage.con-10)/2)
             party[1].hp = party[1].mhp
             party[1].class = "Mage"
             party[1].mov = 2
+            party[1].gender = 'F'
+            party[1].profile = 6
+            party[1].mp = { 0, 0, 0, 0 };
+            party[1].mmp = { 0, 0, 0, 0 }
             --inputMode = MOVE_MODE
+            gainMagicState = {}
             inputMode = GAIN_SPELL
         end
-        
+    elseif inputMode == GAIN_SPELL then 
+        if gainMagicState.circle == nil then 
+            if (key == '1') or (key == '2') or (key == '3') or (key == '4') then 
+                gainMagicState.circle = tonumber(key);
+                return
+            end
+        end 
+        if gainMagicState.spell == nil then  
+            if (key == '1') or (key == '2') or (key == '3') or (key == '4') then 
+                gainMagicState.spell = tonumber(key);
+                return
+            end
+        end
+        if key == 'escape' then 
+            if gainMagicState.spell ~= nil then 
+                gainMagicState.spell = nil;
+                return
+            end 
+            if gainMagicState.circle ~= nil then 
+                gainMagicState.circle = nil;
+                return
+            end
+        elseif key == 'return' then 
+            if (gainMagicState.spell ~= nil) and (gainMagicState.circle ~= nil) then 
+                party[activePC].mmp[gainMagicState.circle] = party[activePC].mmp[gainMagicState.circle] + 1;
+                party[activePC].mp[gainMagicState.circle] = party[activePC].mp[gainMagicState.circle] + 1;
+                local bit = ((gainMagicState.circle - 1)*4) + gainMagicState.spell -- 1 to 16
+                party[activePC].spellbook = party[activePC].spellbook or '0000000000000000'
+                party[activePC].spellbook = party[activePC].spellbook:sub(1, bit-1) .. '1' .. party[activePC].spellbook:sub(bit+1)
+                print(party[activePC].spellbook);
+                inputMode = MOVE_MODE
+            end
+        end
+    elseif inputMode == TITLE_SPLASH then 
+        if key ~= nil and titleTimer > 1 then 
+            inputMode = TITLE_SCREEN 
+        end
     elseif inputMode == COMBAT_MELEE then 
         if key == "up" then 
             --print('up')
