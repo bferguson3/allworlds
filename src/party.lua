@@ -111,7 +111,7 @@ party = {
                 equipped = true
             }
         },
-        thaco = 20,
+        thaco = 18,
         level = 1,
         xp = 0,
         class = "Fighter",
@@ -161,7 +161,7 @@ party = {
                 equipped = true
             }
         },
-        thaco = 20,
+        thaco = 18,
         level = 1,
         xp = 0,
         class = "Fighter",
@@ -213,7 +213,7 @@ party = {
                 equipped = true
             }
         },
-        thaco = 20,
+        thaco = 18,
         level = 1,
         xp = 0,
         class = "Fighter",

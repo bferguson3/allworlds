@@ -7,6 +7,7 @@ intro = {
     "You are on a stone plinth, engraved with smouldering runes.",
     "Whatever magic brought you here still electrifies the air",
     "around you. You slide off the stone, noting your form. You",
-    "have the body of a fit young man with long blonde hair.",
-    "      But who are you...?        (Press space to continue)"
+    "have the body of a fit youth with long blonde hair.",
+    "      But who are you...?",
+    "                               (Press space to continue)"
 }

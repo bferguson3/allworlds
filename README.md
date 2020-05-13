@@ -2,26 +2,26 @@
 ALLWORLDS I<br>
 <br>
 Command line args:<br>
---fs: Launches in borderless fullscreen<br>
---fr: Launches in borderless fullscreen with correct pixel<br>
-aspect ratio (must restart to enter this mode again)<br>
+--fs: Launches in unscaled fullscreen<br>
+--win: Launches in windowed mode<br>
+--noscan: Disables scanline effect<br>
 <br>
 Controls:<br>
 <br>
-Alt-enter: Toggle borderless fullscreen<br>
-Tab: Toggle between pixel zoom 1-4<br>
+Alt-enter: Toggle fullscreen<br>
+Tab: Toggle between windows pixel zoom 1-4<br>
 <br>
 1-4 - Select party member<br>
 <br>
 A - Attack<br>
 C - Camp<br>
 D - Defend (and end turn)<br>
-E - Examine (top-down only)*<br>
+E - Examine <br>
 I - Inventory<br>
+L - Look (examine battlefield)<br>
 M - Magic<br>
 T - Talk<br>
 Z - Open party status screen<br>
-*Bump into things in first person to examine them.<br>
 <br>
 Ctrl+S: Save<br>
 Ctrl+L: Load<br>
@@ -36,7 +36,7 @@ intro<br>
     "You are on a stone plinth, engraved with smouldering runes.",<br>
     "Whatever magic brought you here still electrifies the air",<br>
     "around you. You slide off the stone, noting your form. You",<br>
-    "have the body of a fit young man with long blonde hair.",<br>
+    "have the body of a fit youth with long blonde hair.",<br>
     "      But who are you...?<br>
 <br>
 <br>
@@ -75,4 +75,6 @@ Is very unhappy at having lost her memories, somewhat unwilling to cooperate in 
 The ending is, once all the shrines are purified, you must undertake the <br>
 Pilgrimage. This leads you deep within the earth where you find the truth - <br>
 horrors and monsters are a human creation, born from their incurable desire to <br>
-cause evil. You are trapped and put into stasis and your memories are wiped.<br>
+cause evil. You are trapped within after eradicating the Horrors that were<br>
+birthed and put into stasis again, and those that lived have their memories<br>
+erased.

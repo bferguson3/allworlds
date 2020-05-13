@@ -15,6 +15,7 @@ camping = false
 roll = 0;
 lightMode = false;
 hitac = 0;
+scanlines = false;
 enemyStep = 1;
 dmgtxt = {};
 origPos = {};
@@ -47,7 +48,7 @@ ZOOM_FP = 2;
 STATUSWINDOW = 3
 cameraMode = ZOOM_SMALL;
 
-log = { ".", ".", ".", ".", ".", ".", ".", ".", ".", ".", "> Loaded." }
+log = { ".", ".", ".", ".", ".", ".", ".", ".", ".", ".", "Welcome to ALLWORLDS!" }
 --inputMOde
 MOVE_MODE = 0;
 TALK_MODE = 1;
@@ -64,6 +65,7 @@ MAKE_CHR = 13;
 FP_MOVE = 14;
 GAIN_SPELL = 15;
 TITLE_SPLASH = 16;
+SELECT_CIRCLE = 17;
 --inputMode = TITLE_SCREEN;
 inputMode = TITLE_SPLASH;
 INDICATOR_FAR, INDICATOR_NME, INDICATOR_NPC, INDICATOR_OBJ = nil, nil, nil, nil
@@ -184,6 +186,9 @@ classes = {
     Fighter = {}
 }
 
+m = love.filesystem.load("src/magic.lua")
+m()
+
 m = love.filesystem.load("src/enemies.lua")
 m()
 
@@ -289,22 +294,46 @@ function SetZoom(z)
 end
 
 function love.load(arg)
-    SetZoom(3);
+    local modeset = nil;
+    scanlines = true;
     for a=1,#arg do
         if arg[a] == '--fs' then 
+            modeset = true;
             eFullscr = true;
             love.window.setMode(0, 0, {fullscreen=true});
             scr_w, scr_h = lg.getDimensions();
-            scale = scr_w / 320;
+            scale = scr_h / 200;
+            local s2 = scr_w / 320;
+            if s2 < scale then scale = s2 end 
             x_draw_offset = (scr_w - (scale * 320))/2;
-        elseif arg[a] == '--fr' then 
-            eFullscr = true;
-            love.window.setMode(0, 0, {fullscreen=true});
+            y_draw_offset = (scr_h - (scale * 200))/2;
+        elseif arg[a] == '--win' then 
+            modeset = true;
+            love.window.setMode(320*3, 200*3, {fullscreen=false})
+            zoomTab = 3
+            SetZoom(zoomTab)
             scr_w, scr_h = lg.getDimensions();
-            scale = math.floor(scr_w / 320);
+            scale = math.floor(scr_h / 200);
+            local s2 = math.floor(scr_w / 320);
+            if s2 < scale then scale = s2 end
             x_draw_offset = (scr_w - (scale * 320))/2;
             y_draw_offset = (scr_h - (scale * 200))/2;
         end
+            
+        if arg[a] == '--noscan' then 
+            scanlines = false
+        end
+    end
+    if modeset == nil then 
+        SetZoom(3);
+        eFullscr = true;
+        love.window.setMode(0, 0, {fullscreen=true});
+        scr_w, scr_h = lg.getDimensions();
+        scale = math.floor(scr_h / 200);
+        local s2 = math.floor(scr_w / 320);
+        if s2 < scale then scale = s2 end
+        x_draw_offset = (scr_w - (scale * 320))/2;
+        y_draw_offset = (scr_h - (scale * 200))/2;
     end
     if love.filesystem.getInfo("01.sav") == nil then 
         currentSave = love.filesystem.newFile("01.sav")
@@ -706,12 +735,15 @@ function love.update(dT)
             eFullscr = true;
             love.window.setMode(0, 0, {fullscreen=true});
             scr_w, scr_h = lg.getDimensions();
-            scale = scr_w / 320;
+            scale = scr_h / 200;
+            local s2 = scr_w / 320;
+            if s2 < scale then scale = s2 end 
             x_draw_offset = (scr_w - (scale * 320))/2;
+            y_draw_offset = (scr_h - (scale * 200))/2;
              return
         else 
             eFullscr = false;
-            SetZoom(3);
+            SetZoom(zoomTab);
             return
             --love.window.setMode(320*2, 200*2);
         end
@@ -758,7 +790,6 @@ function love.update(dT)
         --print(math.sin(dmgtxt[d].t))
         dmgtxt[d].y = dmgtxt[d].y or dmgtxt[d].ya
         dmgtxt[d].t = dmgtxt[d].t + (dT*4)
-        --lg.print(dmgtxt[d].txt, (scale*(dmgtxt[d].x+0.25)*16)+(dmgtxt[d].t*8*scale), (scale*dmgtxt[d].y*16)-math.floor((math.sin(dmgtxt[d].t)*16*scale)), 0, scale*m);
         dmgtxt[d].x = dmgtxt[d].x+(dT*scale*16)
         dmgtxt[d].y = dmgtxt[d].ya-(math.sin(dmgtxt[d].t)*scale*8)
         if dmgtxt[d].t > 3.2 then table.remove(dmgtxt, d) end
@@ -826,6 +857,8 @@ function love.update(dT)
                 MoveRandomly(t)
             elseif queue[1][1] == "goForward" then 
                 table.remove(queue, 1)
+                sfx.step:stop()
+                sfx.step:play()
                 --if inputMode ~= FP_MOVE then return end 
                 if fpDirection == 0 then py = py - 1 
                 elseif fpDirection == 1 then px = px + 1 
@@ -989,6 +1022,7 @@ function CheckCollision(x, y, backwards)
             inputMode = nil
             AddQueue({"wait", 0.1});
             AddQueue({"goForward"});
+            
             AddQueue({"wait", 0.1});
             AddQueue({"inputMode", FP_MOVE})
         end
@@ -999,6 +1033,7 @@ function CheckCollision(x, y, backwards)
             inputMode = nil;
             AddQueue({"wait", 0.1});
             AddQueue({"goForward"});
+            
             AddQueue({"wait", 0.1});
             AddQueue({"inputMode", FP_MOVE})
         end 
@@ -1016,7 +1051,7 @@ function AddLog(l, arrow)
     local toadd = {}
     --string.find(string, substring, startloc)
     --local sl = 1
-    
+    --if string.find(l, "\n") == nil then l = l .. "\n"; end
     while string.find(l, "\n") do 
         local po = string.find(l, "\n") -- get location of linebreak
         
@@ -1277,20 +1312,20 @@ function CreateWMEnemy()
     local r = math.floor(love.math.random(4))
     if (r==1) then 
         --print("left")
-        enc.y = py-9+love.math.random(19)
-        enc.x = px-9
+        enc.y = py-10+love.math.random(20)
+        enc.x = px-10
     elseif (r==2) then 
         --print("up")
-        enc.x = px-9+love.math.random(19)
-        enc.y = py-9
+        enc.x = px-10+love.math.random(20)
+        enc.y = py-10
     elseif (r==3) then 
         --print("down")
-        enc.x = px-9+love.math.random(19)
-        enc.y = py+9
+        enc.x = px-10+love.math.random(20)
+        enc.y = py+10
     elseif (r==4) then 
         --print("right")
-        enc.y = py-9+love.math.random(19)
-        enc.x = px+9
+        enc.y = py-10+love.math.random(20)
+        enc.x = px+10
     end
     for i=1,#e.enemies do 
         table.insert(enc.enemies, e.enemies[i])

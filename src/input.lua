@@ -5,6 +5,8 @@ function GetTilesFrom(a, b)
     return (xd+yd)
 end
 
+circleTemp = 0
+
 function TryCamp()
     -- check 1 udlr for collision
     -- if ok, return true, if false, addlog return false
@@ -70,10 +72,12 @@ function love.keypressed(key)
             elseif fpDirection == 2 and not CheckCollision(px, py-1, 'TRUE')  then py = py - 1; sfx.step:play(); AddLog("Back"); moved=true;
             elseif fpDirection == 3 and not CheckCollision(px+1, py, 'TRUE') then px = px + 1; sfx.step:play(); AddLog("Back"); moved=true; end
         elseif key == "right" then 
-            sfx.step:play(); AddLog("Turn right");
+            --sfx.step:play(); 
+            AddLog("Turn right");
             fpDirection = fpDirection + 1
         elseif key == "left" then 
-            sfx.step:play(); AddLog("Turn left");
+            --sfx.step:play(); 
+            AddLog("Turn left");
             fpDirection = fpDirection - 1
         elseif key == "up" then 
             if fpDirection == 0  and not CheckCollision(px, py-1) then py = py - 1; AddLog("Forward"); moved=true;
@@ -270,6 +274,7 @@ function love.keypressed(key)
             party[1].profile = 6
             party[1].mmp = { 0, 0, 0, 0 }
             party[1].mp = { 0, 0, 0, 0 };
+            party[1].thaco = 18;
             inputMode = MOVE_MODE
             --AddQueue({"startTrans"})
         elseif key == "r" then 
@@ -287,6 +292,7 @@ function love.keypressed(key)
             party[1].profile = 6
             party[1].mp = { 0, 0, 0, 0 }; 
             party[1].mmp = { 0, 0, 0, 0 }
+            party[1].thaco = 19;
             inputMode = MOVE_MODE
         elseif key == "m" then 
             party[1].str = init.mage.str
@@ -303,6 +309,7 @@ function love.keypressed(key)
             party[1].profile = 6
             party[1].mp = { 0, 0, 0, 0 };
             party[1].mmp = { 0, 0, 0, 0 }
+            party[1].thaco = 19;
             --inputMode = MOVE_MODE
             gainMagicState = {}
             inputMode = GAIN_SPELL
@@ -330,7 +337,7 @@ function love.keypressed(key)
                 return
             end
         elseif key == 'return' then 
-            if (gainMagicState.spell ~= nil) and (gainMagicState.circle ~= nil) then 
+            if (gainMagicState.spell == 1) and (gainMagicState.circle == 3) then 
                 party[activePC].mmp[gainMagicState.circle] = party[activePC].mmp[gainMagicState.circle] + 1;
                 party[activePC].mp[gainMagicState.circle] = party[activePC].mp[gainMagicState.circle] + 1;
                 local bit = ((gainMagicState.circle - 1)*4) + gainMagicState.spell -- 1 to 16
@@ -339,9 +346,10 @@ function love.keypressed(key)
                 print(party[activePC].spellbook);
                 inputMode = MOVE_MODE
             end
+
         end
     elseif inputMode == TITLE_SPLASH then 
-        if key ~= nil and titleTimer > 1 then 
+        if key ~= nil and titleTimer > 2 then 
             inputMode = TITLE_SCREEN 
         end
     elseif inputMode == COMBAT_MELEE then 
@@ -492,7 +500,7 @@ function love.keypressed(key)
         end
     elseif inputMode == STATS_MAIN then 
         if key=='escape' or (key=='z') then--(key == "z") or (key=="esc")then 
-            inputMode = MOVE_MODE 
+            if cameraMode == ZOOM_FP then inputMode = FP_MOVE else inputMode = MOVE_MODE end 
             if inCombat then inputMode = COMBAT_MOVE end; return;
         elseif key == "left" then 
             --if inCombat then return end
@@ -515,6 +523,43 @@ function love.keypressed(key)
             activePC = 3
         elseif key == "4" then 
             activePC = 4
+        end
+    elseif inputMode == SELECT_CIRCLE then 
+        if key == '1' then 
+            if circleTemp == 0 then 
+                circleTemp = 1
+                AddLog("Metastatics:\n1) Invisibility\n2) Teleport\n3) Telekinesis\n4) Float\n", 0)
+                return
+            end
+        elseif key == '2' then 
+            if circleTemp == 0 then 
+                circleTemp = 2
+                AddLog("Mentalpetics:\n1) Burst\n2) Sleep\n3) Fear Aura\n4) Entangle\n", 0)
+                return
+            end
+        elseif key == '3' then 
+            if circleTemp == 0 then 
+                circleTemp = 3
+                AddLog("Litany:\n1) Heal\n2) Pure\n3) Revive\n4) Bless\n", 0)
+                return
+            end
+        elseif key == '4' then 
+            if circleTemp == 0 then 
+                circleTemp = 4
+                AddLog("Transmogrification:\n1) Firewall\n2) Sheepify\n3) Dispell\n4) Boulder\n", 0)
+                return
+            end
+        else
+            circleTemp = 0;
+            AddLog("Not a spell!")
+            inputMode = MOVE_MODE 
+        end
+        if (circleTemp ~= 0) and ((key == '1') or (key == '2') or (key == '3') or (key == '4')) then 
+            if (circleTemp == 3) and (tonumber(key)==1) then 
+                AddLog(':"' .. magic[3][1].name .. '!!"');
+                inputMode = MOVE_MODE;
+            end
+            --AddLog(magic[circleTemp][tonumber(key)].name);
         end
     elseif inputMode == MOVE_MODE then 
         
@@ -577,7 +622,12 @@ function love.keypressed(key)
                 AddQueue({"exitCamp", healed})
             end
         elseif key == "a" then 
-            AddLog("unimplemented")
+            --AddLog("unimplemented")
+        elseif key == "m" then 
+            AddLog("Cast Spell")
+            AddLog("Circle?\n1) Metastatics\n2) Mentaleptics\n3) Litany\n4) Transmogrification\n", 0);
+            inputMode = SELECT_CIRCLE
+        
         elseif key == "z" then 
             inputMode = STATS_MAIN
             return

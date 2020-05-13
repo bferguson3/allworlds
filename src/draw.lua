@@ -816,12 +816,28 @@ function ShowMagicDesc(cir, spl)
     lg.print('Enter) Scribe        Esc) Back', 6*8*s, 16*8*s, 0, s);
 end
 
+function Scanlines()
+    if scanlines == true then 
+        if scale >= 2 then 
+            lg.setColor(0, 0, 0, 0.25);
+            for i = 0,199 do
+                lg.rectangle("fill", 0, i*scale, 320*scale, math.floor(scale/2))
+            end 
+            lg.setColor(1, 1, 1, 1);
+        end
+    end
+end
+
 function love.draw(dT)
+    lg.setColor(EGA_BLACK)
+    lg.rectangle("fill", -200*scale, -200*scale, 800*scale, 800*scale)
+    lg.setColor(EGA_WHITE);
     love.graphics.translate(x_draw_offset, y_draw_offset)
     local ofs = ((py-10) * map_w) + (px-10);
     lg.setColor(0, 0, 0, 1);
     lg.rectangle("fill", 0, 0, 320*scale, 200*scale)
     lg.setColor(1, 1, 1, 1);
+    
     if inputMode == TITLE_SPLASH then 
         if titleTimer < 1 then
             if titleTimer < 0.25 then 
@@ -846,6 +862,7 @@ function love.draw(dT)
             lg.setColor(EGA_WHITE)
             lg.print('Press any key...', 16*8*scale, 192*scale, 0, scale);
         end
+        Scanlines();
         return;
     end
 
@@ -992,12 +1009,13 @@ function love.draw(dT)
         lg.rectangle("fill", 0, 0, -32*scale, 200*scale)
         g.setColor(1, 1, 1, 1);
         g.pop();
-        
+        Scanlines();
         --return
     elseif inputMode == TITLE_SCREEN then 
-        lg.print("  ALLWORLDS 1:\n\nHeir to Horrors", 15*8*scale, 7*8*scale, 0, scale);
-        lg.print("1) New Game\n2) Load Game\n3) Quit", 10*8*scale, 17*8*scale, 0, scale);
+        lg.print("  ALLWORLDS I \n\nHeir to Horrors", 16*8*scale, 7*8*scale, 0, scale);
+        lg.print("1) New Game\n2) Load Game\n3) Quit", 14*8*scale, 17*8*scale, 0, scale);
         if lightMode then lg.print("Light Mode Enabled", 15*8*scale, 23*8*scale, 0, scale); end
+        Scanlines();
         return
     elseif inputMode == PLAY_INTRO then
         --GUI:
@@ -1012,10 +1030,10 @@ function love.draw(dT)
                 elseif h < 0.75 then lg.setColor(0.67, 0.67, 0.67, 1)
                 else lg.setColor(1, 1, 1, 1) end 
             end
-            if k > 10 then return end 
+            if k > 11 then Scanlines(); return end 
             lg.print(intro[k], 8*5*s, (16*s*k)+(8*s), 0, s)
         end
-        
+        Scanlines();
         return
     elseif inputMode == GAIN_SPELL then 
             g = lg;
@@ -1030,18 +1048,22 @@ function love.draw(dT)
                 g.print(' 1)         \t\t\t\t\t2)          \n\n\n\n\n\n\n\n 3)    \t\t\t\t\t\t 4)', 4*8*s, 7*8*s, 0, s);
             end
             g.print('Metastatics\t\t\t\t\tMentaleptics\n\n\n\n\n\n\n\nLitany\t\t\t\t\t\t Transmogrification', 6*8*s, 7*8*s, 0, s);
-            g.setColor(1, 1, 1, 1);
-            if gainMagicState.circle == 1 then g.setColor(EGA_BRIGHTGREEN); g.print('1)\n2)\n3)\n4)', 5.5*8*s, 9*8*s, 0, s);
-                else g.setColor(EGA_WHITE) end
+            g.setColor(EGA_DARKGREY);
+            g.print('Metastatics\t\t\t\t\tMentaleptics\n\n\n\n\n\n\n\n      \t\t\t\t\t\t Transmogrification', 6*8*s, 7*8*s, 0, s);
+            g.setColor(EGA_WHITE)
+            if gainMagicState.circle == 1 then g.setColor(EGA_DARKGREY); g.print('1)\n2)\n3)\n4)', 5.5*8*s, 9*8*s, 0, s);
+                else g.setColor(EGA_DARKGREY) end
             g.print('Invisibility\nTeleport\nTelekinesis\nFloat', 7*8*s, 9*8*s, 0, s);
-            if gainMagicState.circle == 2 then g.setColor(EGA_BRIGHTGREEN); g.print('1)\n2)\n3)\n4)', 21.5*8*s, 9*8*s, 0, s);
-                else g.setColor(EGA_WHITE) end
+            if gainMagicState.circle == 2 then g.setColor(EGA_DARKGREY); g.print('1)\n2)\n3)\n4)', 21.5*8*s, 9*8*s, 0, s);
+                else g.setColor(EGA_DARKGREY) end
             g.print('Burst\nSleep\nFear Aura\nEntangle', 23*8*s, 9*8*s, 0, s);
             if gainMagicState.circle == 3 then g.setColor(EGA_BRIGHTGREEN); g.print('1)\n2)\n3)\n4)', 5.5*8*s, 17*8*s, 0, s);
                 else g.setColor(EGA_WHITE) end
             g.print('Heal\nPure\nRevive\nBless', 7*8*s, 17*8*s, 0, s);
-            if gainMagicState.circle == 4 then g.setColor(EGA_BRIGHTGREEN); g.print('1)\n2)\n3)\n4)', 21.5*8*s, 17*8*s, 0, s);
-                else g.setColor(EGA_WHITE) end
+            if gainMagicState.circle == 3 then g.setColor(EGA_DARKGREY); --test
+                g.print('    \nPure\nRevive\nBless', 7*8*s, 17*8*s, 0, s); end --test
+            if gainMagicState.circle == 4 then g.setColor(EGA_DARKGREY); g.print('1)\n2)\n3)\n4)', 21.5*8*s, 17*8*s, 0, s);
+                else g.setColor(EGA_DARKGREY) end
             g.print('Firewall\nSheepify\nDispell\nBoulder', 23*8*s, 17*8*s, 0, s);
 
             if gainMagicState.spell ~= nil then 
@@ -1049,6 +1071,7 @@ function love.draw(dT)
             end
 
             g.pop();
+            Scanlines();
             return;
     elseif inputMode == MAKE_CHR then 
         DrawGUIWindow(1, 1, 38, 24)
@@ -1063,11 +1086,17 @@ function love.draw(dT)
         lg.print("                     10                 10                14", 3*8*s, 11*8*s, 0, s)
         lg.print("                     10                 12                12", 3*8*s, 12*8*s, 0, s)        
         lg.print("Bonus HP/LV", 3*8*s, 14*8*s, 0, s)
-        lg.print("                     10                  8                 6", 3*8*s, 14*8*s, 0, s)
-        lg.print("-Uses heavy armor\n-Can use all\nweapons", 10*8*s, 16*8*s, 0, s)        
-        lg.print("-Find and remove\ntraps and secrets\n-Good with ranged", 20*8*s, 16*8*s, 0, s)
-        lg.print("-Uses offensive\nand defensive\nmagic", 30*8*s, 16*8*s, 0, s)
+        lg.print("THAC0/Lv", 3*8*s, 15*8*s, 0, s);
+        lg.print("                     -2                -1.5               -1", 3*8*s, 15*8*s, 0, s);
+        lg.print("                     10                  8                 4", 3*8*s, 14*8*s, 0, s)
+        --lg.print("-Uses heavy armor\n-Can use all\nweapons", 10*8*s, 17*8*s, 0, s)        
+        lg.print("+1 Skullduggery", 20*8*s, 17*8*s, 0, s)
+        lg.print("+1 Spell & MP", 30*8*s, 17*8*s, 0, s)
         lg.print("F)ighter,  R)ogue  or  M)age ?", 8*8*s, 21*8*s, 0, s)
+        -- mage level 8, 9, 10 gains 2 spells&mp instead of 1
+        -- fighter gains second attack when thac0 reaches 0
+        -- only certain secrets can be found with skullduggery lv 10
+        Scanlines();
         return
     end
 
@@ -1118,7 +1147,9 @@ function love.draw(dT)
         end
         for d=1,#dmgtxt do 
             local m = 1
-            if dmgtxt[d].t < 0.1 then m = 2 end
+            if dmgtxt[d].t < 0.1 then m = 1.5 end
+            --dmgtxt[d].x = dmgtxt[d].x 
+            --dmgtxt[d].x = math.floor(dmgtxt[d].x/scale)*scale
             dmgtxt[d].y = dmgtxt[d].y or dmgtxt[d].ya
             lg.setColor(0, 0, 0, 1)
             lg.print(dmgtxt[d].txt, dmgtxt[d].x, dmgtxt[d].y, 0, scale*m);
@@ -1266,8 +1297,8 @@ function love.draw(dT)
     end
     lg.translate(-8*scale, 0)
     if inputMode == MOVE_MODE or inputMode==FP_MOVE then 
-        lg.print(" A)ttack   C)amp   E)xamine   I)nventory\n   M)agic   T)alk    Z)tats", 0, (8*23)*scale, 0, scale);
-        lg.print("↑→↓← Move", (8*15)*scale, (8*24)*scale, 0, scale);
+        lg.print(" C)amp   E)xamine   I)nventory\n   M)agic   T)alk    Z)tats", 0, (8*23)*scale, 0, scale);
+        lg.print("↑→↓← Move", (8*17)*scale, (8*23)*scale, 0, scale);
     end
     if (inputMode == COMBAT_MOVE) or (inputMode == COMBAT_COMMAND) or (inputMode == nil) then 
         if selectorflash == 1 or selectorflash == 3 then 
@@ -1280,7 +1311,7 @@ function love.draw(dT)
         lg.draw(tileSet[2].sheet, tileSet[2].quads[21], selector.x*scale*16, selector.y*scale*16, 0, scale);
         lg.translate(-16*scale, -8*scale)
         lg.setColor(1, 1, 1, 1);
-        lg.print(" A)ttack  D)efend  E)quip  I)tem\n  L)ook   M)agic   Z)tats", 0, (8*23)*scale, 0, scale);
+        lg.print(" A)ttack    D)efend    E)xamine    I)nventory\n   L)ook   M)agic   Z)tats", 0, (8*23)*scale, 0, scale);
         if remainingMov > 0 then 
             lg.print("↑→↓← Move", (8*16)*scale, (8*24)*scale, 0, scale);
         end
@@ -1354,6 +1385,7 @@ function love.draw(dT)
         end
         lg.setColor(1, 1, 1, 1)
     end
+    Scanlines()
 end --love.draw
 
 function togglezoom(cm)

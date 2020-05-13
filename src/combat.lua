@@ -37,15 +37,12 @@ function MeleeTwo(tgt)
 end
 
 function MeleeAttack(tgt)
-    --local tgt = combat_actors[i]
     AddLog(currentTurn.name .. " attacks\n " .. tgt.name .. "!")
     selector.x, selector.y = currentTurn.x, currentTurn.y
     roll = math.ceil(love.math.random()*20)
     hitac = (currentTurn.thaco - roll - math.floor( (currentTurn.str-10)/2))
     AddLog("Roll: " .. roll .. " (AC".. hitac .."+)", 0);
-    --animationTimer = 0.5
     sfx.atk:play()
-    --AddQueue({"MeleeTwo", tgt});
 end
 
 
@@ -160,17 +157,6 @@ function FindNearestPlayerTo(o)
     return c, d
 end
 
---XP table *1000
---1
---3
---6
---10
---15
---21
---28
---36
---45
---nme xp table - 25*lvl
 
 function startTrans()
     transitioning=true 
