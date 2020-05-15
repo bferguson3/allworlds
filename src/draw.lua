@@ -86,13 +86,31 @@ function DrawGUIWindow(x, y, w, h)
 
 end
 
+function fillRed(x, y, r, g, b, a)
+    if (a ~= 0) then 
+        r = (170/255); g = 0.0; b = 0.0
+    end
+    return r, g, b, a 
+end
+
+EGA_FILL = EGA_WHITE
+
+function fillEGA(x, y, r, g, b, a)
+    fillred = EGA_FILL[1] 
+    fillgreen = EGA_FILL[2] 
+    fillblue = EGA_FILL[3]
+    if (a ~= 0) then 
+        r = fillred; g = fillgreen; b = fillblue
+    end
+    return r, g, b, a 
+end
 
 function changeTransparent(x, y, r, g, b, a)
     if r == (255/255) and g == (175/255) and b == (255/255) then
       a = 0.0;
     end
     return r, g, b, a
-  end
+end
 
 -- direction matters
 -- add to viewable array
@@ -780,32 +798,23 @@ function DrawWalls()
     
 end
 
-spellDesc = {
-    {
-        'Invisibility\n\nIn combat / out of combat\n\nTurns the caster invisible for 20 steps\nor until their next attack.',
-        'Teleport    \n\nIn combat / out of combat\n\nAllows the party to return to a prev-\niously visited location or forcibly\nescapes combat.',
-        'Telekinesis \n\nOut of combat\n\n\'Examine\' an object from afar.',
-        'Float       \n\nOut of combat            \n\nCross water, traps and unpassable tiles\nfor 20 steps.'
-    },
-    {
-        'Burst       \n\nIn combat                \n\nCauses an enemy\'s head to explode\nif they fail a saving throw.',
-        'Sleep       \n\nIn combat                \n\nPuts a group of enemies to sleep.',
-        'Fear Aura   \n\nIn combat / out of combat\n\nKeeps enemies from entering melee range\naround one party member or\nprevents combat for 20 steps.',
-        'Entangle    \n\nIn combat                \n\nPrevents enemies from moving for\nseveral turns.'
-    },
-    {
-        'Heal        \n\nIn combat / out of combat\n\nHeals the wounds of one ally.',
-        'Pure        \n\nIn combat / out of combat\n\nRemoves ailments from one ally.',
-        'Revive      \n\nIn combat / out of combat\n\nBrings one ally back from\ndeath.',
-        'Bless       \n\nIn combat / out of combat\n\nSlightly enhances physical abilities\nof all allies for 20 rounds.'
-    },
-    {
-        'Firewall    \n\nIn combat                \n\nCreates a pillar of flame that injures\nany who touch it.',
-        'Sheepify    \n\nIn combat                \n\nTransmutes one enemy into a sheep\nif they fail a saving throw.',
-        'Dispell     \n\nIn combat / out of combat\n\nRemoves a target magical effect.',
-        'Boulder     \n\nIn combat                \n\nSummons a menhir to block the path\nof any combatants.'
-    }
-}
+function ReloadGfx(c)
+    c.img = g.newImage('assets/' .. c.g .. '_8x8.png')
+    c.imgb = g.newImage('assets/' .. c.g .. '_16x16.png')
+end
+
+function FlashPC(pcno, color)
+    --take image assigned to pc no
+    --image:mapPixel(fillRed)
+    EGA_FILL = color 
+    local data = love.image.newImageData('assets/'..party[pcno].g..'_16x16.png')
+    data:mapPixel(fillEGA)
+    party[pcno].imgb = love.graphics.newImage(data)
+    local data = love.image.newImageData('assets/'..party[pcno].g..'_8x8.png')
+    data:mapPixel(fillEGA)
+    party[pcno].img = love.graphics.newImage(data)
+    
+end
 
 function ShowMagicDesc(cir, spl)
     lg.setColor(EGA_BLACK);
@@ -1311,7 +1320,7 @@ function love.draw(dT)
         lg.draw(tileSet[2].sheet, tileSet[2].quads[21], selector.x*scale*16, selector.y*scale*16, 0, scale);
         lg.translate(-16*scale, -8*scale)
         lg.setColor(1, 1, 1, 1);
-        lg.print(" A)ttack    D)efend    E)xamine    I)nventory\n   L)ook   M)agic   Z)tats", 0, (8*23)*scale, 0, scale);
+        lg.print(" A)ttack    D)efend    I)nventory\n   L)ook    M)agic    Z)tats", 0, (8*23)*scale, 0, scale);
         if remainingMov > 0 then 
             lg.print("↑→↓← Move", (8*16)*scale, (8*24)*scale, 0, scale);
         end

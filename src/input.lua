@@ -7,6 +7,13 @@ end
 
 circleTemp = 0
 
+aab = function () aaa=false end
+
+function MoveMode()
+    if inCombat == true then inputMode = COMBAT_MOVE; return end
+    if cameraMode == ZOOM_FP then inputMode = FP_MOVE else inputMode = MOVE_MODE end 
+end
+
 function TryCamp()
     -- check 1 udlr for collision
     -- if ok, return true, if false, addlog return false
@@ -103,11 +110,7 @@ function love.keypressed(key)
         end
         if fpDirection > 3 then fpDirection = 0 end 
         if fpDirection < 0 then fpDirection = 3 end
-        --if key == '0' then 
-        --    inputMode = MOVE_MODE
-        --    cameraMode = 0
-        --    return
-        --end
+        
         if (moved == true) then 
             timeSinceMove = 0
             sfx.step:play()
@@ -163,6 +166,7 @@ function love.keypressed(key)
         elseif key == "a" then 
             AddLog("unimplemented")
         elseif key == "z" then 
+            AddLog("Z-View status")
             inputMode = STATS_MAIN
             return
         
@@ -275,7 +279,7 @@ function love.keypressed(key)
             party[1].mmp = { 0, 0, 0, 0 }
             party[1].mp = { 0, 0, 0, 0 };
             party[1].thaco = 18;
-            inputMode = MOVE_MODE
+            MoveMode()
             --AddQueue({"startTrans"})
         elseif key == "r" then 
             party[1].str = init.rogue.str
@@ -293,7 +297,7 @@ function love.keypressed(key)
             party[1].mp = { 0, 0, 0, 0 }; 
             party[1].mmp = { 0, 0, 0, 0 }
             party[1].thaco = 19;
-            inputMode = MOVE_MODE
+            MoveMode()
         elseif key == "m" then 
             party[1].str = init.mage.str
             party[1].dex = init.mage.dex
@@ -310,7 +314,7 @@ function love.keypressed(key)
             party[1].mp = { 0, 0, 0, 0 };
             party[1].mmp = { 0, 0, 0, 0 }
             party[1].thaco = 19;
-            --inputMode = MOVE_MODE
+            --MoveMode()
             gainMagicState = {}
             inputMode = GAIN_SPELL
         end
@@ -344,7 +348,7 @@ function love.keypressed(key)
                 party[activePC].spellbook = party[activePC].spellbook or '0000000000000000'
                 party[activePC].spellbook = party[activePC].spellbook:sub(1, bit-1) .. '1' .. party[activePC].spellbook:sub(bit+1)
                 print(party[activePC].spellbook);
-                inputMode = MOVE_MODE
+                MoveMode()
             end
 
         end
@@ -352,6 +356,49 @@ function love.keypressed(key)
         if key ~= nil and titleTimer > 2 then 
             inputMode = TITLE_SCREEN 
         end
+    elseif inputMode == SPELL_HEAL_TARGET then 
+        if (key == '1') or (key=='2') or (key=='3') or (key=='4') then 
+            local pn = tonumber(key)
+            if #party >= pn then -- size of party is greater or equal to key pressed
+                local p = party[pn]
+                if p.hp == p.mhp then AddLog("HP is full!", 0); MoveMode(); return end 
+                if p.hp == 0 then AddLog("They're dead!!", 0); MoveMode(); return end 
+                -- OK - queue flash+cast sfx, wait, twinkle+sfx+text+heal
+                sfx.spell1:play()
+                party[activePC].mp[circleTemp] = party[activePC].mp[circleTemp] - 1
+                AddQueue({"FlashPC", activePC, EGA_BRIGHTGREEN})
+                AddQueue({"wait", 0.125})
+                qu(function() ReloadGfx(party[activePC]) end)
+                qu(function() animationTimer = 0.125 end)
+                qu(function() FlashPC(activePC, EGA_BRIGHTGREEN) end)
+                qu(function() animationTimer = 0.125 end)
+                qu(function() ReloadGfx(party[activePC]) end)
+                AddQueue(function () MoveMode() end)
+                p.hp = p.mhp 
+                if inCombat == false then pn = activePC end
+                qu(function() AddLog(party[tonumber(key)].name .. " healed!!", 0) end)
+                qu(function() FlashPC(pn, EGA_BRIGHTCYAN) end)
+                qu(function() animationTimer = (1/16) end)
+                qu(function() ReloadGfx(party[activePC]) end)
+                qu(function() animationTimer = (1/16) end)
+                qu(function() FlashPC(pn, EGA_BRIGHTCYAN) end)
+                qu(function() animationTimer = (1/16) end)
+                qu(function() ReloadGfx(party[activePC]) end)
+                qu(function() animationTimer = (1/16) end)
+                qu(function() FlashPC(pn, EGA_BRIGHTCYAN) end)
+                qu(function() animationTimer = (1/16) end)
+                qu(function() ReloadGfx(party[activePC]) end)
+                qu(function() animationTimer = (1/16) end)
+                
+                --AddQueue({"PlayEffect", px, py, 'twinkle'})
+            end
+        else 
+            AddLog("Error: Use keys 1-4", 0)
+            MoveMode()
+        end
+    elseif inputMode == SPELL_TARGET_COMBAT then 
+        -- get range and target type from spell table
+
     elseif inputMode == COMBAT_MELEE then 
         if key == "up" then 
             --print('up')
@@ -439,6 +486,7 @@ function love.keypressed(key)
                 if party[k] == currentTurn then activePC=k end 
             end 
             inputMode = STATS_MAIN
+            AddLog("Z-View status")
             return
         elseif key == "d" then 
             currentTurn.defend = true;
@@ -447,6 +495,24 @@ function love.keypressed(key)
             AddQueue({"wait", 0.5})
             currentTurn.init = -1;
             AddQueue({"nextTurn"});--NextTurn();
+        elseif key == "m" then 
+            AddLog("M-Cast Spell")
+            local ok = false 
+            for i=1,4 do 
+                if party[activePC].mmp[i] > 0 then 
+                    ok = true 
+                end 
+            end
+            if ok == false then 
+                AddLog("Doesn't know magic!", 0)
+                MoveMode()
+                return
+            end
+            
+            circleTemp = 0
+            AddLog("Circle?\n1) Metastatics\n2) Mentaleptics\n3) Litany\n4) Transmogrification\n?", 0);
+            inputMode = SELECT_CIRCLE    
+            return 
         end
     end
     if inputMode == TALK_MODE then 
@@ -454,53 +520,62 @@ function love.keypressed(key)
             if CheckTalk(px+1, py) then 
                 --AddLog("? _", 0);
                 inputMode = CHAT_INPUT
+            else 
+                AddLog("Nobody there!", 0)
             end
         elseif key == "left" then 
             if CheckTalk(px-1, py) then 
                 --AddLog("? _",0); 
                 inputMode = CHAT_INPUT
+            else 
+                AddLog("Nobody there!", 0)
             end
         elseif key == "down" then 
             if CheckTalk(px, py+1) then 
                 --AddLog("? _",0); 
                 inputMode = CHAT_INPUT
+            else 
+                AddLog("Nobody there!", 0)
             end
         elseif key == "up" then 
             if CheckTalk(px, py-1) then 
                 --AddLog("? _",0); 
                 inputMode = CHAT_INPUT
+            else 
+                AddLog("Nobody there!", 0)
             end
         elseif key == "tab" then 
             togglezoom();
         else 
             AddLog("Invalid direction!", 0);
-            inputMode = MOVE_MODE
+            MoveMode()
+            return
         end
     end
     if inputMode == EXAMINE_MODE then 
         if key == "right" then 
             if CheckSearch(px+1, py) then 
-                inputMode = MOVE_MODE
+                MoveMode()
             end
         elseif key == "left" then 
             if CheckSearch(px-1, py) then 
-                inputMode = MOVE_MODE
+                MoveMode()
             end
         elseif key == "down" then 
             if CheckSearch(px, py+1) then 
-                inputMode = MOVE_MODE
+                MoveMode()
             end
         elseif key == "up" then 
             if CheckSearch(px, py-1) then 
-                inputMode = MOVE_MODE
+                MoveMode()
             end
         else 
             AddLog("Invalid direction!", 0);
-            inputMode = MOVE_MODE
+            MoveMode()
         end
     elseif inputMode == STATS_MAIN then 
         if key=='escape' or (key=='z') then--(key == "z") or (key=="esc")then 
-            if cameraMode == ZOOM_FP then inputMode = FP_MOVE else inputMode = MOVE_MODE end 
+            MoveMode()
             if inCombat then inputMode = COMBAT_MOVE end; return;
         elseif key == "left" then 
             --if inCombat then return end
@@ -525,39 +600,79 @@ function love.keypressed(key)
             activePC = 4
         end
     elseif inputMode == SELECT_CIRCLE then 
+        if ((key == '1') or (key == '2') or (key=='3') or (key=='4')) and (circleTemp==0) then 
+            if party[activePC].mp[tonumber(key)] == 0 then 
+                log[#log] = log[#log] .. ' ' .. key
+                AddLog("No MP!", 0)
+                MoveMode()
+                return 
+            end
+        end
+        if ((key == '1') or (key == '2') or (key=='3') or (key=='4')) and (circleTemp~=0) then
+            -- selecting spell. see if its in my spellbook
+            local sp = party[activePC].spellbook;
+            local f = ((circleTemp-1)*4) + tonumber(key)
+            if sp:sub(f, f) == '0' then 
+                log[#log] = log[#log] .. ' ' .. key 
+                AddLog("Not known!", 0)
+                MoveMode()
+                return
+            end
+        end
         if key == '1' then 
             if circleTemp == 0 then 
-                circleTemp = 1
-                AddLog("Metastatics:\n1) Invisibility\n2) Teleport\n3) Telekinesis\n4) Float\n", 0)
+                if party[activePC].mp[1] > 0 then 
+                    log[#log] = log[#log] .. ' 1'
+                    circleTemp = 1
+                    AddLog("Metastatics:\n1) Invisibility\n2) Teleport\n3) Telekinesis\n4) Float\n?", 0)
+                
+                end
                 return
             end
         elseif key == '2' then 
             if circleTemp == 0 then 
+                
+                log[#log] = log[#log] .. ' 2'
                 circleTemp = 2
-                AddLog("Mentalpetics:\n1) Burst\n2) Sleep\n3) Fear Aura\n4) Entangle\n", 0)
+                AddLog("Mentalpetics:\n1) Burst\n2) Sleep\n3) Fear Aura\n4) Entangle\n?", 0)
                 return
             end
         elseif key == '3' then 
             if circleTemp == 0 then 
+                log[#log] = log[#log] .. ' 3'
                 circleTemp = 3
-                AddLog("Litany:\n1) Heal\n2) Pure\n3) Revive\n4) Bless\n", 0)
+                AddLog("Litany:\n1) Heal\n2) Pure\n3) Revive\n4) Bless\n?", 0)
                 return
             end
         elseif key == '4' then 
             if circleTemp == 0 then 
+                log[#log] = log[#log] .. ' 4'
                 circleTemp = 4
-                AddLog("Transmogrification:\n1) Firewall\n2) Sheepify\n3) Dispell\n4) Boulder\n", 0)
+                AddLog("Transmogrification:\n1) Firewall\n2) Sheepify\n3) Dispell\n4) Boulder\n?", 0)
                 return
             end
         else
             circleTemp = 0;
             AddLog("Not a spell!")
-            inputMode = MOVE_MODE 
+            MoveMode()
         end
+        -- ACTUAL CAST SPELL CODE
         if (circleTemp ~= 0) and ((key == '1') or (key == '2') or (key == '3') or (key == '4')) then 
+            log[#log] = log[#log] .. ' ' .. key
+            if inCombat == true and magic[circleTemp][tonumber(key)].inCombat == false then 
+                AddLog("Can't cast that in combat", 0)
+                MoveMode()
+                return
+            end
             if (circleTemp == 3) and (tonumber(key)==1) then 
                 AddLog(':"' .. magic[3][1].name .. '!!"');
-                inputMode = MOVE_MODE;
+                AddQueue({"CastSpell", circleTemp, tonumber(key)}); 
+                --MoveMode()
+                return
+            else 
+                AddLog("not implemented")
+                MoveMode()
+                return
             end
             --AddLog(magic[circleTemp][tonumber(key)].name);
         end
@@ -594,7 +709,7 @@ function love.keypressed(key)
             AddLog("Talk")
             if string.find(party[activePC].name, "Retainer") then 
                 AddLog(":\"I think you'd best do\n the talking, highness.", 0)
-                inputMode = MOVE_MODE 
+                MoveMode()
                 return 
             end
             AddLog("Direction?", 0)
@@ -624,11 +739,25 @@ function love.keypressed(key)
         elseif key == "a" then 
             --AddLog("unimplemented")
         elseif key == "m" then 
-            AddLog("Cast Spell")
-            AddLog("Circle?\n1) Metastatics\n2) Mentaleptics\n3) Litany\n4) Transmogrification\n", 0);
+            AddLog("M-Cast Spell")
+            local ok = false 
+            for i=1,4 do 
+                if party[activePC].mmp[i] > 0 then 
+                    ok = true 
+                end 
+            end
+            if ok == false then 
+                AddLog("Doesn't know magic!", 0)
+                MoveMode()
+                return
+            end
+            
+            circleTemp = 0
+            AddLog("Circle?\n1) Metastatics\n2) Mentaleptics\n3) Litany\n4) Transmogrification\n?", 0);
             inputMode = SELECT_CIRCLE
         
         elseif key == "z" then 
+            AddLog("Z-View status")
             inputMode = STATS_MAIN
             return
         

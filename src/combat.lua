@@ -241,11 +241,7 @@ function EndCombat()
     LoadMap(outOfCombatState.map, currentMap.width)
     activePC = lastActive;
     currentMap = mapstate;
-    if cameraMode == ZOOM_FP then 
-        inputMode = FP_MOVE
-    else
-        inputMode = MOVE_MODE
-    end
+    MoveMode()
 end
 
 function EnemyTurn(o)

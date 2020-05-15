@@ -66,6 +66,7 @@ FP_MOVE = 14;
 GAIN_SPELL = 15;
 TITLE_SPLASH = 16;
 SELECT_CIRCLE = 17;
+SPELL_HEAL_TARGET = 18;
 --inputMode = TITLE_SCREEN;
 inputMode = TITLE_SPLASH;
 INDICATOR_FAR, INDICATOR_NME, INDICATOR_NPC, INDICATOR_OBJ = nil, nil, nil, nil
@@ -177,6 +178,8 @@ function round(n)
         return math.floor(n)
     end
 end
+
+function qu(o) table.insert(queue, o) end
 
 m = love.filesystem.load("maps/map_1.lua")--dofile("maps/map_1.lua")
 m()
@@ -350,7 +353,7 @@ function love.load(arg)
     --sfx.miss:setVolume(0.5);
     sfx.spell1 = love.audio.newSource("sfx/spell1.wav", "static");
     sfx.step = love.audio.newSource("sfx/step.wav", "static");
-    --sfx.step:setVolume(0.5);
+    sfx.step:setVolume(0.5);
     love.math.setRandomSeed(love.timer.getTime())
     --currentState = systemState.init;
     init_time = love.timer.getTime();
@@ -484,6 +487,9 @@ function ExitCamp(h)
     if h then 
         for t=1,#party do 
             party[t].hp = party[t].mhp
+            for n=1,4 do 
+                party[t].mp[n] = party[t].mmp[n] 
+            end
         end
         AddLog("Fully healed.", 0)
     end
@@ -623,7 +629,7 @@ function LoadGame()
         party[p].mmp[4] = tonumber(loadData[ct]); ct = ct + 1;
         -- spellbook a and b
         party[p].spellbook = decimal2binary(tonumber(loadData[ct])); ct = ct + 1;
-        party[p].spellbook = party[p].spellbook + decimal2binary(tonumber(loadData[ct])); ct = ct + 1;
+        party[p].spellbook = party[p].spellbook .. decimal2binary(tonumber(loadData[ct])); ct = ct + 1;
         party[p].str = tonumber(loadData[ct]); ct = ct + 1;
         party[p].dex = tonumber(loadData[ct]); ct = ct + 1;
         party[p].con = tonumber(loadData[ct]); ct = ct + 1;
@@ -665,8 +671,9 @@ function LoadGame()
             end
         end
         party[p].acc = party[p].acc or { name = "(none)"}
+        print(party[p].spellbook)
     end
-    inputMode = MOVE_MODE
+    MoveMode()
     AddLog("Loaded.", 0)
 end
 
@@ -778,11 +785,7 @@ function love.update(dT)
             transitionCounter = 0; 
             transitioning = false; 
             if inCombat == false then 
-                if cameraMode~=ZOOM_FP then 
-                    inputMode = MOVE_MODE 
-                else 
-                    inputMode = FP_MOVE 
-                end 
+                MoveMode()
             end
         end;
     end
@@ -807,6 +810,12 @@ function love.update(dT)
     end
     if queue ~= nil then 
         if #queue > 0 then 
+            if type(queue[1])=='function' then 
+                local f = queue[1]
+                table.remove(queue, 1)
+                f()
+                return
+            end
             if queue[1][1] == "nextTurn" then 
                 table.remove(queue, 1);
                 NextTurn()
@@ -833,6 +842,14 @@ function love.update(dT)
                 local t = queue[1][2]
                 table.remove(queue, 1);
                 MeleeTwo(t)
+            elseif queue[1][1] == "CastSpell" then 
+                local a, b = queue[1][2], queue[1][3]
+                table.remove(queue, 1);
+                CastSpell(a, b);
+            elseif queue[1][1] == "FlashPC" then 
+                local a, b = queue[1][2], queue[1][3]
+                table.remove(queue, 1)
+                FlashPC(a, b)
             elseif queue[1][1] == "wait" then 
                 local t = queue[1][2]
                 table.remove(queue, 1)
@@ -1133,7 +1150,7 @@ function AskNPC(inp)
     AddLog("\""..ss.."\"", 0)
     if inp == "bye" then 
         AddLog("Ok.")
-        if cameraMode == ZOOM_FP then inputMode = FP_MOVE else inputMode = MOVE_MODE end
+        MoveMode()
     else 
         AddLog("\n? _", 0)
     end
