@@ -116,8 +116,11 @@ currentMap = {
         [1] = {
             x = 24, y = 20,
             e = function () 
+                    inputBuffer = {}
+                    inputMode = nil
                     AddLog(' Your footsteps echo off the\ncracked tile down the tower\nhallways into the darkness.\nA stale breeze drifts past \nyour face, eminating from    \nsomewhere deeper within.\n', 0)
-                    inputMode = WAIT_KEYPRESS
+                    qu(function() animationTimer = 0.5 end)
+                    qu(function() inputMode = WAIT_KEYPRESS end)
                     qu(function() AddLog('Ok.'); MoveMode() end) -- first keypress < 
                 end,
             seen = false, -- if this needs to persist, add to save file

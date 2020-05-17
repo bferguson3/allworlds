@@ -15,9 +15,12 @@ function EndCurTurn()
     qu(function() NextTurn() end); 
 end
 
+currentTurn = { x = 0, y = 0 }
+
 function MoveMode()
     CheckRoomZoom()
     if inCombat == true then 
+        currentTurn = currentTurn or { x = 99, y = 99 }
         inputMode = COMBAT_MOVE; selectTiles = oldTiles; selector.x = currentTurn.x; selector.y = currentTurn.y; 
     else
         if cameraMode == ZOOM_FP then inputMode = FP_MOVE else inputMode = MOVE_MODE end 
@@ -109,14 +112,45 @@ function DoCamp()
     qu(function() MoveMode() end)
 end
 
+function SafeLoad(opt)
+    --inputMode = nil
+    opt = opt or nil 
+    inputMode = opt 
+    AddLog("Loading...")
+    qu(function() startTrans() end)
+    qu(function() animationTimer = 1 end)
+    qu(function() LoadGame() end)
+    qu(function() CheckRoomZoom() end)
+    qu(function() animationTimer = 1 end)
+    qu(function() MoveMode() end)
+    qu(function() AddLog("Game loaded.", 0) end)
+
+end
+
+inputBuffer = {}
+
 function love.keypressed(key)
-    if timeSinceMove < 0.1 then 
+    if (timeSinceMove < 0.1) and (key ~= nil) then 
+        if (#inputBuffer < 5) and (inputMode ~= nil) then 
+            table.insert(inputBuffer, key)
+        end
         return
     end
     if key ~= nil then 
         timeSinceMove = 0
-        --return 
     end
+    if CTRLHELD then 
+        if (inputMode == MOVE_MODE) or (inputMode == FP_MOVE) then 
+            if key == 's' then 
+                SaveGame()
+                return 
+            elseif key == 'l' then 
+                SafeLoad()
+                return
+            end
+        end
+    end
+
     if camping then return end 
     if inputMode == CHAT_INPUT then 
         if key == 'backspace' and #myinput > 0 then 
@@ -165,6 +199,9 @@ function love.keypressed(key)
             elseif fpDirection==2 and CheckTalk(px, py+1) then AddQueue({"wait", 0.25}); AddQueue({"setIMchat"}); return; 
             elseif fpDirection==3 and CheckTalk(px-1, py) then AddQueue({"wait", 0.25}); AddQueue({"setIMchat"}); return; 
             else AddLog("Nobody there!",0); end
+            return
+        elseif key == 'm' then 
+            InitiateSpell()
             return
         elseif key == 'e' then 
             print(px, py)
@@ -302,7 +339,15 @@ function love.keypressed(key)
             inputMode = PLAY_INTRO
             return
         elseif key=="2" then 
-            LoadGame()
+            --cameraMode = ZOOM_SMALL
+            --transitioning = true 
+            --transitionCounter = 0
+            --inputMode = ZOOM_FP
+            --LoadGame()
+            --inputMode = LOAD_TRANS_WAIT
+            SafeLoad(LOAD_TRANS_WAIT)
+            
+            
             --init tileset
             if lightMode == true then 
                 tileSet[1] = SliceTileSheet(lg.newImage('assets/bglight_8x8.png'), 8, 8);
@@ -329,6 +374,7 @@ function love.keypressed(key)
             local f = queue[1] 
             table.remove(queue, 1)
             f() 
+            return
         end
     elseif inputMode == MAKE_CHR then 
         if key == "f" then 
@@ -348,8 +394,9 @@ function love.keypressed(key)
             party[1].mp = { 0, 0, 0, 0 };
             party[1].thaco = 18;
             party[1].level = { 1, 0, 0 }
-            MoveMode()
+            --MoveMode()
             --AddQueue({"startTrans"})
+            qu(function() LoadMap('map_1', 36) end)
         elseif key == "r" then 
             party[1].str = init.rogue.str
             party[1].dex = init.rogue.dex
@@ -367,7 +414,10 @@ function love.keypressed(key)
             party[1].mmp = { 0, 0, 0, 0 }
             party[1].level = { 0, 1, 0 }
             party[1].thaco = 19;
-            MoveMode()
+            --MoveMode()
+            --qu(function() currentMap = {} end )
+            qu(function() LoadMap('map_1', 36) end)
+            
         elseif key == "m" then 
             party[1].str = init.mage.str
             party[1].dex = init.mage.dex
@@ -419,7 +469,9 @@ function love.keypressed(key)
                 party[activePC].spellbook = party[activePC].spellbook or '0000000000000000'
                 party[activePC].spellbook = party[activePC].spellbook:sub(1, bit-1) .. '1' .. party[activePC].spellbook:sub(bit+1)
                 print(party[activePC].spellbook);
-                MoveMode()
+                qu(function() LoadMap('map_1', 36) end)
+                --MoveMode()
+                return
             end
 
         end
@@ -868,7 +920,7 @@ function love.keypressed(key)
         elseif key == "a" then 
             --AddLog("unimplemented")
         elseif key == "m" then 
-            AddLog("M-Cast Spell")
+            --[[ AddLog("M-Cast Spell")
             curSpell = nil
             local ok = false 
             for i=1,4 do 
@@ -884,7 +936,8 @@ function love.keypressed(key)
             
             circleTemp = 0
             AddLog("Circle?\n1) Metastatics\n2) Mentaleptics\n3) Litany\n4) Transmogrification\n?", 0);
-            inputMode = SELECT_CIRCLE
+            inputMode = SELECT_CIRCLE ]]
+            InitiateSpell()
         
         elseif key == "z" then 
             AddLog("Z-View status")
@@ -941,6 +994,7 @@ function love.keypressed(key)
                     end
                 end
             end
+            CheckEvents()
         end
     end
     lastkey = key;

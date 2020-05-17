@@ -48,6 +48,7 @@ end
 
 function StartCombat(nmes)
     queue = {};
+    
     lastActive = activePC;
     outOfCombatState.map = currentMap.fname
     outOfCombatState.x, outOfCombatState.y = px, py
@@ -87,6 +88,7 @@ function FinishTransCombat(m)
     mapstate = currentMap;
     scriptbackup = mapscripts
     inCombat = true;
+    
     LoadMap(m, 11)
     togglezoom("big");
     --
@@ -213,10 +215,11 @@ function TestDead(t)
             --animationTimer = 0.5
             selector.x, selector.y = 99, 99
             queue = {}
+            print('locator A')
             AddLog("Ending combat.")
             AddQueue({"wait", 1})
             AddQueue({"startTrans"})
-            AddQueue({"wait", 0.35})
+            AddQueue({"wait", 1})
             AddQueue({"EndCombat"})
             
             
@@ -247,7 +250,8 @@ function EndCombat()
     activePC = lastActive;
     currentMap = mapstate;
     mapscripts = scriptbackup
-    qu(function() MoveMode() end)
+    DoMapScripts()
+    --qu(function() MoveMode() end)
 end
 
 function EnemyTurn(o)

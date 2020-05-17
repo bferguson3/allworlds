@@ -80,5 +80,20 @@ currentMap = {
             y = 24,
             target = { map="worldmap", x=13, y=22 }
         }
+    },
+    events = {
+        [1] = {
+            x = 10, y = 12,
+            e = function () 
+                    inputMode = nil
+                    inputBuffer = {}
+                    AddLog('Welcome to the demo!\nCtrl+S to save, and\nCtrl+L to load.\nPress \'E\' to examine any\nsigns and find secrets.\n', 0)
+                    qu(function() animationTimer = 0.5 end)
+                    qu(function() inputMode = WAIT_KEYPRESS end)
+                    qu(function() AddLog('Ok.'); MoveMode() end) -- first keypress < 
+                end,
+            seen = false, -- if this needs to persist, add to save file
+            repeatable = false
+        }
     }
 }

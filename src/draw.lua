@@ -1,10 +1,11 @@
 
 function DrawMapObjects_Small()
+    --if cameraMode == ZOOM_FP then return end 
     --noEnemiesSpawned = 0
     for i=1,#currentMap do
         if ((px + 11) >= currentMap[i].x) and ((px - 11) <= currentMap[i].x) then 
             if ((py+10)>=currentMap[i].y) and ((py-10)<=currentMap[i].y) then
-                
+                if currentMap[i].g == 'NONE' then return end
                 currentMap[i].img = currentMap[i].img or nil 
                 if currentMap[i].img == nil then 
                     local r = "assets/"..currentMap[i].g.."_8x8.png"
@@ -34,6 +35,7 @@ function DrawMapObjects_Large()
     for i=1,#currentMap do
         if ((px + 5) >= currentMap[i].x) and ((px - 5) <= currentMap[i].x) then 
             if ((py+5)>=currentMap[i].y) and ((py-5)<=currentMap[i].y) then
+                if currentMap[i].g == 'NONE' then return end 
                 currentMap[i].imgb = currentMap[i].imgb or nil 
                 if currentMap[i].imgb == nil then 
                     local r = "assets/"..currentMap[i].g.."_16x16.png"
@@ -1220,7 +1222,9 @@ function love.draw(dT)
                 end
             end
         end
-        DrawMapObjects_Small();
+        if inputMode ~= LOAD_TRANS_WAIT then 
+            DrawMapObjects_Small();
+        end
         if inCombat==false then 
             party[activePC].img = party[activePC].img or nil 
             if party[activePC].img==nil then 
@@ -1354,12 +1358,13 @@ function love.draw(dT)
         lg.print(" C)amp   E)xamine   I)nventory\n   M)agic   T)alk    Z)tats", 0, (8*23)*scale, 0, scale);
         lg.print("↑→↓← Move", (8*17)*scale, (8*23)*scale, 0, scale);
     end
-    if (inputMode == COMBAT_MOVE) or (inputMode == COMBAT_COMMAND) then 
+    if (inputMode == COMBAT_MOVE) or (inputMode == COMBAT_COMMAND) or ((inputMode == nil)and(inCombat==true)) then 
         if selectorflash == 1 or selectorflash == 3 then 
             lg.setColor(0, 0, 0, 1);
         elseif selectorflash == 0 or selectorflash == 4 then 
             lg.setColor(0, 0, 0, 0);
         end
+        if selector.x == 0 and selector.y == 0 then selector.x, selector.y = 99, 99 end
         --selector.x, selector.y = currentTurn.x, currentTurn.y;
         lg.translate(16*scale, 8*scale)
         lg.draw(tileSet[2].sheet, tileSet[2].quads[21], selector.x*scale*16, selector.y*scale*16, 0, scale);

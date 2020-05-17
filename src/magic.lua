@@ -78,9 +78,12 @@ function HealSpell(src, tgt)
         qu(function() ReloadGfx(src) end)
         qu(function() animationTimer = (1/15) end)
     end
-    AddQueue(function () MoveMode() end)
+    if inCombat == false then 
+        AddQueue(function () MoveMode() end) 
+        pn = activePC
+    end
     p.hp = p.mhp 
-    if inCombat == false then pn = activePC end
+    --if inCombat == false then pn = activePC end
     qu(function() AddLog(tgt.name .. " healed!!", 0) end)
     for l=1,4 do 
         --qu(function() FlashPC(pn, EGA_BRIGHTCYAN) end)
@@ -92,6 +95,26 @@ function HealSpell(src, tgt)
     if inCombat == true then 
         EndCurTurn()
     end
+end
+
+function InitiateSpell()
+    AddLog("M-Cast Spell")
+    curSpell = nil
+    local ok = false 
+    for i=1,4 do 
+        if party[activePC].mmp[i] > 0 then 
+            ok = true 
+        end 
+    end
+    if ok == false then 
+        AddLog("Doesn't know magic!", 0)
+        MoveMode()
+        return
+    end
+    
+    circleTemp = 0
+    AddLog("Circle?\n1) Metastatics\n2) Mentaleptics\n3) Litany\n4) Transmogrification\n?", 0);
+    inputMode = SELECT_CIRCLE
 end
 
 function CastSpell(ci, sp)
