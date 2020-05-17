@@ -76,21 +76,18 @@ function StartCombat(nmes)
     transitionTick = 0
     --inCombat = true;
     
-    AddQueue({"wait", 0.35})
+    AddQueue({"wait", 1})
     AddQueue({"FinishTransCombat", "batt"..n})
 
 end
 
 mapstate = {}
-
+scriptbackup = nil 
 function FinishTransCombat(m)
-    --inCombat = true;
     mapstate = currentMap;
-    --currentMap = {}
-    --transitionCounter = 10
+    scriptbackup = mapscripts
     inCombat = true;
     LoadMap(m, 11)
-    --transitionCounter = 10
     togglezoom("big");
     --
     AddLog("Combat!!", 0)
@@ -165,8 +162,9 @@ end
 
 
 function startTrans()
-    transitioning=true 
-    transitionCounter=0
+    transitioning = true;
+    transitionCounter = 0
+    transitionTick = 0
 end
 
 function TestDead(t)
@@ -248,7 +246,8 @@ function EndCombat()
     LoadMap(outOfCombatState.map, currentMap.width)
     activePC = lastActive;
     currentMap = mapstate;
-    MoveMode()
+    mapscripts = scriptbackup
+    qu(function() MoveMode() end)
 end
 
 function EnemyTurn(o)

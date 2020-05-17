@@ -31,6 +31,7 @@ currentMap = {
         lock = 1,
         g = 'NONE'
     },
+
     {
         x = 33, y = 17,
         name = "locked door",
@@ -124,27 +125,3 @@ currentMap = {
         }
     }
 }
---[[
-'''local cm = currentMap
-mapscripts = {
-    ["tower_innocence_1f"] = function() cm.events[1].seen = false end
-}'''
-IN LOAD CODE:
-savescript = "local cm = currentMap\nmapscripts = {\n"
-
-IN EVENT CODE:
-if e.repeatable == false then 
-    savescript = savescript .. "\t[\"" .. currentMap.fname .. "\"] = function() "
-    local evno = 0
-    for m=1,#currentMap.events do 
-        if e == events[m] then 
-            evno = m 
-            break
-        end
-    end
-    savescript = savescript .. 'cm.events[' .. evno .. '].seen = false end\n'
-end
-
-IN SAVE CODE:
-savescript = savescript .. '}'
---]]

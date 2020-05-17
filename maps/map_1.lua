@@ -39,6 +39,8 @@ currentMap = {
         y = 13, 
         examine = {": \"Used to have food, now\nit just has scraps.\""}
     },
+    { g = "rock", x=23, y=16 },
+    { g = "rock", x=10, y=23 },
     {
         g = "table",
         object = true,

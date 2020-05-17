@@ -16,8 +16,13 @@ function EndCurTurn()
 end
 
 function MoveMode()
-    if inCombat == true then inputMode = COMBAT_MOVE; selectTiles = oldTiles; selector.x = currentTurn.x; selector.y = currentTurn.y; return end
-    if cameraMode == ZOOM_FP then inputMode = FP_MOVE else inputMode = MOVE_MODE end 
+    CheckRoomZoom()
+    if inCombat == true then 
+        inputMode = COMBAT_MOVE; selectTiles = oldTiles; selector.x = currentTurn.x; selector.y = currentTurn.y; 
+    else
+        if cameraMode == ZOOM_FP then inputMode = FP_MOVE else inputMode = MOVE_MODE end 
+    end
+    --transitionCounter = 0
 end
 
 function TryCamp()
@@ -80,6 +85,28 @@ function GetFirstSelectablePlayer()
         end
     end
     return nil 
+end
+
+function DoCamp()
+    inputMode = INP_TRANSITIONING
+    AddLog("Setting up camp...", 0)
+    local healed = TryConsumeRations()
+    
+    AddQueue({"startTrans"})
+    AddQueue({"wait", 1})
+    AddQueue({"campZoom"})
+    
+    AddQueue({"wait", 1})
+    
+    AddQueue({"startTrans"})
+    AddQueue({"wait", 1})
+    qu(function() inputMode = SPLASH_CAMP end)
+    AddQueue({"wait", 3})
+
+    AddQueue({"startTrans"})
+    AddQueue({"wait", 1})
+    AddQueue({"exitCamp", healed})
+    qu(function() MoveMode() end)
 end
 
 function love.keypressed(key)
@@ -193,19 +220,8 @@ function love.keypressed(key)
         if key == "c" then 
             AddLog("Camp")
             if TryCamp() then 
-                inputMode = INP_TRANSITIONING
-                AddLog("Setting up camp...", 0)
-                local healed = TryConsumeRations()
+                DoCamp()
                 
-                --AddQueue({"wait", 0.5})
-                AddQueue({"startTrans"})
-                AddQueue({"wait", 0.4})
-                AddQueue({"campZoom"})
-                AddQueue({"wait", 3})
-                
-                AddQueue({"startTrans"})
-                AddQueue({"wait", 0.4})
-                AddQueue({"exitCamp", healed})
             end
         elseif key == "a" then 
             AddLog("unimplemented")
@@ -636,6 +652,7 @@ function love.keypressed(key)
                 inputMode = CHAT_INPUT
             else 
                 AddLog("Nobody there!", 0)
+                MoveMode()
             end
         elseif key == "left" then 
             if CheckTalk(px-1, py) then 
@@ -643,6 +660,7 @@ function love.keypressed(key)
                 inputMode = CHAT_INPUT
             else 
                 AddLog("Nobody there!", 0)
+                MoveMode()
             end
         elseif key == "down" then 
             if CheckTalk(px, py+1) then 
@@ -650,6 +668,7 @@ function love.keypressed(key)
                 inputMode = CHAT_INPUT
             else 
                 AddLog("Nobody there!", 0)
+                MoveMode()
             end
         elseif key == "up" then 
             if CheckTalk(px, py-1) then 
@@ -657,6 +676,7 @@ function love.keypressed(key)
                 inputMode = CHAT_INPUT
             else 
                 AddLog("Nobody there!", 0)
+                MoveMode()
             end
         elseif key == "tab" then 
             togglezoom();
@@ -843,19 +863,7 @@ function love.keypressed(key)
         elseif key == "c" then 
             AddLog("Camp")
             if TryCamp() then 
-                inputMode = INP_TRANSITIONING
-                AddLog("Setting up camp...", 0)
-                local healed = TryConsumeRations()
-                
-                --AddQueue({"wait", 0.5})
-                AddQueue({"startTrans"})
-                AddQueue({"wait", 0.4})
-                AddQueue({"campZoom"})
-                AddQueue({"wait", 3})
-                
-                AddQueue({"startTrans"})
-                AddQueue({"wait", 0.4})
-                AddQueue({"exitCamp", healed})
+                DoCamp()
             end
         elseif key == "a" then 
             --AddLog("unimplemented")

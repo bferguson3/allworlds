@@ -3,6 +3,8 @@
 
 lg = love.graphics;
 
+GAMEVERSION = 1
+
 outOfCombatState = {
     map = "worldmap",
     x = 10,
@@ -70,8 +72,10 @@ SELECT_CIRCLE = 17;
 SPELL_HEAL_TARGET = 18;
 SPELL_TARGET_COMBAT = 19;
 WAIT_KEYPRESS = 20
+SPLASH_CAMP = 21
 --inputMode = TITLE_SCREEN;
 inputMode = TITLE_SPLASH;
+CAMPIMAGE = nil
 INDICATOR_FAR, INDICATOR_NME, INDICATOR_NPC, INDICATOR_OBJ = nil, nil, nil, nil
 -- str dex con int wis cha 
 init = {}
@@ -418,7 +422,7 @@ function love.load(arg)
     GEMBLUEH = g.newImage('assets/bluegemh_8x8.png');
     GEMGREENH = g.newImage('assets/greengemh_8x8.png');
     GEMYELLOWH = g.newImage('assets/yellowgemh_8x8.png');
-
+    CAMPIMAGE = g.newImage('assets/allworldscamp.png')
     SPLASHIMG = g.newImage('assets/allworlds.png');
 
     --defaultfont = lg.setNewFont('ModernDOS8x8.ttf', 16);
@@ -499,8 +503,8 @@ function ExitCamp(h)
     end
     togglezoom("small")
     camping = false 
-    qu(function() animationTimer = 0.1 end)
-    qu(function() MoveMode() end)
+    --qu(function() animationTimer = 0.1 end)
+    --qu(function() MoveMode() end)
 end
 
 function TryConsumeRations()
@@ -527,6 +531,7 @@ eFullscr = false;
 
 function SaveGame()
     saveData = ''
+    saveData = saveData .. GAMEVERSION .. '\xff'
     saveData = saveData .. px .. '\xff'
     saveData = saveData .. py .. '\xff'
     --saveData = saveData .. partyGold .. '\xff'
@@ -630,10 +635,13 @@ function LoadGame()
         lD = lD:sub(loca+1)
     end
     --for i=1,#loadData do print(loadData[i]) end 
-    local ct = 4;
-    px = tonumber(loadData[1])
-    py = tonumber(loadData[2])
-    local cm = loadData[3]
+    local ct = 5;
+    if (tonumber(loadData[1])) ~= GAMEVERSION then 
+        return
+    end
+    px = tonumber(loadData[2])
+    py = tonumber(loadData[3])
+    local cm = loadData[4]
     --print(cm)
     m = love.filesystem.load("maps/"..cm..".lua")
     m()
@@ -787,10 +795,6 @@ function CheckEvents(force)
                 qu(e.e)
                 if e.repeatable == false then 
                     print('adding to save script')
-                    --
-                    --savescript = savescript .. "\t[\"" .. currentMap.fname .. "\"] = function() "
-                    --mapscripts[fname] = mapscripts[fname] or '' -- mapscripts["tower_innocence_1f"]
-                    --mapscripts[fname] = mapscripts[fname] .. 'function() '
                     local evno = 0
                     for m=1,#currentMap.events do 
                         if e == currentMap.events[m] then 
@@ -799,8 +803,7 @@ function CheckEvents(force)
                         end
                     end
                     table.insert(mapscripts, { fname=currentMap.fname, e=evno })
-                    --mapscripts[fname] = mapscripts[fname] 
-                    --savescript = savescript .. 'cm.events[' .. evno .. '].seen = true end\n'
+                    
                 end
                 return true 
             else
@@ -811,15 +814,15 @@ function CheckEvents(force)
     return false 
 end
 
-function love.update(dT)
-    accumulator = accumulator + dT 
-    if accumulator >= framerate then 
-        update60(dT) -- 1/30 = 2, 1/15 = 4, 1/60 = 1
-        accumulator = accumulator - framerate
-    end
-end
+--function love.update(dT)
+--    accumulator = accumulator + dT 
+--    if accumulator >= framerate then 
+--        update60(dT) -- 1/30 = 2, 1/15 = 4, 1/60 = 1
+--        accumulator = accumulator - framerate
+--    end
+--end
 
-function update60(dT)
+function love.update(dT)
     
     if inputMode == TITLE_SPLASH then titleTimer = titleTimer + (dT/3) end 
     --print(zoomTab)
@@ -872,17 +875,17 @@ function update60(dT)
         animationTimer = animationTimer - dT;
         flashtimer = flashtimer - dT;
         timeSinceMove = timeSinceMove + dT;
-        transitionTick = transitionTick + dT;
+        transitionTick = transitionTick + (dT/2);
         --print(transitionTick)
     end
     if transitioning == true then 
-        if transitionTick >= (1/20) then transitionTick = transitionTick - (1/20); transitionCounter = transitionCounter + 1; end
+        if transitionTick >= (1/20) then transitionTick = transitionTick -(1/20); transitionCounter = transitionCounter + 1; end
         if transitionCounter >= 20 then 
             transitionCounter = 0; 
             transitioning = false; 
-            if inCombat == false then 
-                MoveMode()
-            end
+            --if inCombat == false then 
+            --    MoveMode()
+            --end
         end;
     end
     for d=1,#dmgtxt do 
@@ -1013,7 +1016,7 @@ function update60(dT)
                 transitioning = true;
                 transitionCounter = 0
                 transitionTick = 0
-                AddQueue({"wait", 0.35})
+                AddQueue({"wait", 1})
                 AddQueue({"FinishTrans", currentMap.warps[i].target})
             end
         end
@@ -1190,6 +1193,8 @@ function CheckTalk(x, y)
         currentMap[i].object = currentMap[i].object or false
         if x == currentMap[i].x and currentMap[i].y == y and currentMap[i].object==false then 
             if currentMap[i].name then 
+                currentMap[i].chat = currentMap[i].chat or nil 
+                if currentMap[i].chat == nil then return false end 
                 AddLog("You greet "..currentMap[i].name..".");
                 --AddLog("\""..currentMap[i].chat["hello"][1].."\"", 0);
                 current_npc = currentMap[i];
@@ -1497,6 +1502,9 @@ function CheckSearch(x, y)
                             -- ok i can pick it
                             currentMap[i].lock = -1
                             AddLog(":\"Got it.\"\nThe lock clicks open.", 0)
+                            return true 
+                        else 
+                            AddLog(":\"...Shoot! I'm not quite\n skilled enough...\"\nThe lock remains intact.", 0)
                             return true 
                         end
                     end

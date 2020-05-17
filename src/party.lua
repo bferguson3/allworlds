@@ -127,7 +127,7 @@ party = {
         mmp = { 0, 0, 0, 0 },
         mov = 2,
         str = 16,
-        dex = 12,
+        dex = 14,
         con = 8,
         int = 10,
         wis = 10,
@@ -171,14 +171,14 @@ party = {
     {
         name = "Retainer C",
         g = "retc",
-        hp = 32,
-        mhp = 32,
+        hp = 29,
+        mhp = 29,
         mp = { 0, 0, 0, 0 },
         mmp = { 0, 0, 0, 0 },
         mov = 2,
         str = 12,
-        dex = 12,
-        con = 14,
+        dex = 14,
+        con = 12,
         int = 10,
         wis = 10,
         cha = 10,
@@ -213,10 +213,10 @@ party = {
                 equipped = true
             }
         },
-        thaco = 18,
-        level = { 1, 0, 0 },
+        thaco = 19,
+        level = { 0, 1, 0 },
         xp = 0,
-        class = "Fighter",
+        class = "Rogue",
         player = true,
         spellbook = '0000000000000000'
     }

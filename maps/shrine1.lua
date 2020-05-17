@@ -25,6 +25,12 @@ currentMap = {
         x = 99,
         y = 99
     },
+    { g = "rock", x=17, y=19 },
+    { g = "rock", x=15, y=17 },
+    { g = "rock", x=15, y=25 },
+    { g = "rock", x=15, y=29 },
+    { g = "rock", x=32, y=24 },
+    { g = "rock", x=26, y=22 },
     {
         g = "torch",
         x = 23,

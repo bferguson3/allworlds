@@ -1439,6 +1439,15 @@ function love.draw(dT)
         lg.print("AC:     " .. getac(party[activePC]), (8*12)*s, 128*s, 0, s)
         lg.print(" ← →  Select character     Z or Esc) Exit", -24*s, (8*21)*scale, 0, scale)
     end
+    if inputMode == SPLASH_CAMP then 
+        DrawGUIWindow(2, 2, 23, 20)
+        lg.setColor(EGA_BLACK)
+        lg.rectangle("fill", 3*8*scale, 3*8*scale, 20*8*scale, 17*8*scale)
+        lg.setColor(EGA_WHITE)
+        lg.draw(CAMPIMAGE, 3*8*scale, 3*8*scale, 0, scale)
+       
+    end
+    --print(inputMode)
     if (transitionCounter > 0) and (transitioning==true) then 
         --if its 1...
         local tc = transitionCounter
