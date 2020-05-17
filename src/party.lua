@@ -59,7 +59,7 @@ party = {
             }
         },
         thaco = 20,
-        level = 1,
+        level = { 1, 0, 0 },
         xp = 0,
         class = "Fighter",
         player = true,
@@ -112,7 +112,7 @@ party = {
             }
         },
         thaco = 18,
-        level = 1,
+        level = { 1, 0, 0 },
         xp = 0,
         class = "Fighter",
         player = true,
@@ -162,7 +162,7 @@ party = {
             }
         },
         thaco = 18,
-        level = 1,
+        level = { 1, 0, 0 },
         xp = 0,
         class = "Fighter",
         player = true,
@@ -214,7 +214,7 @@ party = {
             }
         },
         thaco = 18,
-        level = 1,
+        level = { 1, 0, 0 },
         xp = 0,
         class = "Fighter",
         player = true,

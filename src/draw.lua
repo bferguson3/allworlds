@@ -45,28 +45,49 @@ function DrawMapObjects_Large()
     end
 end
 
-function DrawMoveBox(o)
-    lg.setColor((85/255), 1, (85/255), 1);
---    o.mov = o.mov or 1;
+function DrawSelectionTiles(color, o)
+    lg.setColor(color)
     for s=1,#selectTiles do 
         if (selectTiles[s].x <= 10) and (selectTiles[s].y <= 10) and (selectTiles[s].x >= 0) and (selectTiles[s].y >= 0) then
             lg.rectangle("fill", selectTiles[s].x*scale*16, selectTiles[s].y*scale*16, 16*scale, 16*scale)
         end
     end
-    --lg.rectangle("fill", o.x*16*scale-(16*scale), o.y*16*scale-(16*scale), scale*16*3, scale*16*3);
     lg.setColor(1, 1, 1, 1);
 end
 
-function DrawAttackBox(o)
-    lg.setColor(1, (85/255), (85/255), 1);
-    --loop through selectTiles
-    for s=1,#selectTiles do 
-        if (selectTiles[s].x <= 10) and (selectTiles[s].y <= 10) and (selectTiles[s].x >= 0) and (selectTiles[s].y >= 0) then
-            lg.rectangle("fill", selectTiles[s].x*scale*16, selectTiles[s].y*scale*16, 16*scale, 16*scale)
-        end
-    end
-    lg.setColor(1, 1, 1, 1);
-end
+-- function DrawMoveBox(o)
+--     lg.setColor(EGA_BRIGHTGREEN);
+-- --    o.mov = o.mov or 1;
+--     for s=1,#selectTiles do 
+--         if (selectTiles[s].x <= 10) and (selectTiles[s].y <= 10) and (selectTiles[s].x >= 0) and (selectTiles[s].y >= 0) then
+--             lg.rectangle("fill", selectTiles[s].x*scale*16, selectTiles[s].y*scale*16, 16*scale, 16*scale)
+--         end
+--     end
+--     --lg.rectangle("fill", o.x*16*scale-(16*scale), o.y*16*scale-(16*scale), scale*16*3, scale*16*3);
+--     lg.setColor(1, 1, 1, 1);
+-- end
+
+-- function DrawAttackBox(o)
+--     lg.setColor(EGA_BRIGHTRED);
+--     --loop through selectTiles
+--     for s=1,#selectTiles do 
+--         if (selectTiles[s].x <= 10) and (selectTiles[s].y <= 10) and (selectTiles[s].x >= 0) and (selectTiles[s].y >= 0) then
+--             lg.rectangle("fill", selectTiles[s].x*scale*16, selectTiles[s].y*scale*16, 16*scale, 16*scale)
+--         end
+--     end
+--     lg.setColor(1, 1, 1, 1);
+-- end
+
+-- function DrawSpellBox(o)
+--     lg.setColor(EGA_BRIGHTCYAN)
+--     --loop through selectTiles
+--     for s=1,#selectTiles do 
+--         if (selectTiles[s].x <= 10) and (selectTiles[s].y <= 10) and (selectTiles[s].x >= 0) and (selectTiles[s].y >= 0) then
+--             lg.rectangle("fill", selectTiles[s].x*scale*16, selectTiles[s].y*scale*16, 16*scale, 16*scale)
+--         end
+--     end
+--     lg.setColor(1, 1, 1, 1);
+-- end
 
 sinCounter = 0
 function DrawGUIWindow(x, y, w, h)
@@ -326,7 +347,9 @@ function GetFPObj(x, y)
             elseif o.object == true then 
                 return INDICATOR_OBJ 
             else
-                return INDICATOR_NPC
+                if o.g ~= 'NONE' then 
+                    return INDICATOR_NPC
+                end
             end
         end
     end
@@ -803,6 +826,16 @@ function ReloadGfx(c)
     c.imgb = g.newImage('assets/' .. c.g .. '_16x16.png')
 end
 
+function FlashObject(o, color)
+    EGA_FILL = color 
+    local data = love.image.newImageData('assets/' .. o.g .. '_16x16.png')
+    data:mapPixel(fillEGA)
+    o.imgb = love.graphics.newImage(data)
+    local data = love.image.newImageData('assets/' .. o.g .. '_8x8.png')
+    data:mapPixel(fillEGA)
+    o.img = love.graphics.newImage(data)
+end
+
 function FlashPC(pcno, color)
     --take image assigned to pc no
     --image:mapPixel(fillRed)
@@ -1138,11 +1171,22 @@ function love.draw(dT)
                 lg.draw(party[4].imgb, 16*scale*4, 16*scale*5, 0, scale);
             end
         else
-            if selectorflash == 4 and inputMode == COMBAT_MOVE then 
-            -- draw movement box - base on char's mov stat
-                DrawMoveBox(currentTurn);                
-            elseif selectorflash == 4 and inputMode == COMBAT_MELEE then 
-                DrawAttackBox(currentTurn);
+            --if (inputMode ~= COMBAT_MOVE) and (inputMode ~= COMBAT_MELEE) and (inputMode ~= SPELL_TARGET_COMBAT) then 
+            --    selectTiles = {}
+            --end
+            if (selectorflash == 4) then
+                local pt = currentTurn or { player = false }
+                
+                if pt.player == true then  
+                    if (inputMode == COMBAT_MOVE) or (inputMode == MOVE_MODE) or (inputMode == COMBAT_COMMAND) then
+                        DrawSelectionTiles(EGA_BRIGHTGREEN, currentTurn)
+                    elseif (inputMode == COMBAT_MELEE) then 
+                        DrawSelectionTiles(EGA_BRIGHTRED, currentTurn)
+                    elseif (inputMode == SPELL_TARGET_COMBAT) then 
+                        DrawSelectionTiles(EGA_YELLOW, currentTurn)
+                        --print('yellow')
+                    end
+                end
             end
             
             for i=1,#combat_actors do 
@@ -1229,8 +1273,9 @@ function love.draw(dT)
             end
             
             lg.print(party[b].name, 24*8*scale, ((24*b)-16)*scale, 0, scale);
-            lg.print(party[b].class[1] .. party[b].class[2] .. " " .. party[b].level, 32*8*scale, ((24*b)-16)*scale, 0, scale);
-            lg.print(" / AC " .. getac(party[b]), 34*8*scale, ((24*b)-16)*scale, 0, scale);
+            --lg.print(party[b].class[1] .. party[b].class[2] .. " " .. party[b].level, 32*8*scale, ((24*b)-16)*scale, 0, scale);
+            lg.print('Lv'.. party[b].level[1] .. '/' ..party[b].level[2] .. '/' ..party[b].level[3], 31*8*scale, ((24*b)-16)*scale, 0, scale);
+            lg.print("   AC " .. getac(party[b]), 34*8*scale, ((24*b)-16)*scale, 0, scale);
             lg.setColor(1,1,1,1)
             lg.draw(HP_ICON, 25*8*scale, ((24*b)-8)*scale, 0, scale);
             lg.draw(MP_ICON, 25*8*scale, 24*b*scale, 0, scale);
@@ -1303,13 +1348,13 @@ function love.draw(dT)
         lg.setColor(1, 1, 1, 1)
         --lg.print("GOLD\nRELICS", 24*8*scale, (8*13)*scale, 0, scale);
         lg.translate(-4*scale, 0);
-    end
+    end -- if not in chat input, above is always displayed 
     lg.translate(-8*scale, 0)
     if inputMode == MOVE_MODE or inputMode==FP_MOVE then 
         lg.print(" C)amp   E)xamine   I)nventory\n   M)agic   T)alk    Z)tats", 0, (8*23)*scale, 0, scale);
         lg.print("↑→↓← Move", (8*17)*scale, (8*23)*scale, 0, scale);
     end
-    if (inputMode == COMBAT_MOVE) or (inputMode == COMBAT_COMMAND) or (inputMode == nil) then 
+    if (inputMode == COMBAT_MOVE) or (inputMode == COMBAT_COMMAND) then 
         if selectorflash == 1 or selectorflash == 3 then 
             lg.setColor(0, 0, 0, 1);
         elseif selectorflash == 0 or selectorflash == 4 then 
@@ -1336,6 +1381,19 @@ function love.draw(dT)
         lg.translate(-16*scale, -8*scale)
         lg.setColor(1, 1, 1, 1);
         lg.print("  ↑→↓←    Direction        Esc Cancel\n  space/enter Select", 0, (8*23)*scale, 0, scale);
+    elseif (inputMode == SPELL_TARGET_COMBAT) or (inputMode == SELECT_CIRCLE) then 
+        -- DRAW SELECTOR
+        if selectorflash == 1 or selectorflash == 3 then 
+            lg.setColor(0, 0, 0, 1);
+        elseif selectorflash == 0 or selectorflash == 4 then 
+            lg.setColor(0, 0, 0, 0);
+        end
+        lg.translate(16*scale, 8*scale)
+        lg.draw(tileSet[2].sheet, tileSet[2].quads[21], selector.x*scale*16, selector.y*scale*16, 0, scale);
+        lg.translate(-16*scale, -8*scale)
+        lg.setColor(1, 1, 1, 1);
+        -- END DRAW SEL
+        lg.print("  ↑→↓←    Move Selector        Esc Cancel\n  1-4) Select spell", 0, (8*23)*scale, 0, scale);
     elseif inputMode == STATS_MAIN then 
         local s = scale
         lg.setColor(0, 0, 0, 1);
@@ -1363,7 +1421,9 @@ function love.draw(dT)
         lg.print("Strength\nDexterity\nConstitution\nIntelligence\nWisdom\nCharisma", 8*s, 56*s, 0, s);
         lg.print(party[activePC].str..'\n'..party[activePC].dex..'\n'..party[activePC].con..'\n'..party[activePC].int..'\n'..party[activePC].wis..'\n'..party[activePC].cha, 72*s, 56*s, 0, s);
         lg.print("Level:\nXP:\nTNL:", 8*s, 112*s, 0, s)
-        lg.print(party[activePC].level ..'\n'.. party[activePC].xp ..'\n'..(xpTable[party[activePC].level]-party[activePC].xp), (8*8)*s, 112*s, 0, s)
+        local lst = party[activePC].level[1] .. '/' .. party[activePC].level[2] .. '/' .. party[activePC].level[3]
+        local getlvs = function() local t=0; for l=1,3 do t = party[activePC].level[l] + t; end return t end 
+        lg.print(lst ..'\n'.. party[activePC].xp ..'\n'..(xpTable[getlvs()]-party[activePC].xp), (8*8)*s, 112*s, 0, s)
         lg.print("HP:      /", (8*12)*s, 32*s, 0, s);
         lg.print(party[activePC].hp, (8*15)*s, 32*s, 0, s);
         lg.print(party[activePC].mhp, (8*18)*s, 32*s, 0, s);

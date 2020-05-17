@@ -17,11 +17,13 @@ A - Attack<br>
 C - Camp<br>
 D - Defend (and end turn)<br>
 E - Examine <br>
-I - Inventory<br>
-L - Look (examine battlefield)<br>
-M - Magic<br>
+I - Inventory**<br>
+L - Look (examine battlefield**)<br>
+M - Magic (Only 'Heal')<br>
 T - Talk<br>
 Z - Open party status screen<br>
+<br>
+**not implemented<br>
 <br>
 Ctrl+S: Save<br>
 Ctrl+L: Load<br>

@@ -9,8 +9,14 @@ circleTemp = 0
 
 aab = function () aaa=false end
 
+function EndCurTurn() 
+    inputMode = nil; 
+    currentTurn.init = -1; 
+    qu(function() NextTurn() end); 
+end
+
 function MoveMode()
-    if inCombat == true then inputMode = COMBAT_MOVE; return end
+    if inCombat == true then inputMode = COMBAT_MOVE; selectTiles = oldTiles; selector.x = currentTurn.x; selector.y = currentTurn.y; return end
     if cameraMode == ZOOM_FP then inputMode = FP_MOVE else inputMode = MOVE_MODE end 
 end
 
@@ -46,9 +52,43 @@ function SetIMchat()
     inputMode = CHAT_INPUT;
 end
 
+function GetFirstSelectableEnemy()
+    for z=1,#combat_actors do 
+        combat_actors[z].player = combat_actors[z].player or false 
+        if combat_actors[z].player == false then 
+            local e = combat_actors[z] 
+            for ll=1,#selectTiles do 
+                if (e.x==selectTiles[ll].x) and (e.y==selectTiles[ll].y) then 
+                    return e 
+                end
+            end
+        end
+    end
+    return nil 
+end
+
+function GetFirstSelectablePlayer()
+    for z=1,#combat_actors do 
+        combat_actors[z].player = combat_actors[z].player or false 
+        if combat_actors[z].player == true then 
+            local e = combat_actors[z] 
+            for ll=1,#selectTiles do 
+                if (e.x==selectTiles[ll].x) and (e.y==selectTiles[ll].y) then 
+                    return e 
+                end
+            end
+        end
+    end
+    return nil 
+end
+
 function love.keypressed(key)
     if timeSinceMove < 0.1 then 
         return
+    end
+    if key ~= nil then 
+        timeSinceMove = 0
+        --return 
     end
     if camping then return end 
     if inputMode == CHAT_INPUT then 
@@ -100,23 +140,25 @@ function love.keypressed(key)
             else AddLog("Nobody there!",0); end
             return
         elseif key == 'e' then 
+            print(px, py)
             AddLog("Examine");
-            if CheckSearch(px, py) then return end
+            if CheckSearch(px, py) then return end 
+            if CheckEvents(1) then return end --checkevents too
             if fpDirection == 0 then if CheckSearch(px, py-1) then return; end end --and not CheckCollision(px, py-1) then py = py - 1; AddLog("Forward"); moved=true;
             if fpDirection == 1 then if CheckSearch(px+1, py) then return; end end--elseif fpDirection == 1 and not CheckCollision(px+1, py) then px = px + 1; AddLog("Forward"); moved=true;
             if fpDirection == 2 then if CheckSearch(px, py+1) then return; end end--elseif fpDirection == 2 and not CheckCollision(px, py+1) then py = py + 1; AddLog("Forward"); moved=true;
             if fpDirection == 3 then if CheckSearch(px-1, py) then return; end end--elseif fpDirection == 3 and not CheckCollision(px-1, py) then px = px - 1; AddLog("Forward"); moved=true; end
-            AddLog("Nothing here.", 0);
+            AddLog("Nothing unusual.", 0);
         end
         if fpDirection > 3 then fpDirection = 0 end 
         if fpDirection < 0 then fpDirection = 3 end
         
-        if (moved == true) then 
-            timeSinceMove = 0
+        if (moved == true) then -- first person
+            --timeSinceMove = 0
             sfx.step:play()
             AddQueue({"wait", 0.1})
             --AddQueue({"inputMode", ip})
-                    
+            movedThisMap = true;
             enemyStep = enemyStep - 1
             if enemyStep == 0 then 
                 enemyStep = 2
@@ -144,7 +186,9 @@ function love.keypressed(key)
                     end
                 end
             end
-        end
+            CheckEvents()
+            
+        end -- first person moved
         --print(inputMode, cameraMode, moved)
         if key == "c" then 
             AddLog("Camp")
@@ -262,6 +306,14 @@ function love.keypressed(key)
             introSpeed = 8
             if introTicker > 12 then inputMode = MAKE_CHR; return; end 
         end
+    elseif inputMode == WAIT_KEYPRESS then 
+        if key ~= nil then 
+            --MoveMode()
+            --log[#log] = '> Ok.'
+            local f = queue[1] 
+            table.remove(queue, 1)
+            f() 
+        end
     elseif inputMode == MAKE_CHR then 
         if key == "f" then 
             party[1].str = init.fighter.str
@@ -279,6 +331,7 @@ function love.keypressed(key)
             party[1].mmp = { 0, 0, 0, 0 }
             party[1].mp = { 0, 0, 0, 0 };
             party[1].thaco = 18;
+            party[1].level = { 1, 0, 0 }
             MoveMode()
             --AddQueue({"startTrans"})
         elseif key == "r" then 
@@ -296,6 +349,7 @@ function love.keypressed(key)
             party[1].profile = 6
             party[1].mp = { 0, 0, 0, 0 }; 
             party[1].mmp = { 0, 0, 0, 0 }
+            party[1].level = { 0, 1, 0 }
             party[1].thaco = 19;
             MoveMode()
         elseif key == "m" then 
@@ -312,6 +366,7 @@ function love.keypressed(key)
             party[1].gender = 'F'
             party[1].profile = 6
             party[1].mp = { 0, 0, 0, 0 };
+            party[1].level = { 0, 0, 1 }
             party[1].mmp = { 0, 0, 0, 0 }
             party[1].thaco = 19;
             --MoveMode()
@@ -366,30 +421,22 @@ function love.keypressed(key)
                 -- OK - queue flash+cast sfx, wait, twinkle+sfx+text+heal
                 sfx.spell1:play()
                 party[activePC].mp[circleTemp] = party[activePC].mp[circleTemp] - 1
-                AddQueue({"FlashPC", activePC, EGA_BRIGHTGREEN})
-                AddQueue({"wait", 0.125})
-                qu(function() ReloadGfx(party[activePC]) end)
-                qu(function() animationTimer = 0.125 end)
-                qu(function() FlashPC(activePC, EGA_BRIGHTGREEN) end)
-                qu(function() animationTimer = 0.125 end)
-                qu(function() ReloadGfx(party[activePC]) end)
+                for l=1,2 do 
+                    qu(function() FlashPC(activePC, EGA_BRIGHTGREEN) end)
+                    qu(function() animationTimer = (1/15) end)
+                    qu(function() ReloadGfx(party[activePC]) end)
+                    qu(function() animationTimer = (1/15) end)
+                end
                 AddQueue(function () MoveMode() end)
                 p.hp = p.mhp 
                 if inCombat == false then pn = activePC end
                 qu(function() AddLog(party[tonumber(key)].name .. " healed!!", 0) end)
-                qu(function() FlashPC(pn, EGA_BRIGHTCYAN) end)
-                qu(function() animationTimer = (1/16) end)
-                qu(function() ReloadGfx(party[activePC]) end)
-                qu(function() animationTimer = (1/16) end)
-                qu(function() FlashPC(pn, EGA_BRIGHTCYAN) end)
-                qu(function() animationTimer = (1/16) end)
-                qu(function() ReloadGfx(party[activePC]) end)
-                qu(function() animationTimer = (1/16) end)
-                qu(function() FlashPC(pn, EGA_BRIGHTCYAN) end)
-                qu(function() animationTimer = (1/16) end)
-                qu(function() ReloadGfx(party[activePC]) end)
-                qu(function() animationTimer = (1/16) end)
-                
+                for l=1,4 do 
+                    qu(function() FlashPC(pn, EGA_BRIGHTCYAN) end)
+                    qu(function() animationTimer = (1/30) end)
+                    qu(function() ReloadGfx(party[activePC]) end)
+                    qu(function() animationTimer = (1/30) end)
+                end
                 --AddQueue({"PlayEffect", px, py, 'twinkle'})
             end
         else 
@@ -397,8 +444,68 @@ function love.keypressed(key)
             MoveMode()
         end
     elseif inputMode == SPELL_TARGET_COMBAT then 
-        -- get range and target type from spell table
-
+        if key == 'escape' then 
+            curSpell = nil 
+            AddLog("Casting cancelled.", 0)
+            MoveMode()
+            return
+        end
+        -- move selector
+        if key == "up" then
+            for p=1,#selectTiles do 
+                if (selectTiles[p].x==selector.x) and (selectTiles[p].y==(selector.y-1)) then 
+                    selector.y = selector.y - 1
+                    return
+                end
+            end
+        elseif key == "down" then 
+            for p=1,#selectTiles do 
+                if (selectTiles[p].x==selector.x) and (selectTiles[p].y==(selector.y+1)) then 
+                    selector.y = selector.y+1
+                    return
+                end
+            end
+        elseif key == "left" then 
+            for p=1,#selectTiles do 
+                if (selectTiles[p].x==(selector.x-1)) and (selectTiles[p].y==selector.y) then 
+                    selector.x = selector.x - 1
+                    return
+                end
+            end
+        elseif key == "right" then 
+            for p=1,#selectTiles do 
+                if (selectTiles[p].x==(selector.x+1)) and (selectTiles[p].y==selector.y) then 
+                    selector.x = selector.x + 1
+                    return
+                end
+            end
+        elseif (key == 'space') or (key == 'return') then 
+            for ci=1,#combat_actors do 
+                c = combat_actors[ci]
+            --for c in combat_actors do 
+                if (c.x == selector.x) and (c.y == selector.y) then 
+                    if curSpell.target == 'ally' then-- or 'enemy'    
+                        if c.player == true then 
+                            AddLog("Target: " .. c.name, 0)
+                            HealSpell(currentTurn, c) -- src, tgt
+                        else
+                            AddLog("Invalid target!", 0)
+                            --"Invalid target: Ally only"
+                        end
+                    else --spell target is enemy
+                        if c.player == false then 
+                            --ok
+                            AddLog("Casting spell on enemy!", 0)
+                        else
+                            AddLog("Invalid target!", 0)
+                            --"Invalid target: Enemy only"
+                        end
+                    end
+                end
+            end
+        end
+        -- space/enter to select target - but only if it matches spell.target type
+        
     elseif inputMode == COMBAT_MELEE then 
         if key == "up" then 
             --print('up')
@@ -446,6 +553,7 @@ function love.keypressed(key)
                         if (combat_actors[i].player == true) then 
                             return 
                         end
+                        
                         inputMode = nil
                         currentTurn.init = -1;
                         AddQueue({"MeleeAttack", combat_actors[i]})
@@ -479,8 +587,10 @@ function love.keypressed(key)
                     end
                 end
             end
-            selector.x, selector.y = selectTiles[1].x, selectTiles[1].y
-            
+            --selector.x, selector.y = selectTiles[1].x, selectTiles[1].y
+            local e = GetFirstSelectableEnemy()
+            if e == nil then e = selectTiles[1] end 
+            selector.x, selector.y = e.x, e.y
         elseif key == "z" then 
             for k=1,#party do 
                 if party[k] == currentTurn then activePC=k end 
@@ -496,15 +606,19 @@ function love.keypressed(key)
             currentTurn.init = -1;
             AddQueue({"nextTurn"});--NextTurn();
         elseif key == "m" then 
+            oldTiles = selectTiles
+            selectTiles = {}
             AddLog("M-Cast Spell")
+            curSpell = nil
             local ok = false 
             for i=1,4 do 
-                if party[activePC].mmp[i] > 0 then 
+                if currentTurn.mmp[i] > 0 then 
                     ok = true 
                 end 
             end
             if ok == false then 
                 AddLog("Doesn't know magic!", 0)
+                --selectTiles = oldTiles
                 MoveMode()
                 return
             end
@@ -600,21 +714,24 @@ function love.keypressed(key)
             activePC = 4
         end
     elseif inputMode == SELECT_CIRCLE then 
+        currentTurn = party[activePC]
         if ((key == '1') or (key == '2') or (key=='3') or (key=='4')) and (circleTemp==0) then 
-            if party[activePC].mp[tonumber(key)] == 0 then 
+            if currentTurn.mp[tonumber(key)] == 0 then 
                 log[#log] = log[#log] .. ' ' .. key
                 AddLog("No MP!", 0)
                 MoveMode()
+                --selectTiles = oldTiles
                 return 
             end
         end
         if ((key == '1') or (key == '2') or (key=='3') or (key=='4')) and (circleTemp~=0) then
             -- selecting spell. see if its in my spellbook
-            local sp = party[activePC].spellbook;
+            local sp = currentTurn.spellbook;
             local f = ((circleTemp-1)*4) + tonumber(key)
             if sp:sub(f, f) == '0' then 
                 log[#log] = log[#log] .. ' ' .. key 
                 AddLog("Not known!", 0)
+                --selectTiles = oldTiles
                 MoveMode()
                 return
             end
@@ -655,12 +772,15 @@ function love.keypressed(key)
             circleTemp = 0;
             AddLog("Not a spell!")
             MoveMode()
+            --selectTiles = oldTiles
+            return
         end
         -- ACTUAL CAST SPELL CODE
         if (circleTemp ~= 0) and ((key == '1') or (key == '2') or (key == '3') or (key == '4')) then 
             log[#log] = log[#log] .. ' ' .. key
             if inCombat == true and magic[circleTemp][tonumber(key)].inCombat == false then 
                 AddLog("Can't cast that in combat", 0)
+                --selectTiles = oldTiles
                 MoveMode()
                 return
             end
@@ -671,6 +791,7 @@ function love.keypressed(key)
                 return
             else 
                 AddLog("not implemented")
+                --selectTiles = oldTiles
                 MoveMode()
                 return
             end
@@ -740,6 +861,7 @@ function love.keypressed(key)
             --AddLog("unimplemented")
         elseif key == "m" then 
             AddLog("M-Cast Spell")
+            curSpell = nil
             local ok = false 
             for i=1,4 do 
                 if party[activePC].mmp[i] > 0 then 
@@ -770,12 +892,8 @@ function love.keypressed(key)
         elseif key == "4" then 
             activePC = 4
         end
-        --if key == '0' then 
-        --    inputMode = FP_MOVE
-        --    cameraMode = 3
-        --end
-        if (moved == true) then 
-            timeSinceMove = 0;
+        if (moved == true) then -- top down view
+            --timeSinceMove = 0;
             sfx.step:play()
             local ip = inputMode;
             --inputMode = nil;

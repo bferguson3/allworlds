@@ -15,7 +15,7 @@ magic = {
         {
             name = 'Heal',
             inCombat = true, 
-            target = "ally",
+            target = "ally", -- or "enemy"
             range = 2,
             circle = 3
         },
@@ -58,6 +58,42 @@ spellDesc = {
     }
 }
 
+curSpell = nil
+
+
+
+function HealSpell(src, tgt)
+    local p = tgt
+
+    if p.hp == p.mhp then AddLog("HP is full!", 0); MoveMode(); return end 
+    if p.hp == 0 then AddLog("They're dead!!", 0); MoveMode(); return end 
+    -- OK - queue flash+cast sfx, wait, twinkle+sfx+text+heal
+    sfx.spell1:play()
+    selectTiles = {}
+    src.mp[circleTemp] = src.mp[circleTemp] - 1
+    for l=1,2 do 
+        --qu(function() FlashPC(activePC, EGA_BRIGHTGREEN) end)
+        qu(function() FlashObject(src, EGA_BRIGHTGREEN) end)
+        qu(function() animationTimer = (1/15) end)
+        qu(function() ReloadGfx(src) end)
+        qu(function() animationTimer = (1/15) end)
+    end
+    AddQueue(function () MoveMode() end)
+    p.hp = p.mhp 
+    if inCombat == false then pn = activePC end
+    qu(function() AddLog(tgt.name .. " healed!!", 0) end)
+    for l=1,4 do 
+        --qu(function() FlashPC(pn, EGA_BRIGHTCYAN) end)
+        qu(function() FlashObject(tgt, EGA_BRIGHTCYAN) end)
+        qu(function() animationTimer = (1/30) end)
+        qu(function() ReloadGfx(tgt) end)
+        qu(function() animationTimer = (1/30) end)
+    end
+    if inCombat == true then 
+        EndCurTurn()
+    end
+end
+
 function CastSpell(ci, sp)
     if ci==3 then
         if sp==1 then 
@@ -68,8 +104,12 @@ function CastSpell(ci, sp)
             --input mode to target heal - 1,2,3,4
                 inputMode = SPELL_HEAL_TARGET;
             else 
-                inputMode = SPELL_TARGET_COMBAT
                 curSpell = magic[ci][sp]
+                GetActiveMovTiles(curSpell.range)
+                local p = GetFirstSelectablePlayer()
+                if p == nil then p = selectTiles[1] end 
+                selector.x, selector.y = p.x, p.y
+                inputMode = SPELL_TARGET_COMBAT
             end
             ---check if player exists and if HP > 0 && < MHP
             ---if ok then hp = mhp, curpc loses 1 mp

@@ -80,15 +80,21 @@ function StartCombat(nmes)
     AddQueue({"FinishTransCombat", "batt"..n})
 
 end
+
 mapstate = {}
+
 function FinishTransCombat(m)
     --inCombat = true;
     mapstate = currentMap;
+    --currentMap = {}
+    --transitionCounter = 10
+    inCombat = true;
     LoadMap(m, 11)
+    --transitionCounter = 10
     togglezoom("big");
     --
     AddLog("Combat!!", 0)
-    inCombat = true;
+    
     px, py = 5, 5;
     currentMusic = ''
     music:stop()
@@ -179,7 +185,8 @@ function TestDead(t)
             for pn=1,#combat_actors do 
                 if combat_actors[pn].player == true then 
                     pcnt = pcnt + 1
-                    alv = alv + combat_actors[pn].level
+                    local getlvs = function() local t=0; for l=1,3 do t = combat_actors[pn].level[l] + t; end return t end 
+                    alv = alv + getlvs()--combat_actors[pn].level
                 end
             end
             alv = math.floor(alv/pcnt); -- total level divided by player count
@@ -259,6 +266,9 @@ function EnemyTurn(o)
         AddQueue({"wait", 0.25})
         AddQueue({"MeleeTwo", c})
         AddQueue({"wait", 0.25})
+        remainingMov = 0
+        --o.init = -1;
+        --AddQueue({"nextTurn"})
         --AddQueue({"nextTurn"});
         --MeleeAttack(c)
     else
@@ -286,26 +296,32 @@ function EnemyTurn(o)
                 else TryMoveLR(o, c); end
             end
         end
-        
+        remainingMov = remainingMov - 1 
     end
     selector.x, selector.y = currentTurn.x, currentTurn.y
     --if anim[2] == false then return end;
-    o.init = -1;
-    AddQueue({"nextTurn"})
+    if remainingMov > 0 then 
+        qu(function() EnemyTurn(o) end)
+    elseif remainingMov == 0 then 
+        o.init = -1
+        qu(function() NextTurn() end)
+    end
     --NextTurn()
 end
 
-function GetActiveMovTiles()
+function GetActiveMovTiles(range)
+    range = range or currentTurn.mov 
     selectTiles = {}
     local lx, ly
-    for ly=-currentTurn.mov,currentTurn.mov do 
-        for lx=-currentTurn.mov+(math.abs(ly)),currentTurn.mov-(math.abs(ly)) do 
+    for ly = -range, range do 
+        for lx = -range+(math.abs(ly)), range-(math.abs(ly)) do 
             table.insert(selectTiles, {x=(currentTurn.x+lx), y=(currentTurn.y+ly)})
         end
     end
 end
 
 function NextTurn()
+    selectTiles = {}
     next = combat_actors[1];
     
     for i=1,#combat_actors do 

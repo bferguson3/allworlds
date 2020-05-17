@@ -15,6 +15,7 @@ camping = false
 roll = 0;
 lightMode = false;
 hitac = 0;
+savescript = ''
 scanlines = false;
 enemyStep = 1;
 dmgtxt = {};
@@ -67,6 +68,8 @@ GAIN_SPELL = 15;
 TITLE_SPLASH = 16;
 SELECT_CIRCLE = 17;
 SPELL_HEAL_TARGET = 18;
+SPELL_TARGET_COMBAT = 19;
+WAIT_KEYPRESS = 20
 --inputMode = TITLE_SCREEN;
 inputMode = TITLE_SPLASH;
 INDICATOR_FAR, INDICATOR_NME, INDICATOR_NPC, INDICATOR_OBJ = nil, nil, nil, nil
@@ -299,6 +302,7 @@ end
 function love.load(arg)
     local modeset = nil;
     scanlines = true;
+    savescript = "cm = currentMap\nmapscripts = {\n"
     for a=1,#arg do
         if arg[a] == '--fs' then 
             modeset = true;
@@ -495,6 +499,8 @@ function ExitCamp(h)
     end
     togglezoom("small")
     camping = false 
+    qu(function() animationTimer = 0.1 end)
+    qu(function() MoveMode() end)
 end
 
 function TryConsumeRations()
@@ -521,46 +527,63 @@ eFullscr = false;
 
 function SaveGame()
     saveData = ''
-    saveData = saveData .. px .. '\x00'
-    saveData = saveData .. py .. '\x00'
-    --saveData = saveData .. partyGold .. '\x00'
-    saveData = saveData .. currentMap.fname .. '\x00'
-    saveData = saveData .. party[1].gender .. '\x00'
+    saveData = saveData .. px .. '\xff'
+    saveData = saveData .. py .. '\xff'
+    --saveData = saveData .. partyGold .. '\xff'
+    saveData = saveData .. currentMap.fname .. '\xff'
+    saveData = saveData .. party[1].gender .. '\xff'
     for f=1,#party do 
-        saveData = saveData .. party[f].name .. '\x00'
-        saveData = saveData .. party[f].hp .. '\x00'
-        saveData = saveData .. party[f].mhp .. '\x00'
-        saveData = saveData .. party[f].mmp[1] .. '\x00'
-        saveData = saveData .. party[f].mmp[2] .. '\x00'
-        saveData = saveData .. party[f].mmp[3] .. '\x00'
-        saveData = saveData .. party[f].mmp[4] .. '\x00'
-        saveData = saveData .. binary2decimal(party[f].spellbook:sub(1, 8)) .. '\x00'
-        saveData = saveData .. binary2decimal(party[f].spellbook:sub(9, 16)) .. '\x00'
-        saveData = saveData .. party[f].str .. '\x00'
-        saveData = saveData .. party[f].dex .. '\x00'
-        saveData = saveData .. party[f].con .. '\x00'
-        saveData = saveData .. party[f].int .. '\x00'
-        saveData = saveData .. party[f].wis .. '\x00'
-        saveData = saveData .. party[f].cha .. '\x00'
-        saveData = saveData .. party[f].xp .. '\x00'
-        saveData = saveData .. party[f].level .. '\x00'
-        saveData = saveData .. party[f].g .. '\x00'
-        saveData = saveData .. party[f].mov .. '\x00'
-        saveData = saveData .. party[f].thaco .. '\x00'
-        saveData = saveData .. party[f].class .. '\x00'
+        saveData = saveData .. party[f].name .. '\xff'
+        saveData = saveData .. party[f].hp .. '\xff'
+        saveData = saveData .. party[f].mhp .. '\xff'
+        saveData = saveData .. party[f].mmp[1] .. '\xff'
+        saveData = saveData .. party[f].mmp[2] .. '\xff'
+        saveData = saveData .. party[f].mmp[3] .. '\xff'
+        saveData = saveData .. party[f].mmp[4] .. '\xff'
+        saveData = saveData .. binary2decimal(party[f].spellbook:sub(1, 8)) .. '\xff'
+        saveData = saveData .. binary2decimal(party[f].spellbook:sub(9, 16)) .. '\xff'
+        saveData = saveData .. party[f].str .. '\xff'
+        saveData = saveData .. party[f].dex .. '\xff'
+        saveData = saveData .. party[f].con .. '\xff'
+        saveData = saveData .. party[f].int .. '\xff'
+        saveData = saveData .. party[f].wis .. '\xff'
+        saveData = saveData .. party[f].cha .. '\xff'
+        saveData = saveData .. party[f].xp .. '\xff'
+        saveData = saveData .. party[f].level[1] .. '\xff'
+        saveData = saveData .. party[f].level[2] .. '\xff'
+        saveData = saveData .. party[f].level[3] .. '\xff'
+        saveData = saveData .. party[f].g .. '\xff'
+        saveData = saveData .. party[f].mov .. '\xff'
+        saveData = saveData .. party[f].thaco .. '\xff'
+        saveData = saveData .. party[f].class .. '\xff'
         for u=1,10 do 
             local im = party[f].inventory[u] or { name="none" }
-            saveData = saveData .. im.name .. '\x00'
+            saveData = saveData .. im.name .. '\xff'
             local st = im.stack or 1
-            saveData = saveData .. st .. '\x00'
+            saveData = saveData .. st .. '\xff'
             local e = im.equipped or false 
             if e == false then e = 0 else e = 1 end 
-            saveData = saveData .. e .. '\x00'
+            saveData = saveData .. e .. '\xff'
             --name\stack\equipped
         end
     end
+    --finally, append map info
+    --<fname>\xff<string.dump(e)>\xff
+    for u=1,#mapscripts do 
+        saveData = saveData .. mapscripts[u].fname .. '\xff'
+        saveData = saveData .. mapscripts[u].e .. '\xff'
+    end
     love.filesystem.write('01.sav', saveData)
     AddLog("Saved!")
+    
+    --savescript = 'mapscripts = {'
+    --for r=1,#mapscripts do 
+    --    savescript = savescript .. '\n\t[' .. r .. '] = { fname=\"' .. mapscripts[r].fname .. '\", e=' .. string.dump(mapscripts[r].e) .. '}'
+    --end
+    --savescript = savescript .. '\n}'
+    --print(savescript)
+    --love.filesystem.write('01.lua', savescript)
+    --savescript = savescript:sub(1,#savescript-1)
 end
 
 function decimal2binary(n)
@@ -592,15 +615,21 @@ function binary2decimal(s)
     return v 
 end
 
+mapscripts = {}
+
 function LoadGame()
+    --qu(function() startTrans() end)
+    --qu(function() animationTimer = 1 end)
+    
     lD = love.filesystem.read("01.sav")
     --print(loadData)
     loadData = {}
-    while string.find(lD, '\x00') do 
-        local loca = string.find(lD, '\x00')
+    while string.find(lD, '\xff') do 
+        local loca = string.find(lD, '\xff')
         table.insert(loadData, lD:sub(1, (loca-1)))
         lD = lD:sub(loca+1)
     end
+    --for i=1,#loadData do print(loadData[i]) end 
     local ct = 4;
     px = tonumber(loadData[1])
     py = tonumber(loadData[2])
@@ -637,7 +666,10 @@ function LoadGame()
         party[p].wis = tonumber(loadData[ct]); ct = ct + 1;
         party[p].cha = tonumber(loadData[ct]); ct = ct + 1;
         party[p].xp = tonumber(loadData[ct]); ct = ct + 1;
-        party[p].level = tonumber(loadData[ct]); ct = ct + 1;
+        party[p].level = {}
+        party[p].level[1] = tonumber(loadData[ct]); ct = ct + 1;
+        party[p].level[2] = tonumber(loadData[ct]); ct = ct + 1;
+        party[p].level[3] = tonumber(loadData[ct]); ct = ct + 1;
         party[p].g = loadData[ct]; ct = ct + 1;
         
         party[p].mov = tonumber(loadData[ct]); ct = ct + 1;
@@ -672,9 +704,16 @@ function LoadGame()
         end
         party[p].acc = party[p].acc or { name = "(none)"}
         print(party[p].spellbook)
+    end --end party load
+    -- finally, load in the mapscripts data
+    mapscripts = {}
+    for t=ct,#loadData do 
+        table.insert(mapscripts, { fname=loadData[t], e=loadData[t+1] })
+        t = t + 1
     end
-    MoveMode()
-    AddLog("Loaded.", 0)
+    qu(function() MoveMode() end)
+    qu(function() AddLog("Loaded.", 0) end)
+    
 end
 
 function MoveRandomly(e)
@@ -733,21 +772,78 @@ end
 
 distanceTest = 0
 titleTimer = 0;
+local framerate = (1/60)
+local accumulator = 0.0
+
+function CheckEvents(force)
+    currentMap.events = currentMap.events or {}
+    for u=1,#currentMap.events do 
+        local e = currentMap.events[u]
+        local s = e.seen or false
+        if (force==1) and (e.repeatable==true) then e.seen = false end
+        if (px == e.x) and (py == e.y) and (e.seen==false) then 
+            e.seen = true 
+            if type(e.e) == 'function' then 
+                qu(e.e)
+                if e.repeatable == false then 
+                    print('adding to save script')
+                    --
+                    --savescript = savescript .. "\t[\"" .. currentMap.fname .. "\"] = function() "
+                    --mapscripts[fname] = mapscripts[fname] or '' -- mapscripts["tower_innocence_1f"]
+                    --mapscripts[fname] = mapscripts[fname] .. 'function() '
+                    local evno = 0
+                    for m=1,#currentMap.events do 
+                        if e == currentMap.events[m] then 
+                            evno = m 
+                            break
+                        end
+                    end
+                    table.insert(mapscripts, { fname=currentMap.fname, e=evno })
+                    --mapscripts[fname] = mapscripts[fname] 
+                    --savescript = savescript .. 'cm.events[' .. evno .. '].seen = true end\n'
+                end
+                return true 
+            else
+                print('[DEBUG] Map event not a function!')
+            end
+        end
+    end
+    return false 
+end
 
 function love.update(dT)
+    accumulator = accumulator + dT 
+    if accumulator >= framerate then 
+        update60(dT) -- 1/30 = 2, 1/15 = 4, 1/60 = 1
+        accumulator = accumulator - framerate
+    end
+end
+
+function update60(dT)
+    
     if inputMode == TITLE_SPLASH then titleTimer = titleTimer + (dT/3) end 
     --print(zoomTab)
-     if love.keyboard.isDown("lalt") and love.keyboard.isDown("return") then 
+     if (love.keyboard.isDown("lalt") or love.keyboard.isDown("ralt") ) and love.keyboard.isDown("return") then 
          if eFullscr == false then 
+            --UNEVEN PIXEL RATIO:
+            -- eFullscr = true;
+            -- love.window.setMode(0, 0, {fullscreen=true});
+            -- scr_w, scr_h = lg.getDimensions();
+            -- scale = scr_h / 200;
+            -- local s2 = scr_w / 320;
+            -- if s2 < scale then scale = s2 end 
+            -- x_draw_offset = (scr_w - (scale * 320))/2;
+            -- y_draw_offset = (scr_h - (scale * 200))/2;
+            --  return
+            SetZoom(3);
             eFullscr = true;
             love.window.setMode(0, 0, {fullscreen=true});
             scr_w, scr_h = lg.getDimensions();
-            scale = scr_h / 200;
-            local s2 = scr_w / 320;
-            if s2 < scale then scale = s2 end 
+            scale = math.floor(scr_h / 200);
+            local s2 = math.floor(scr_w / 320);
+            if s2 < scale then scale = s2 end
             x_draw_offset = (scr_w - (scale * 320))/2;
             y_draw_offset = (scr_h - (scale * 200))/2;
-             return
         else 
             eFullscr = false;
             SetZoom(zoomTab);
@@ -780,8 +876,8 @@ function love.update(dT)
         --print(transitionTick)
     end
     if transitioning == true then 
-        if transitionTick > (1/30) then transitionTick = 0; transitionCounter = transitionCounter + 1; end
-        if transitionCounter > 21 then 
+        if transitionTick >= (1/20) then transitionTick = transitionTick - (1/20); transitionCounter = transitionCounter + 1; end
+        if transitionCounter >= 20 then 
             transitionCounter = 0; 
             transitioning = false; 
             if inCombat == false then 
@@ -794,7 +890,8 @@ function love.update(dT)
         dmgtxt[d].y = dmgtxt[d].y or dmgtxt[d].ya
         dmgtxt[d].t = dmgtxt[d].t + (dT*4)
         dmgtxt[d].x = dmgtxt[d].x+(dT*scale*16)
-        dmgtxt[d].y = dmgtxt[d].ya-(math.sin(dmgtxt[d].t)*scale*8)
+        dmgtxt[d].y = dmgtxt[d].ya-(math.floor((math.sin(dmgtxt[d].t)*8))*scale)
+
         if dmgtxt[d].t > 3.2 then table.remove(dmgtxt, d) end
     end
     if sinCounter > (math.pi) then sinCounter = 0 end
@@ -806,6 +903,10 @@ function love.update(dT)
     if inCombat == false then selector.x = 999*scale end
     if animationTimer > 0 then 
         love.draw()
+        return 
+    end
+    if inputMode == WAIT_KEYPRESS then 
+        log[#log] = '        (Press any key...)'
         return 
     end
     if queue ~= nil then 
@@ -881,6 +982,8 @@ function love.update(dT)
                 elseif fpDirection == 1 then px = px + 1 
                 elseif fpDirection == 2 then py = py + 1 
                 elseif fpDirection == 3 then px = px - 1 end
+                CheckEvents()
+                --moved = true
                 --inputMode = FP_MOVE;
             elseif queue[1][1] == "inputMode" then 
                 local t = queue[1][2];
@@ -893,37 +996,17 @@ function love.update(dT)
             end
         end
     end
-    -- am I in a room?
-    if inputMode == FP_MOVE then cameraMode = ZOOM_FP end 
-    if cameraMode ~= ZOOM_FP then
-        local b = false
-        for i=1,#currentMap.rooms do 
-            r = currentMap.rooms[i]
-            if (px >= r.x1) and (px <= r.x2) then 
-                if (py >= r.y1) and (py <= r.y2) then 
-                    b = true 
-                    if inCombat==false then 
-                        if r.fp == 1 then cameraMode = ZOOM_FP; inputMode = FP_MOVE; return; end
-                    end
-                end
-            end 
+    if camping == false then 
+        CheckRoomZoom()
+        if inCombat == true then 
+            cameraMode = ZOOM_BIG
         end
-        if camping==true then 
-            b = true 
-        end
-        if b == true then 
-            togglezoom("big")
-        else 
-            togglezoom("small")
-        end
-
     end
-    --print(cameraMode, inputMode)
-    -- am I on a teleporter?
     if ((inputMode == MOVE_MODE) or (inputMode==FP_MOVE)) and (movedThisMap==true) then 
         for i=1,#currentMap.warps do 
             w = currentMap.warps[i] 
             if (px==w.x) and (py==w.y) then 
+                --print('ok tp')
                 --AddQueue({"wait", 1})
                 inputMode = INP_TRANSITIONING
                 sfx.exit:play()
@@ -955,7 +1038,7 @@ function love.update(dT)
     if inCombat == false then 
         for ii=1,#currentMap do 
             currentMap[ii].encounter = currentMap[ii].encounter or false 
-            if currentMap[ii].x == px and currentMap[ii].y == py and currentMap[ii].encounter==true then 
+            if (currentMap[ii].x == px) and (currentMap[ii].y == py) and (currentMap[ii].encounter==true) then 
                 f = currentMap[ii].enemies
                 table.remove(currentMap, ii)
                 StartCombat(f)
@@ -963,11 +1046,27 @@ function love.update(dT)
             end
         end
     end
+    --if inputMode == WAIT_KEYPRESS then 
+    --    log[#log] = '           (Press any key...)'
+    --end
 end -- love.update
 
 --dofile("draw.lua")
 m = love.filesystem.load("src/draw.lua")
 m()
+moved = nil
+function ForceStepForward()
+    --qu(function() AddLog("Open!") end)
+    if inputMode == FP_MOVE then 
+        --inputMode = INP_TRANSITIONING
+        
+        AddQueue({"wait", 0.1});
+        AddQueue({"goForward"});
+        qu(function() AddLog("Forward") end)
+        AddQueue({"wait", 0.1});    
+        AddQueue({"inputMode", FP_MOVE})
+    end
+end
 
 function CheckCollision(x, y, backwards)
     backwards = backwards or 'FALSE';
@@ -988,22 +1087,20 @@ function CheckCollision(x, y, backwards)
             if x == currentMap[i].x and currentMap[i].y == y then 
                 currentMap[i].encounter = currentMap[i].encounter or false;
                 if currentMap[i].encounter == true then 
-                    --local t = currentMap[i].enemies
-                    --table.remove(currentMap, i)
-                    --print('trouble over here')
-                    --StartCombat(t)
+                    
                     --return false;
                 else
                     if currentMap[i].g ~= "campfire" then 
                         if inputMode == FP_MOVE then 
+                            if currentMap[i].lock == -1 then
+                                qu(function() AddLog("Open!") end)
+                                moved = true
+                                ForceStepForward()
+                                return false 
+                            end 
                             currentMap[i].examine = currentMap[i].examine or {}
                             currentMap[i].name = currentMap[i].name or currentMap[i].g
                             local df = "You see: " .. currentMap[i].name 
-                            --currentMap[i].examine[1] = currentMap[i].examine[1] or df
-                            --if currentMap[i].examine[1] ~= df then 
-                            --    print(currentMap[i].examine[1])
-                            --    df = "> Examine " .. currentMap[i].name .. "\n"..currentMap[i].examine[1]
-                            --end
                             AddLog(df, 0)
                             return true 
                         end -- FIRST PERSON CHECK END
@@ -1030,27 +1127,23 @@ function CheckCollision(x, y, backwards)
         --check if there's an object in currentMap that has coords of x, y
         for d=1,#currentMap do 
             if currentMap[d].x == x and currentMap[d].y == y then 
-                AddLog("Locked!", 0); return true;
+                AddLog("Locked!", 0); 
+                if (party[activePC].level[2] == 0) then 
+                    AddLog("Should have a rogue examine it.", 0)    
+                end
+                return true;
             end
         end
-        AddLog("Open!", 0);
-        --if not, we're good - play 'Open!' and sfx
-        if inputMode == FP_MOVE then 
-            inputMode = nil
-            AddQueue({"wait", 0.1});
-            AddQueue({"goForward"});
-            
-            AddQueue({"wait", 0.1});
-            AddQueue({"inputMode", FP_MOVE})
-        end
+        --moved = true
+        ForceStepForward()
     end
     if bgmap[ofs] == '35' then --passwall
-        AddLog("Passwall!!", 0);
+        qu(function() AddLog("Passwall!!", 0) end)
         if inputMode == FP_MOVE then 
             inputMode = nil;
             AddQueue({"wait", 0.1});
             AddQueue({"goForward"});
-            
+            qu(function() AddLog("Forward") end)
             AddQueue({"wait", 0.1});
             AddQueue({"inputMode", FP_MOVE})
         end 
@@ -1209,9 +1302,40 @@ function LoadMap(name, w)
         if music ~= nil then music:stop(); currentMusic = nil; music = nil; end
     end
     movedThisMap = false;
-    --print(name .. " loaded.");
+    
+    cm = currentMap
+    for i=1,#mapscripts do 
+        if (mapscripts[i].fname == currentMap.fname) then 
+            currentMap.events[i].seen = true
+        end
+    end
+    
 end
 
+function CheckRoomZoom()
+    --if camping then CampZoom() end 
+    for r=1,#currentMap.rooms do 
+        rm = currentMap.rooms[r] 
+        if px >= rm.x1 then 
+            if py >= rm.y1 then 
+                if px <= rm.x2 then 
+                    if py <= rm.y2 then 
+                        rm.fp = rm.fp or 0
+                        if rm.fp == 0 then 
+                            cameraMode = ZOOM_BIG
+                            --inputMode = MOVE_MODE
+                        else
+                            cameraMode = ZOOM_FP
+                            --inputMode = FP_MOVE
+                        end
+                        return
+                    end
+                end
+            end
+        end
+    end
+    cameraMode = ZOOM_SMALL
+end
 
 function AddQueue(q)
     table.insert(queue, q)
@@ -1357,15 +1481,30 @@ function CreateWMEnemy()
     return CreateWMEnemy()
 end
 
+--NONE = 'NONE'
 
 function CheckSearch(x, y)
     for i=1,#currentMap do 
         if currentMap[i].x == x then 
             if currentMap[i].y == y then 
+                currentMap[i].lock = currentMap[i].lock or 0
+                if currentMap[i].lock > 0 then 
+                    if party[activePC].level[2] == 0 then 
+                        AddLog(":\"Locked... Better have a\nrogue examine this.\"", 0)
+                        return true 
+                    else 
+                        if (party[activePC].level[2] >= currentMap[i].lock) then 
+                            -- ok i can pick it
+                            currentMap[i].lock = -1
+                            AddLog(":\"Got it.\"\nThe lock clicks open.", 0)
+                            return true 
+                        end
+                    end
+                end
+                if currentMap[i].lock == -1 then return false end 
                 currentMap[i].name = currentMap[i].name or currentMap[i].g
-                
-                currentMap[i].examine = currentMap[i].examine or { "You see " .. currentMap[i].name .. "." }
-                local ex = currentMap[i].examine[1]--("You see " .. currentMap[i].name) or "Nothing special."
+                currentMap[i].examine = currentMap[i].examine or { "You see: " .. currentMap[i].name}
+                local ex = currentMap[i].examine[1]
                 if ex == nil then ex = "You see: " .. currentMap[i].name;  end 
                 AddLog(ex, 0)
                 return true
@@ -1373,7 +1512,7 @@ function CheckSearch(x, y)
         end 
     end
     if inputMode == EXAMINE_MODE then 
-        AddLog("Nothing there!", 0)
+        AddLog("Nothing unusual.", 0)
         return true
     else
         return false 
