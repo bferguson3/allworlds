@@ -272,8 +272,8 @@ function TestHardware()
     local gfx_support = lg.getSupported();
     for k,v in pairs(gfx_support) do
         if v == false then
-            print('init failed: hardware does not support ' .. k);
-            love.event.quit();
+            print('warning: hardware does not support ' .. k);
+            --love.event.quit();
         end
     end
 end

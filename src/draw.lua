@@ -1176,7 +1176,7 @@ function love.draw(dT)
             --if (inputMode ~= COMBAT_MOVE) and (inputMode ~= COMBAT_MELEE) and (inputMode ~= SPELL_TARGET_COMBAT) then 
             --    selectTiles = {}
             --end
-            if (selectorflash == 4) then
+            if (selectorflash == 4) or (selectorflash == 2) or (selectorflash == 3) then
                 local pt = currentTurn or { player = false }
                 
                 if pt.player == true then  
